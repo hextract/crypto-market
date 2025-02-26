@@ -1,4 +1,4 @@
-```json
+```
 request_handler -> market_maker:
 
 REST
