@@ -1,0 +1,140 @@
+---
+swagger: "2.0"
+info:
+  description: "Crypto Market | Auth svc"
+  version: "0.1.0"
+  title: "market.auth"
+schemes:
+    - "https"
+#  - "http"
+paths:
+  /auth/login:
+    post:
+      summary: "Sign in user by login and password"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "login"
+              - "password"
+            properties:
+              login:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect login data"
+
+  /auth/register:
+    post:
+      summary: "Register user by username and password"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "email"
+              - "login"
+              - "password"
+            properties:
+              email:
+                type: "string"
+              login:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Success operation"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+        409:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+
+  /auth/change-password:
+    post:
+      summary: "Change password"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "login"
+              - "oldPassword"
+              - "newPassword"
+            properties:
+              login:
+                type: "string"
+              oldPassword:
+                type: "string"
+              newPassword:
+                type: "string"
+      responses:
+        200:
+          description: "Success operation"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+        400:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect old password"
+  /metrics:
+    get:
+      summary: "Prometheus metrics"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: ok
+
+definitions:
+  Error:
+    type: "object"
+    required:
+      - "error_status_code"
+    properties:
+      error_message:
+        type: "string"
+      error_status_code:
+        type: integer
