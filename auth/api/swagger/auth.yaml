@@ -21,9 +21,6 @@ paths:
           required: true
           schema:
             type: "object"
-            required:
-              - "login"
-              - "password"
             properties:
               login:
                 type: "string"
@@ -55,10 +52,6 @@ paths:
           required: true
           schema:
             type: "object"
-            required:
-              - "email"
-              - "login"
-              - "password"
             properties:
               email:
                 type: "string"
@@ -92,10 +85,6 @@ paths:
           required: true
           schema:
             type: "object"
-            required:
-              - "login"
-              - "oldPassword"
-              - "newPassword"
             properties:
               login:
                 type: "string"
@@ -131,8 +120,6 @@ paths:
 definitions:
   Error:
     type: "object"
-    required:
-      - "error_status_code"
     properties:
       error_message:
         type: "string"
