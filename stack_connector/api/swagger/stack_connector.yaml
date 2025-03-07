@@ -148,12 +148,17 @@ definitions:
         type: "integer"
         format: "int64"
       min_price:
-        type: "float"
+        type: "number"
+        multipleOf: 0.0000001
       max_price:
-        type: "float"
+        type: "number"
+        multipleOf: 0.0000001
       amount_to_buy:
-        type: "float"
+        type: "number"
+        multipleOf: 0.0000001
       bought_amount:
-        type: "float"
+        type: "number"
+        multipleOf: 0.0000001
       buy_speed:
-        type: "float"
+        type: "number"
+        multipleOf: 0.0000001
