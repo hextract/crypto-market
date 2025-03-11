@@ -22,12 +22,14 @@ paths:
         200:
           description: "Success operation"
           schema:
-            type: object
-            properties:
-              BTC:
-                type: string
-              USDT:
-                type: string
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                currency:
+                  type: "string"
+                amount:
+                  type: "string"
         401:
           schema:
             $ref: "#/definitions/Error"
@@ -124,9 +126,6 @@ paths:
                   - "cancelled"
               currency:
                 type: "string"
-                enum:
-                  - "USDT"
-                  - "BTC"
               operation:
                 type: "string"
                 enum:
@@ -148,9 +147,6 @@ paths:
                   type: "string"
                 currency:
                   type: "string"
-                  enum:
-                    - "USDT"
-                    - "BTC"
                 amount:
                   type: "string"
                 commission:
@@ -200,9 +196,6 @@ paths:
                 type: "string"
               address:
                 type: "string"
-              network:
-                type: "string"
-                example: "BTC"
       responses:
         '200':
           description: "Success operation"
