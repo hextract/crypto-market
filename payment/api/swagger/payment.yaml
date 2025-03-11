@@ -1,0 +1,252 @@
+---
+swagger: "2.0"
+info:
+  description: "Crypto Market | Payment svc"
+  version: "0.1.0"
+  title: "market.payment"
+schemes:
+#  - "https"
+  - "http"
+paths:
+  /account/balance:
+    get:
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      summary: "Get user's balance"
+      description: "Returns balance of all cryptocurrencies"
+      security:
+        - api_key: [ ]
+      responses:
+        200:
+          description: "Success operation"
+          schema:
+            type: object
+            properties:
+              BTC:
+                type: string
+              USDT:
+                type: string
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Unauthorized"
+
+  /transactions/purchase:
+    get:
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      summary: "Get purchase history"
+      description: "Returns all user's purchase"
+      security:
+        - api_key: [ ]
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              status:
+                type: "string"
+                enum:
+                  - "finished"
+                  - "processing"
+                  - "cancelled"
+              date_from:
+                type: "string"
+              date_to:
+                type: "string"
+      responses:
+        '200':
+          description: "Success operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                currency_from:
+                  type: "string"
+                currency_to:
+                  type: "string"
+                amount_from:
+                  type: "string"
+                amount_to:
+                  type: "string"
+                status:
+                  type: "string"
+                  enum:
+                    - "finished"
+                    - "processing"
+                    - "cancelled"
+                date:
+                  type: "string"
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Unauthorized"
+        409:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+
+  /transactions/transfers:
+    get:
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      summary: "Get withdrawal and deposits history"
+      description: "Returns all user's withdrawal and deposits"
+      security:
+        - api_key: [ ]
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              min_amount:
+                type: "string"
+              max_amount:
+                type: "string"
+              status:
+                type: "string"
+                enum:
+                  - "finished"
+                  - "processing"
+                  - "cancelled"
+              currency:
+                type: "string"
+                enum:
+                  - "USDT"
+                  - "BTC"
+              operation:
+                type: "string"
+                enum:
+                  - "deposit"
+                  - "withdrawal"
+              date_from:
+                type: "string"
+              date_to:
+                type: "string"
+      responses:
+        '200':
+          description: "Success operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                currency:
+                  type: "string"
+                  enum:
+                    - "USDT"
+                    - "BTC"
+                amount:
+                  type: "string"
+                commission:
+                  type: "string"
+                operation:
+                  type: "string"
+                  enum:
+                    - "deposit"
+                    - "withdrawal"
+                status:
+                  type: "string"
+                  enum:
+                    - "finished"
+                    - "processing"
+                    - "cancelled"
+                date:
+                  type: "string"
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Unauthorized"
+        409:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+
+  /transactions/withdraw:
+    post:
+      summary: "Withdrawal request"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      description: "Creates a request to withdraw cryptocurrency from the user's account."
+      security:
+        - api_key: [ ]
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              currency:
+                type: "string"
+              amount:
+                type: "string"
+              address:
+                type: "string"
+              network:
+                type: "string"
+                example: "BTC"
+      responses:
+        '200':
+          description: "Success operation"
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              status:
+                type: "string"
+                enum:
+                  - "finished"
+                  - "processing"
+                  - "pending"
+              txHash:
+                type: "string"
+        401:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Unauthorized"
+        409:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+  /metrics:
+    get:
+      summary: "Prometheus metrics"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: ok
+
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+
+definitions:
+  Error:
+    type: "object"
+    properties:
+      error_message:
+        type: "string"
+      error_status_code:
+        type: integer
