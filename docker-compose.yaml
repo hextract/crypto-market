@@ -1,0 +1,86 @@
+ services:
+  db:
+    image: postgres:16.4-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./scripts/multiple_db.sh:/docker-entrypoint-initdb.d/multiple_db.sh
+      - ./scripts/init_sql:/docker-entrypoint-initdb.d/init_sql
+    env_file:
+      - .env
+    expose:
+      - ${POSTGRES_PORT}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    command: -p ${POSTGRES_PORT}
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  connector:
+    container_name: connector-svc
+    env_file:
+      - .env
+    build:
+      context: ./
+      dockerfile: ./stack_connector/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${CONNECTOR_REST_PORT}:${CONNECTOR_REST_PORT}"
+  payment:
+    container_name: payment-svc
+    build:
+      context: ./
+      dockerfile: ./payment/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PAYMENT_REST_PORT}:${PAYMENT_REST_PORT}"
+  auth:
+    container_name: auth-svc
+    build:
+      context: ./
+      dockerfile: ./auth/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    ports:
+      - "${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT}
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    ports:
+      - "${KAFKA_PORT}:${KAFKA_PORT}"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    tmpfs:
+      - /kafka
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:9092" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+ volumes:
+   postgres_data:
