@@ -1,4 +1,7 @@
 # Биржа непрерывных во времени заявок
+
+![db_diagram.png](etc/pic/db_diagram.png)
+
 ```
 request_handler -> market_maker:
 
