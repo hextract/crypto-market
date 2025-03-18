@@ -5,8 +5,8 @@ info:
   version: "0.1.0"
   title: "market.auth"
 schemes:
-    - "https"
-#  - "http"
+#    - "https"
+  - "http"
 paths:
   /auth/login:
     post:
