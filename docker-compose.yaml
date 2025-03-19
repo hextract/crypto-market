@@ -53,6 +53,36 @@
         condition: service_healthy
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start -Dkeycloak.import=/opt/keycloak/data/import/realm-export.json --import-realm --db postgres --hostname-strict false --http-enabled true
+    environment:
+      KC_DB_URL: jdbc:postgresql://db:${POSTGRES_PORT}/${AUTH_DB_NAME}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_SCHEMA: public
+      KC_FEATURES: preview
+      KC_LOG_LEVEL: ERROR
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ./keycloak/config/realm-export.json
+        target: /opt/keycloak/data/import/realm-export.json
+    ports:
+      - ${KEYCLOAK_PORT}:${KEYCLOAK_INNER_PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "/opt/keycloak/bin/kc.sh", "show-config" ]
+      start_period: 10s
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper
