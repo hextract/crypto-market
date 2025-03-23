@@ -4,6 +4,8 @@ package restapi
 
 import (
 	"crypto/tls"
+	"github.com/h4x4d/crypto-market/auth/internal/restapi/handlers"
+	"log"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -36,6 +38,16 @@ func configureAPI(api *operations.MarketAuthAPI) http.Handler {
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
+
+	handler, err := handlers.NewHandler()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	api.PostAuthLoginHandler = operations.PostAuthLoginHandlerFunc(handler.LoginHandler)
+	api.PostAuthRegisterHandler = operations.PostAuthRegisterHandlerFunc(handler.RegisterHandler)
+	api.PostAuthChangePasswordHandler = operations.PostAuthChangePasswordHandlerFunc(handler.ChangePasswordHandler)
+	api.GetMetricsHandler = operations.GetMetricsHandlerFunc(handlers.MetricsHandler)
 
 	if api.GetMetricsHandler == nil {
 		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams) middleware.Responder {
