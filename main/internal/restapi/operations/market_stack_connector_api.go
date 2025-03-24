@@ -42,6 +42,21 @@ func NewMarketStackConnectorAPI(spec *loads.Document) *MarketStackConnectorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
+		}),
+		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
+		}),
+		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation GetTransactionsPurchase has not yet been implemented")
+		}),
+		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
+		}),
+		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
+		}),
 		CancelBidHandler: CancelBidHandlerFunc(func(params CancelBidParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation CancelBid has not yet been implemented")
 		}),
@@ -104,6 +119,16 @@ type MarketStackConnectorAPI struct {
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
+	// GetAccountBalanceHandler sets the operation handler for the get account balance operation
+	GetAccountBalanceHandler GetAccountBalanceHandler
+	// GetMetricsHandler sets the operation handler for the get metrics operation
+	GetMetricsHandler GetMetricsHandler
+	// GetTransactionsPurchaseHandler sets the operation handler for the get transactions purchase operation
+	GetTransactionsPurchaseHandler GetTransactionsPurchaseHandler
+	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
+	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
+	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
+	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
 	CancelBidHandler CancelBidHandler
 	// CreateBidHandler sets the operation handler for the create bid operation
@@ -193,6 +218,21 @@ func (o *MarketStackConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "APIKeyAuth")
 	}
 
+	if o.GetAccountBalanceHandler == nil {
+		unregistered = append(unregistered, "GetAccountBalanceHandler")
+	}
+	if o.GetMetricsHandler == nil {
+		unregistered = append(unregistered, "GetMetricsHandler")
+	}
+	if o.GetTransactionsPurchaseHandler == nil {
+		unregistered = append(unregistered, "GetTransactionsPurchaseHandler")
+	}
+	if o.GetTransactionsTransfersHandler == nil {
+		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
+	}
+	if o.PostTransactionsWithdrawHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
+	}
 	if o.CancelBidHandler == nil {
 		unregistered = append(unregistered, "CancelBidHandler")
 	}
@@ -302,6 +342,26 @@ func (o *MarketStackConnectorAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/account/balance"] = NewGetAccountBalance(o.context, o.GetAccountBalanceHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/metrics"] = NewGetMetrics(o.context, o.GetMetricsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/transactions/purchase"] = NewGetTransactionsPurchase(o.context, o.GetTransactionsPurchaseHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/transactions/transfers"] = NewGetTransactionsTransfers(o.context, o.GetTransactionsTransfersHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}

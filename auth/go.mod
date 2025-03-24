@@ -12,8 +12,6 @@ require (
 	github.com/go-openapi/swag v0.23.0
 	github.com/go-openapi/validate v0.24.0
 	github.com/h4x4d/crypto-market/pkg v0.0.0-00010101000000-000000000000
-	github.com/h4x4d/go_hsse_hotels/auth v0.0.0-20241216103408-cb2359d22b1d
-	github.com/h4x4d/go_hsse_hotels/pkg v0.0.0-20241216103408-cb2359d22b1d
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/prometheus/client_golang v1.21.1
 	go.opentelemetry.io/otel/trace v1.35.0
@@ -35,6 +33,7 @@ require (
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/h4x4d/go_hsse_hotels/pkg v0.0.0-20241216103408-cb2359d22b1d // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

@@ -23,8 +23,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Crypto Market | Payment svc",
-    "title": "market.payment",
+    "description": "continuous market | stack connector",
+    "title": "market.stack_connector",
     "version": "0.1.0"
   },
   "paths": {
@@ -63,6 +63,176 @@ func init() {
           },
           "401": {
             "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/bid": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get my bids",
+        "operationId": "get_bids",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid"
+              }
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Create bid",
+        "operationId": "create_bid",
+        "parameters": [
+          {
+            "name": "object",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/bid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bid_id": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/market/{bid_id}": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get bid info by id",
+        "operationId": "get_bid_by_id",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of bid to return",
+            "name": "bid_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/bid"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Bid not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Cancel bid",
+        "operationId": "cancel_bid",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of bid to cancel",
+            "name": "bid_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -377,6 +547,50 @@ func init() {
           "type": "integer"
         }
       }
+    },
+    "Result": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "bid": {
+      "type": "object",
+      "properties": {
+        "amount_to_buy": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "bid_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "bought_amount": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "buy_speed": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "max_price": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "min_price": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -393,8 +607,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Crypto Market | Payment svc",
-    "title": "market.payment",
+    "description": "continuous market | stack connector",
+    "title": "market.stack_connector",
     "version": "0.1.0"
   },
   "paths": {
@@ -425,6 +639,176 @@ func init() {
           },
           "401": {
             "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/bid": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get my bids",
+        "operationId": "get_bids",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid"
+              }
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Create bid",
+        "operationId": "create_bid",
+        "parameters": [
+          {
+            "name": "object",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/bid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bid_id": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/market/{bid_id}": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get bid info by id",
+        "operationId": "get_bid_by_id",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of bid to return",
+            "name": "bid_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/bid"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Bid not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Cancel bid",
+        "operationId": "cancel_bid",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of bid to cancel",
+            "name": "bid_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -754,6 +1138,50 @@ func init() {
             "processing",
             "cancelled"
           ]
+        }
+      }
+    },
+    "Result": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "bid": {
+      "type": "object",
+      "properties": {
+        "amount_to_buy": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "bid_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "bought_amount": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "buy_speed": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "max_price": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "min_price": {
+          "type": "number",
+          "multipleOf": 1e-7
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     }

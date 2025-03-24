@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/h4x4d/crypto-market/payment/internal/models"
+	"github.com/h4x4d/crypto-market/stack_connector/internal/models"
 )
 
 // GetTransactionsPurchaseOKCode is the HTTP code returned for type GetTransactionsPurchaseOK

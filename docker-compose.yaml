@@ -23,7 +23,7 @@
       - .env
     build:
       context: ./
-      dockerfile: ./stack_connector/Dockerfile
+      dockerfile: main/Dockerfile
     depends_on:
       db:
         condition: service_healthy
