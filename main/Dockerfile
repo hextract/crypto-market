@@ -5,19 +5,19 @@ COPY pkg/go.mod .
 COPY pkg/go.sum .
 RUN go mod download
 
-WORKDIR /stack_connector
-COPY stack_connector/go.mod .
-COPY stack_connector/go.sum .
+WORKDIR /main
+COPY main/go.mod .
+COPY main/go.sum .
 RUN go mod download
 
-COPY stack_connector/ .
+COPY main/ .
 
 COPY ../pkg ../pkg
 
-RUN go build -o stack_connector cmd/main.go
+RUN go build -o main cmd/main.go
 
 EXPOSE $CONNECTOR_REST_PORT
 
-ENTRYPOINT ["./stack_connector", "--port=8880", "--host=0.0.0.0"]
+ENTRYPOINT ["./main", "--port=8880", "--host=0.0.0.0"]
 
 

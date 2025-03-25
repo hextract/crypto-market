@@ -17,8 +17,8 @@
       interval: 10s
       timeout: 5s
       retries: 5
-  connector:
-    container_name: connector-svc
+  main:
+    container_name: main-svc
     env_file:
       - .env
     build:
@@ -29,18 +29,6 @@
         condition: service_healthy
     ports:
       - "${CONNECTOR_REST_PORT}:${CONNECTOR_REST_PORT}"
-  payment:
-    container_name: payment-svc
-    build:
-      context: ./
-      dockerfile: ./payment/Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "${PAYMENT_REST_PORT}:${PAYMENT_REST_PORT}"
   auth:
     container_name: auth-svc
     build:
