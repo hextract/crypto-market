@@ -1,9 +1,9 @@
 ---
 swagger: "2.0"
 info:
-  description: "continuous market | stack connector"
+  description: "continuous market"
   version: "0.1.0"
-  title: "market.stack_connector"
+  title: "market.main"
 schemes:
   #  - "https"
   - "http"

@@ -23,8 +23,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "continuous market | stack connector",
-    "title": "market.stack_connector",
+    "description": "continuous market",
+    "title": "market.main",
     "version": "0.1.0"
   },
   "paths": {
@@ -607,8 +607,8 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "continuous market | stack connector",
-    "title": "market.stack_connector",
+    "description": "continuous market",
+    "title": "market.main",
     "version": "0.1.0"
   },
   "paths": {

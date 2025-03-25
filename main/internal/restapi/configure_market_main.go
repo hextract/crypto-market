@@ -13,13 +13,13 @@ import (
 	"github.com/h4x4d/crypto-market/stack_connector/internal/restapi/operations"
 )
 
-//go:generate swagger generate server --target ../../internal --name MarketStackConnector --spec ../../api/swagger/stack_connector.yaml --principal interface{}
+//go:generate swagger generate server --target ../../internal --name MarketMain --spec ../../api/swagger/main.yaml --principal interface{} --exclude-main
 
-func configureFlags(api *operations.MarketStackConnectorAPI) {
+func configureFlags(api *operations.MarketMainAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
-func configureAPI(api *operations.MarketStackConnectorAPI) http.Handler {
+func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 
@@ -50,6 +50,31 @@ func configureAPI(api *operations.MarketStackConnectorAPI) http.Handler {
 	// Example:
 	// api.APIAuthorizer = security.Authorized()
 
+	if api.GetAccountBalanceHandler == nil {
+		api.GetAccountBalanceHandler = operations.GetAccountBalanceHandlerFunc(func(params operations.GetAccountBalanceParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetAccountBalance has not yet been implemented")
+		})
+	}
+	if api.GetMetricsHandler == nil {
+		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
+		})
+	}
+	if api.GetTransactionsPurchaseHandler == nil {
+		api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(func(params operations.GetTransactionsPurchaseParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetTransactionsPurchase has not yet been implemented")
+		})
+	}
+	if api.GetTransactionsTransfersHandler == nil {
+		api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(func(params operations.GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetTransactionsTransfers has not yet been implemented")
+		})
+	}
+	if api.PostTransactionsWithdrawHandler == nil {
+		api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(func(params operations.PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PostTransactionsWithdraw has not yet been implemented")
+		})
+	}
 	if api.CancelBidHandler == nil {
 		api.CancelBidHandler = operations.CancelBidHandlerFunc(func(params operations.CancelBidParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operations.CancelBid has not yet been implemented")
