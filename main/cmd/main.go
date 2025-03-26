@@ -23,7 +23,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	api := operations.NewMarketStackConnectorAPI(swaggerSpec)
+	api := operations.NewMarketMainAPI(swaggerSpec)
 	server := restapi.NewServer(api)
 	defer server.Shutdown()
 
