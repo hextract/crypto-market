@@ -59,7 +59,7 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	}
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"), "db", os.Getenv("POSTGRES_PORT"), os.Getenv("HOTEL_DB_NAME"))
+		os.Getenv("POSTGRES_PASSWORD"), "db", os.Getenv("POSTGRES_PORT"), os.Getenv("MAIN_DB_NAME"))
 	handler, makeErr := handlers.NewHandler(connStr)
 	for makeErr != nil {
 		handler, makeErr = handlers.NewHandler(connStr)

@@ -18,6 +18,6 @@ RUN go build -o main cmd/main.go
 
 EXPOSE $MAIN_REST_PORT
 
-ENTRYPOINT ["./main", "--port=$MAIN_REST_PORT", "--host=$MAIN_HOST"]
+ENTRYPOINT ["./main", "--port=8880", "--host=0.0.0.0"]
 
 

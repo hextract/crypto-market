@@ -7,24 +7,24 @@ import (
 	"github.com/h4x4d/crypto-market/main/internal/utils"
 )
 
-func (handler *Handler) GetBalanceHandler(params operations.GetAccountBalanceParams, user *models.User) (responder middleware.Responder) {
+func (handler *Handler) GetBalanceHandler(_ operations.GetAccountBalanceParams, user *models.User) (responder middleware.Responder) {
 	defer utils.CatchPanic(&responder)
 
-	value := float32(0.0)
+	balances, err := handler.Database.GetAccountBalance(user)
 
-	var _ []*operations.GetAccountBalanceOKBodyItems0
-
-	v := operations.GetAccountBalanceOKBodyItems0{
-		Amount:   &value,
-		Currency: operations.GetAccountBalanceOKBodyItems0CurrencyBTC,
+	if err != nil {
+		return utils.HandleInternalError(err)
 	}
 
+	var values []*operations.GetAccountBalanceOKBodyItems0
+
+	for _, balance := range balances {
+		values = append(values, &operations.GetAccountBalanceOKBodyItems0{
+			Currency: balance.Currency,
+			Amount:   &balance.Amount,
+		})
+	}
 	result := new(operations.GetAccountBalanceOK)
-	values := []*operations.GetAccountBalanceOKBodyItems0{
-		&v,
-		&v,
-	}
-
 	result.SetPayload(values)
-	return
+	return result
 }

@@ -1,4 +1,4 @@
- services:
+services:
   db:
     image: postgres:16.4-alpine
     volumes:
@@ -100,5 +100,5 @@
       timeout: 5s
       retries: 10
 
- volumes:
-   postgres_data:
+volumes:
+  postgres_data:
