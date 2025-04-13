@@ -9,19 +9,21 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // CancelBidHandlerFunc turns a function with the right signature into a cancel bid handler
-type CancelBidHandlerFunc func(CancelBidParams, interface{}) middleware.Responder
+type CancelBidHandlerFunc func(CancelBidParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn CancelBidHandlerFunc) Handle(params CancelBidParams, principal interface{}) middleware.Responder {
+func (fn CancelBidHandlerFunc) Handle(params CancelBidParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // CancelBidHandler interface for that can handle valid cancel bid params
 type CancelBidHandler interface {
-	Handle(CancelBidParams, interface{}) middleware.Responder
+	Handle(CancelBidParams, *models.User) middleware.Responder
 }
 
 // NewCancelBid creates a new http.Handler for the cancel bid operation
@@ -53,9 +55,9 @@ func (o *CancelBid) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

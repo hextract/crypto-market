@@ -24,7 +24,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/h4x4d/crypto-market/stack_connector/internal/restapi/operations"
+	"github.com/h4x4d/crypto-market/main/internal/restapi/operations"
 )
 
 const (

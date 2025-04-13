@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetAccountBalanceHandlerFunc turns a function with the right signature into a get account balance handler
-type GetAccountBalanceHandlerFunc func(GetAccountBalanceParams, interface{}) middleware.Responder
+type GetAccountBalanceHandlerFunc func(GetAccountBalanceParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetAccountBalanceHandlerFunc) Handle(params GetAccountBalanceParams, principal interface{}) middleware.Responder {
+func (fn GetAccountBalanceHandlerFunc) Handle(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetAccountBalanceHandler interface for that can handle valid get account balance params
 type GetAccountBalanceHandler interface {
-	Handle(GetAccountBalanceParams, interface{}) middleware.Responder
+	Handle(GetAccountBalanceParams, *models.User) middleware.Responder
 }
 
 // NewGetAccountBalance creates a new http.Handler for the get account balance operation
@@ -61,9 +63,9 @@ func (o *GetAccountBalance) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
@@ -83,15 +85,13 @@ type GetAccountBalanceOKBodyItems0 struct {
 
 	// amount
 	// Example: 100.5
-	// Required: true
 	// Minimum: 0
-	Amount *float32 `json:"amount"`
+	Amount *float32 `json:"amount,omitempty"`
 
 	// currency
 	// Example: USDT
-	// Required: true
 	// Enum: ["USDT","BTC"]
-	Currency *string `json:"currency"`
+	Currency string `json:"currency,omitempty"`
 }
 
 // Validate validates this get account balance o k body items0
@@ -113,9 +113,8 @@ func (o *GetAccountBalanceOKBodyItems0) Validate(formats strfmt.Registry) error 
 }
 
 func (o *GetAccountBalanceOKBodyItems0) validateAmount(formats strfmt.Registry) error {
-
-	if err := validate.Required("amount", "body", o.Amount); err != nil {
-		return err
+	if swag.IsZero(o.Amount) { // not required
+		return nil
 	}
 
 	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
@@ -155,13 +154,12 @@ func (o *GetAccountBalanceOKBodyItems0) validateCurrencyEnum(path, location stri
 }
 
 func (o *GetAccountBalanceOKBodyItems0) validateCurrency(formats strfmt.Registry) error {
-
-	if err := validate.Required("currency", "body", o.Currency); err != nil {
-		return err
+	if swag.IsZero(o.Currency) { // not required
+		return nil
 	}
 
 	// value enum
-	if err := o.validateCurrencyEnum("currency", "body", *o.Currency); err != nil {
+	if err := o.validateCurrencyEnum("currency", "body", o.Currency); err != nil {
 		return err
 	}
 

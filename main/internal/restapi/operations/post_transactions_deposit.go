@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // PostTransactionsDepositHandlerFunc turns a function with the right signature into a post transactions deposit handler
-type PostTransactionsDepositHandlerFunc func(PostTransactionsDepositParams, interface{}) middleware.Responder
+type PostTransactionsDepositHandlerFunc func(PostTransactionsDepositParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostTransactionsDepositHandlerFunc) Handle(params PostTransactionsDepositParams, principal interface{}) middleware.Responder {
+func (fn PostTransactionsDepositHandlerFunc) Handle(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostTransactionsDepositHandler interface for that can handle valid post transactions deposit params
 type PostTransactionsDepositHandler interface {
-	Handle(PostTransactionsDepositParams, interface{}) middleware.Responder
+	Handle(PostTransactionsDepositParams, *models.User) middleware.Responder
 }
 
 // NewPostTransactionsDeposit creates a new http.Handler for the post transactions deposit operation
@@ -61,9 +63,9 @@ func (o *PostTransactionsDeposit) ServeHTTP(rw http.ResponseWriter, r *http.Requ
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

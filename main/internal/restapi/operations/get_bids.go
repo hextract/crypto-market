@@ -9,19 +9,21 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetBidsHandlerFunc turns a function with the right signature into a get bids handler
-type GetBidsHandlerFunc func(GetBidsParams, interface{}) middleware.Responder
+type GetBidsHandlerFunc func(GetBidsParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetBidsHandlerFunc) Handle(params GetBidsParams, principal interface{}) middleware.Responder {
+func (fn GetBidsHandlerFunc) Handle(params GetBidsParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetBidsHandler interface for that can handle valid get bids params
 type GetBidsHandler interface {
-	Handle(GetBidsParams, interface{}) middleware.Responder
+	Handle(GetBidsParams, *models.User) middleware.Responder
 }
 
 // NewGetBids creates a new http.Handler for the get bids operation
@@ -53,9 +55,9 @@ func (o *GetBids) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

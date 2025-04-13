@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetTransactionsTransfersHandlerFunc turns a function with the right signature into a get transactions transfers handler
-type GetTransactionsTransfersHandlerFunc func(GetTransactionsTransfersParams, interface{}) middleware.Responder
+type GetTransactionsTransfersHandlerFunc func(GetTransactionsTransfersParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetTransactionsTransfersHandlerFunc) Handle(params GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
+func (fn GetTransactionsTransfersHandlerFunc) Handle(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetTransactionsTransfersHandler interface for that can handle valid get transactions transfers params
 type GetTransactionsTransfersHandler interface {
-	Handle(GetTransactionsTransfersParams, interface{}) middleware.Responder
+	Handle(GetTransactionsTransfersParams, *models.User) middleware.Responder
 }
 
 // NewGetTransactionsTransfers creates a new http.Handler for the get transactions transfers operation
@@ -61,9 +63,9 @@ func (o *GetTransactionsTransfers) ServeHTTP(rw http.ResponseWriter, r *http.Req
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

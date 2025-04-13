@@ -12,19 +12,21 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // CreateBidHandlerFunc turns a function with the right signature into a create bid handler
-type CreateBidHandlerFunc func(CreateBidParams, interface{}) middleware.Responder
+type CreateBidHandlerFunc func(CreateBidParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn CreateBidHandlerFunc) Handle(params CreateBidParams, principal interface{}) middleware.Responder {
+func (fn CreateBidHandlerFunc) Handle(params CreateBidParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // CreateBidHandler interface for that can handle valid create bid params
 type CreateBidHandler interface {
-	Handle(CreateBidParams, interface{}) middleware.Responder
+	Handle(CreateBidParams, *models.User) middleware.Responder
 }
 
 // NewCreateBid creates a new http.Handler for the create bid operation
@@ -56,9 +58,9 @@ func (o *CreateBid) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

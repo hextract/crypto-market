@@ -131,9 +131,6 @@ paths:
             type: "array"
             items:
               type: "object"
-              required:
-                - currency
-                - amount
               properties:
                 currency:
                   type: "string"

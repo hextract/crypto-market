@@ -18,6 +18,8 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // NewMarketMainAPI creates a new MarketMain instance
@@ -43,39 +45,39 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		JSONProducer: runtime.JSONProducer(),
 		TxtProducer:  runtime.TextProducer(),
 
-		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal interface{}) middleware.Responder {
+		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
 		}),
 		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
 		}),
-		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal interface{}) middleware.Responder {
+		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsPurchase has not yet been implemented")
 		}),
-		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
+		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
 		}),
-		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal interface{}) middleware.Responder {
+		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
 		}),
-		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
+		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
-		CancelBidHandler: CancelBidHandlerFunc(func(params CancelBidParams, principal interface{}) middleware.Responder {
+		CancelBidHandler: CancelBidHandlerFunc(func(params CancelBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation CancelBid has not yet been implemented")
 		}),
-		CreateBidHandler: CreateBidHandlerFunc(func(params CreateBidParams, principal interface{}) middleware.Responder {
+		CreateBidHandler: CreateBidHandlerFunc(func(params CreateBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation CreateBid has not yet been implemented")
 		}),
-		GetBidByIDHandler: GetBidByIDHandlerFunc(func(params GetBidByIDParams, principal interface{}) middleware.Responder {
+		GetBidByIDHandler: GetBidByIDHandlerFunc(func(params GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBidByID has not yet been implemented")
 		}),
-		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal interface{}) middleware.Responder {
+		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBids has not yet been implemented")
 		}),
 
 		// Applies when the "api_key" header is set
-		APIKeyAuth: func(token string) (interface{}, error) {
+		APIKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
 		},
 		// default authorizer is authorized meaning no requests are blocked
@@ -121,7 +123,7 @@ type MarketMainAPI struct {
 
 	// APIKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key api_key provided in the header
-	APIKeyAuth func(string) (interface{}, error)
+	APIKeyAuth func(string) (*models.User, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -280,7 +282,9 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 		switch name {
 		case "api_key":
 			scheme := schemes[name]
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.APIKeyAuth)
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
+				return o.APIKeyAuth(token)
+			})
 
 		}
 	}

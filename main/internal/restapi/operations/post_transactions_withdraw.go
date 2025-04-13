@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // PostTransactionsWithdrawHandlerFunc turns a function with the right signature into a post transactions withdraw handler
-type PostTransactionsWithdrawHandlerFunc func(PostTransactionsWithdrawParams, interface{}) middleware.Responder
+type PostTransactionsWithdrawHandlerFunc func(PostTransactionsWithdrawParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostTransactionsWithdrawHandlerFunc) Handle(params PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
+func (fn PostTransactionsWithdrawHandlerFunc) Handle(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostTransactionsWithdrawHandler interface for that can handle valid post transactions withdraw params
 type PostTransactionsWithdrawHandler interface {
-	Handle(PostTransactionsWithdrawParams, interface{}) middleware.Responder
+	Handle(PostTransactionsWithdrawParams, *models.User) middleware.Responder
 }
 
 // NewPostTransactionsWithdraw creates a new http.Handler for the post transactions withdraw operation
@@ -61,9 +63,9 @@ func (o *PostTransactionsWithdraw) ServeHTTP(rw http.ResponseWriter, r *http.Req
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params

@@ -47,10 +47,6 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
-                "required": [
-                  "currency",
-                  "amount"
-                ],
                 "properties": {
                   "amount": {
                     "type": "number",
@@ -1508,10 +1504,6 @@ func init() {
     },
     "GetAccountBalanceOKBodyItems0": {
       "type": "object",
-      "required": [
-        "currency",
-        "amount"
-      ],
       "properties": {
         "amount": {
           "type": "number",
