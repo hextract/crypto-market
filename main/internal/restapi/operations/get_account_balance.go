@@ -85,13 +85,16 @@ type GetAccountBalanceOKBodyItems0 struct {
 
 	// amount
 	// Example: 100.5
+	// Required: true
 	// Minimum: 0
-	Amount *float32 `json:"amount,omitempty"`
+	// Multiple Of: 1e-08
+	Amount *float32 `json:"amount"`
 
 	// currency
 	// Example: USDT
+	// Required: true
 	// Enum: ["USDT","BTC"]
-	Currency string `json:"currency,omitempty"`
+	Currency *string `json:"currency"`
 }
 
 // Validate validates this get account balance o k body items0
@@ -113,11 +116,16 @@ func (o *GetAccountBalanceOKBodyItems0) Validate(formats strfmt.Registry) error 
 }
 
 func (o *GetAccountBalanceOKBodyItems0) validateAmount(formats strfmt.Registry) error {
-	if swag.IsZero(o.Amount) { // not required
-		return nil
+
+	if err := validate.Required("amount", "body", o.Amount); err != nil {
+		return err
 	}
 
 	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("amount", "body", float64(*o.Amount), 1e-08); err != nil {
 		return err
 	}
 
@@ -154,12 +162,13 @@ func (o *GetAccountBalanceOKBodyItems0) validateCurrencyEnum(path, location stri
 }
 
 func (o *GetAccountBalanceOKBodyItems0) validateCurrency(formats strfmt.Registry) error {
-	if swag.IsZero(o.Currency) { // not required
-		return nil
+
+	if err := validate.Required("currency", "body", o.Currency); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateCurrencyEnum("currency", "body", o.Currency); err != nil {
+	if err := o.validateCurrencyEnum("currency", "body", *o.Currency); err != nil {
 		return err
 	}
 

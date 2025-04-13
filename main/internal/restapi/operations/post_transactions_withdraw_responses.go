@@ -26,7 +26,7 @@ type PostTransactionsWithdrawOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *PostTransactionsWithdrawOKBody `json:"body,omitempty"`
+	Payload *models.WithdrawResponse `json:"body,omitempty"`
 }
 
 // NewPostTransactionsWithdrawOK creates PostTransactionsWithdrawOK with default headers values
@@ -36,13 +36,13 @@ func NewPostTransactionsWithdrawOK() *PostTransactionsWithdrawOK {
 }
 
 // WithPayload adds the payload to the post transactions withdraw o k response
-func (o *PostTransactionsWithdrawOK) WithPayload(payload *PostTransactionsWithdrawOKBody) *PostTransactionsWithdrawOK {
+func (o *PostTransactionsWithdrawOK) WithPayload(payload *models.WithdrawResponse) *PostTransactionsWithdrawOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the post transactions withdraw o k response
-func (o *PostTransactionsWithdrawOK) SetPayload(payload *PostTransactionsWithdrawOKBody) {
+func (o *PostTransactionsWithdrawOK) SetPayload(payload *models.WithdrawResponse) {
 	o.Payload = payload
 }
 

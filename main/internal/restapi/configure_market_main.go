@@ -65,10 +65,16 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 		handler, makeErr = handlers.NewHandler(connStr)
 	}
 
+	if api.MetricsKeyAuth == nil {
+		api.MetricsKeyAuth = func(token string) (*models.User, error) {
+			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
+		}
+	}
+
 	api.GetAccountBalanceHandler = operations.GetAccountBalanceHandlerFunc(handler.GetBalanceHandler)
 
 	if api.GetMetricsHandler == nil {
-		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams) middleware.Responder {
+		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
 		})
 	}
@@ -98,11 +104,6 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	if api.GetBidByIDHandler == nil {
 		api.GetBidByIDHandler = operations.GetBidByIDHandlerFunc(func(params operations.GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetBidByID has not yet been implemented")
-		})
-	}
-	if api.GetBidsHandler == nil {
-		api.GetBidsHandler = operations.GetBidsHandlerFunc(func(params operations.GetBidsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetBids has not yet been implemented")
 		})
 	}
 

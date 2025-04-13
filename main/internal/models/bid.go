@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -20,30 +21,66 @@ import (
 type Bid struct {
 
 	// amount to buy
-	// Multiple Of: 1e-07
-	AmountToBuy float64 `json:"amount_to_buy,omitempty"`
+	// Required: true
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	AmountToBuy *float32 `json:"amount_to_buy"`
 
-	// bid id
-	BidID int64 `json:"bid_id,omitempty"`
+	// avg price
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	AvgPrice *float32 `json:"avg_price,omitempty"`
 
 	// bought amount
-	// Multiple Of: 1e-07
-	BoughtAmount float64 `json:"bought_amount,omitempty"`
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	BoughtAmount *float32 `json:"bought_amount,omitempty"`
 
 	// buy speed
-	// Multiple Of: 1e-07
-	BuySpeed float64 `json:"buy_speed,omitempty"`
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	BuySpeed *float32 `json:"buy_speed,omitempty"`
+
+	// complete date
+	// Format: date-time
+	CompleteDate strfmt.DateTime `json:"complete_date,omitempty"`
+
+	// create date
+	// Required: true
+	// Format: date-time
+	CreateDate *strfmt.DateTime `json:"create_date"`
+
+	// from currency
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	FromCurrency *string `json:"from_currency"`
+
+	// id
+	// Example: bid_123
+	// Required: true
+	ID *string `json:"id"`
 
 	// max price
-	// Multiple Of: 1e-07
-	MaxPrice float64 `json:"max_price,omitempty"`
+	// Required: true
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	MaxPrice *float32 `json:"max_price"`
 
 	// min price
-	// Multiple Of: 1e-07
-	MinPrice float64 `json:"min_price,omitempty"`
+	// Required: true
+	// Minimum: 0
+	// Multiple Of: 1e-08
+	MinPrice *float32 `json:"min_price"`
 
-	// user id
-	UserID int64 `json:"user_id,omitempty"`
+	// status
+	// Required: true
+	// Enum: ["pending","processing","finished","cancelled"]
+	Status *string `json:"status"`
+
+	// to currency
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	ToCurrency *string `json:"to_currency"`
 }
 
 // Validate validates this bid
@@ -51,6 +88,10 @@ func (m *Bid) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmountToBuy(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateAvgPrice(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -62,11 +103,35 @@ func (m *Bid) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateCompleteDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCreateDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateFromCurrency(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateMaxPrice(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateMinPrice(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateToCurrency(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,11 +142,32 @@ func (m *Bid) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Bid) validateAmountToBuy(formats strfmt.Registry) error {
-	if swag.IsZero(m.AmountToBuy) { // not required
+
+	if err := validate.Required("amount_to_buy", "body", m.AmountToBuy); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("amount_to_buy", "body", float64(*m.AmountToBuy), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("amount_to_buy", "body", float64(*m.AmountToBuy), 1e-08); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Bid) validateAvgPrice(formats strfmt.Registry) error {
+	if swag.IsZero(m.AvgPrice) { // not required
 		return nil
 	}
 
-	if err := validate.MultipleOf("amount_to_buy", "body", m.AmountToBuy, 1e-07); err != nil {
+	if err := validate.Minimum("avg_price", "body", float64(*m.AvgPrice), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("avg_price", "body", float64(*m.AvgPrice), 1e-08); err != nil {
 		return err
 	}
 
@@ -93,7 +179,11 @@ func (m *Bid) validateBoughtAmount(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MultipleOf("bought_amount", "body", m.BoughtAmount, 1e-07); err != nil {
+	if err := validate.Minimum("bought_amount", "body", float64(*m.BoughtAmount), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("bought_amount", "body", float64(*m.BoughtAmount), 1e-08); err != nil {
 		return err
 	}
 
@@ -105,7 +195,88 @@ func (m *Bid) validateBuySpeed(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MultipleOf("buy_speed", "body", m.BuySpeed, 1e-07); err != nil {
+	if err := validate.Minimum("buy_speed", "body", float64(*m.BuySpeed), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("buy_speed", "body", float64(*m.BuySpeed), 1e-08); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Bid) validateCompleteDate(formats strfmt.Registry) error {
+	if swag.IsZero(m.CompleteDate) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("complete_date", "body", "date-time", m.CompleteDate.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Bid) validateCreateDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("create_date", "body", m.CreateDate); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("create_date", "body", "date-time", m.CreateDate.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var bidTypeFromCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		bidTypeFromCurrencyPropEnum = append(bidTypeFromCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// BidFromCurrencyUSDT captures enum value "USDT"
+	BidFromCurrencyUSDT string = "USDT"
+
+	// BidFromCurrencyBTC captures enum value "BTC"
+	BidFromCurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (m *Bid) validateFromCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, bidTypeFromCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Bid) validateFromCurrency(formats strfmt.Registry) error {
+
+	if err := validate.Required("from_currency", "body", m.FromCurrency); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateFromCurrencyEnum("from_currency", "body", *m.FromCurrency); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Bid) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
 	}
 
@@ -113,11 +284,16 @@ func (m *Bid) validateBuySpeed(formats strfmt.Registry) error {
 }
 
 func (m *Bid) validateMaxPrice(formats strfmt.Registry) error {
-	if swag.IsZero(m.MaxPrice) { // not required
-		return nil
+
+	if err := validate.Required("max_price", "body", m.MaxPrice); err != nil {
+		return err
 	}
 
-	if err := validate.MultipleOf("max_price", "body", m.MaxPrice, 1e-07); err != nil {
+	if err := validate.Minimum("max_price", "body", float64(*m.MaxPrice), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("max_price", "body", float64(*m.MaxPrice), 1e-08); err != nil {
 		return err
 	}
 
@@ -125,11 +301,108 @@ func (m *Bid) validateMaxPrice(formats strfmt.Registry) error {
 }
 
 func (m *Bid) validateMinPrice(formats strfmt.Registry) error {
-	if swag.IsZero(m.MinPrice) { // not required
-		return nil
+
+	if err := validate.Required("min_price", "body", m.MinPrice); err != nil {
+		return err
 	}
 
-	if err := validate.MultipleOf("min_price", "body", m.MinPrice, 1e-07); err != nil {
+	if err := validate.Minimum("min_price", "body", float64(*m.MinPrice), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("min_price", "body", float64(*m.MinPrice), 1e-08); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var bidTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["pending","processing","finished","cancelled"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		bidTypeStatusPropEnum = append(bidTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// BidStatusPending captures enum value "pending"
+	BidStatusPending string = "pending"
+
+	// BidStatusProcessing captures enum value "processing"
+	BidStatusProcessing string = "processing"
+
+	// BidStatusFinished captures enum value "finished"
+	BidStatusFinished string = "finished"
+
+	// BidStatusCancelled captures enum value "cancelled"
+	BidStatusCancelled string = "cancelled"
+)
+
+// prop value enum
+func (m *Bid) validateStatusEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, bidTypeStatusPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Bid) validateStatus(formats strfmt.Registry) error {
+
+	if err := validate.Required("status", "body", m.Status); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var bidTypeToCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		bidTypeToCurrencyPropEnum = append(bidTypeToCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// BidToCurrencyUSDT captures enum value "USDT"
+	BidToCurrencyUSDT string = "USDT"
+
+	// BidToCurrencyBTC captures enum value "BTC"
+	BidToCurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (m *Bid) validateToCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, bidTypeToCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Bid) validateToCurrency(formats strfmt.Registry) error {
+
+	if err := validate.Required("to_currency", "body", m.ToCurrency); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateToCurrencyEnum("to_currency", "body", *m.ToCurrency); err != nil {
 		return err
 	}
 

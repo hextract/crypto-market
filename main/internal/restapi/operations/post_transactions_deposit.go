@@ -87,6 +87,7 @@ type PostTransactionsDepositBody struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
+	// Multiple Of: 1e-08
 	Amount *float32 `json:"amount"`
 
 	// currency
@@ -121,6 +122,10 @@ func (o *PostTransactionsDepositBody) validateAmount(formats strfmt.Registry) er
 	}
 
 	if err := validate.Minimum("body"+"."+"amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("body"+"."+"amount", "body", float64(*o.Amount), 1e-08); err != nil {
 		return err
 	}
 
@@ -186,138 +191,6 @@ func (o *PostTransactionsDepositBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PostTransactionsDepositBody) UnmarshalBinary(b []byte) error {
 	var res PostTransactionsDepositBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-// PostTransactionsDepositOKBody post transactions deposit o k body
-// Example: {"address":"0x1234567890abcdef1234567890abcdef12345678","id":"tx_dep_123456","status":"pending"}
-//
-// swagger:model PostTransactionsDepositOKBody
-type PostTransactionsDepositOKBody struct {
-
-	// address
-	// Example: 0x1234567890abcdef1234567890abcdef12345678
-	// Required: true
-	Address *string `json:"address"`
-
-	// id
-	// Example: tx_dep_123456
-	// Required: true
-	ID *string `json:"id"`
-
-	// status
-	// Example: pending
-	// Required: true
-	// Enum: ["finished","processing","pending"]
-	Status *string `json:"status"`
-}
-
-// Validate validates this post transactions deposit o k body
-func (o *PostTransactionsDepositOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateAddress(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *PostTransactionsDepositOKBody) validateAddress(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsDepositOK"+"."+"address", "body", o.Address); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (o *PostTransactionsDepositOKBody) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsDepositOK"+"."+"id", "body", o.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var postTransactionsDepositOKBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","pending"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		postTransactionsDepositOKBodyTypeStatusPropEnum = append(postTransactionsDepositOKBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// PostTransactionsDepositOKBodyStatusFinished captures enum value "finished"
-	PostTransactionsDepositOKBodyStatusFinished string = "finished"
-
-	// PostTransactionsDepositOKBodyStatusProcessing captures enum value "processing"
-	PostTransactionsDepositOKBodyStatusProcessing string = "processing"
-
-	// PostTransactionsDepositOKBodyStatusPending captures enum value "pending"
-	PostTransactionsDepositOKBodyStatusPending string = "pending"
-)
-
-// prop value enum
-func (o *PostTransactionsDepositOKBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, postTransactionsDepositOKBodyTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *PostTransactionsDepositOKBody) validateStatus(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsDepositOK"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("postTransactionsDepositOK"+"."+"status", "body", *o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this post transactions deposit o k body based on context it is used
-func (o *PostTransactionsDepositOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *PostTransactionsDepositOKBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *PostTransactionsDepositOKBody) UnmarshalBinary(b []byte) error {
-	var res PostTransactionsDepositOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -26,7 +26,7 @@ type GetTransactionsPurchaseOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*GetTransactionsPurchaseOKBodyItems0 `json:"body,omitempty"`
+	Payload []*models.Purchase `json:"body,omitempty"`
 }
 
 // NewGetTransactionsPurchaseOK creates GetTransactionsPurchaseOK with default headers values
@@ -36,13 +36,13 @@ func NewGetTransactionsPurchaseOK() *GetTransactionsPurchaseOK {
 }
 
 // WithPayload adds the payload to the get transactions purchase o k response
-func (o *GetTransactionsPurchaseOK) WithPayload(payload []*GetTransactionsPurchaseOKBodyItems0) *GetTransactionsPurchaseOK {
+func (o *GetTransactionsPurchaseOK) WithPayload(payload []*models.Purchase) *GetTransactionsPurchaseOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get transactions purchase o k response
-func (o *GetTransactionsPurchaseOK) SetPayload(payload []*GetTransactionsPurchaseOKBodyItems0) {
+func (o *GetTransactionsPurchaseOK) SetPayload(payload []*models.Purchase) {
 	o.Payload = payload
 }
 
@@ -53,7 +53,7 @@ func (o *GetTransactionsPurchaseOK) WriteResponse(rw http.ResponseWriter, produc
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*GetTransactionsPurchaseOKBodyItems0, 0, 50)
+		payload = make([]*models.Purchase, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

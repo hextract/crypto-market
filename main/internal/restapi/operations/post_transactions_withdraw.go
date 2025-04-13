@@ -92,6 +92,7 @@ type PostTransactionsWithdrawBody struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
+	// Multiple Of: 1e-08
 	Amount *float32 `json:"amount"`
 
 	// currency
@@ -139,6 +140,10 @@ func (o *PostTransactionsWithdrawBody) validateAmount(formats strfmt.Registry) e
 	}
 
 	if err := validate.Minimum("body"+"."+"amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MultipleOf("body"+"."+"amount", "body", float64(*o.Amount), 1e-08); err != nil {
 		return err
 	}
 
@@ -204,159 +209,6 @@ func (o *PostTransactionsWithdrawBody) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (o *PostTransactionsWithdrawBody) UnmarshalBinary(b []byte) error {
 	var res PostTransactionsWithdrawBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-// PostTransactionsWithdrawOKBody post transactions withdraw o k body
-// Example: {"commission":0.1,"id":"tx_with_123456","status":"pending","tx_hash":"0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"}
-//
-// swagger:model PostTransactionsWithdrawOKBody
-type PostTransactionsWithdrawOKBody struct {
-
-	// commission
-	// Example: 0.1
-	// Minimum: 0
-	Commission *float32 `json:"commission,omitempty"`
-
-	// id
-	// Example: tx_with_123456
-	// Required: true
-	ID *string `json:"id"`
-
-	// status
-	// Example: pending
-	// Required: true
-	// Enum: ["finished","processing","pending"]
-	Status *string `json:"status"`
-
-	// tx hash
-	// Example: 0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
-	// Required: true
-	TxHash *string `json:"tx_hash"`
-}
-
-// Validate validates this post transactions withdraw o k body
-func (o *PostTransactionsWithdrawOKBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateCommission(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateTxHash(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *PostTransactionsWithdrawOKBody) validateCommission(formats strfmt.Registry) error {
-	if swag.IsZero(o.Commission) { // not required
-		return nil
-	}
-
-	if err := validate.Minimum("postTransactionsWithdrawOK"+"."+"commission", "body", float64(*o.Commission), 0, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (o *PostTransactionsWithdrawOKBody) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsWithdrawOK"+"."+"id", "body", o.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var postTransactionsWithdrawOKBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","pending"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		postTransactionsWithdrawOKBodyTypeStatusPropEnum = append(postTransactionsWithdrawOKBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// PostTransactionsWithdrawOKBodyStatusFinished captures enum value "finished"
-	PostTransactionsWithdrawOKBodyStatusFinished string = "finished"
-
-	// PostTransactionsWithdrawOKBodyStatusProcessing captures enum value "processing"
-	PostTransactionsWithdrawOKBodyStatusProcessing string = "processing"
-
-	// PostTransactionsWithdrawOKBodyStatusPending captures enum value "pending"
-	PostTransactionsWithdrawOKBodyStatusPending string = "pending"
-)
-
-// prop value enum
-func (o *PostTransactionsWithdrawOKBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, postTransactionsWithdrawOKBodyTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *PostTransactionsWithdrawOKBody) validateStatus(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsWithdrawOK"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("postTransactionsWithdrawOK"+"."+"status", "body", *o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (o *PostTransactionsWithdrawOKBody) validateTxHash(formats strfmt.Registry) error {
-
-	if err := validate.Required("postTransactionsWithdrawOK"+"."+"tx_hash", "body", o.TxHash); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this post transactions withdraw o k body based on context it is used
-func (o *PostTransactionsWithdrawOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *PostTransactionsWithdrawOKBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *PostTransactionsWithdrawOKBody) UnmarshalBinary(b []byte) error {
-	var res PostTransactionsWithdrawOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

@@ -48,7 +48,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
 		}),
-		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams) middleware.Responder {
+		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
 		}),
 		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
@@ -72,13 +72,14 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetBidByIDHandler: GetBidByIDHandlerFunc(func(params GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBidByID has not yet been implemented")
 		}),
-		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GetBids has not yet been implemented")
-		}),
 
 		// Applies when the "api_key" header is set
 		APIKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
+		},
+		// Applies when the "metrics_key" header is set
+		MetricsKeyAuth: func(token string) (*models.User, error) {
+			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
 		},
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
@@ -125,6 +126,10 @@ type MarketMainAPI struct {
 	// it performs authentication based on an api key api_key provided in the header
 	APIKeyAuth func(string) (*models.User, error)
 
+	// MetricsKeyAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key metrics_key provided in the header
+	MetricsKeyAuth func(string) (*models.User, error)
+
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
@@ -146,8 +151,6 @@ type MarketMainAPI struct {
 	CreateBidHandler CreateBidHandler
 	// GetBidByIDHandler sets the operation handler for the get bid by id operation
 	GetBidByIDHandler GetBidByIDHandler
-	// GetBidsHandler sets the operation handler for the get bids operation
-	GetBidsHandler GetBidsHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -231,6 +234,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.APIKeyAuth == nil {
 		unregistered = append(unregistered, "APIKeyAuth")
 	}
+	if o.MetricsKeyAuth == nil {
+		unregistered = append(unregistered, "MetricsKeyAuth")
+	}
 
 	if o.GetAccountBalanceHandler == nil {
 		unregistered = append(unregistered, "GetAccountBalanceHandler")
@@ -259,9 +265,6 @@ func (o *MarketMainAPI) Validate() error {
 	if o.GetBidByIDHandler == nil {
 		unregistered = append(unregistered, "GetBidByIDHandler")
 	}
-	if o.GetBidsHandler == nil {
-		unregistered = append(unregistered, "GetBidsHandler")
-	}
 
 	if len(unregistered) > 0 {
 		return fmt.Errorf("missing registration: %s", strings.Join(unregistered, ", "))
@@ -284,6 +287,12 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 			scheme := schemes[name]
 			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
 				return o.APIKeyAuth(token)
+			})
+
+		case "metrics_key":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
+				return o.MetricsKeyAuth(token)
 			})
 
 		}
@@ -399,10 +408,6 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/market/{bid_id}"] = NewGetBidByID(o.context, o.GetBidByIDHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/bid"] = NewGetBids(o.context, o.GetBidsHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

@@ -19,7 +19,8 @@ var (
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -47,10 +48,15 @@ func init() {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "currency",
+                  "amount"
+                ],
                 "properties": {
                   "amount": {
                     "type": "number",
                     "format": "float",
+                    "multipleOf": 1e-8,
                     "example": 100.5
                   },
                   "currency": {
@@ -62,17 +68,7 @@ func init() {
                     "example": "USDT"
                   }
                 }
-              },
-              "example": [
-                {
-                  "amount": 100.5,
-                  "currency": "USDT"
-                },
-                {
-                  "amount": 0.005,
-                  "currency": "BTC"
-                }
-              ]
+              }
             }
           },
           "401": {
@@ -85,35 +81,6 @@ func init() {
       }
     },
     "/bid": {
-      "get": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get my bids",
-        "operationId": "get_bids",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/bid"
-              }
-            }
-          },
-          "403": {
-            "description": "No access",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
       "post": {
         "security": [
           {
@@ -130,10 +97,54 @@ func init() {
         "operationId": "create_bid",
         "parameters": [
           {
-            "name": "object",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/bid"
+              "type": "object",
+              "required": [
+                "from_currency",
+                "to_currency",
+                "min_price",
+                "max_price",
+                "amount_to_buy"
+              ],
+              "properties": {
+                "amount_to_buy": {
+                  "type": "number",
+                  "format": "float",
+                  "multipleOf": 1e-8
+                },
+                "buy_speed": {
+                  "type": "number",
+                  "format": "float",
+                  "multipleOf": 1e-8
+                },
+                "from_currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ]
+                },
+                "max_price": {
+                  "type": "number",
+                  "format": "float",
+                  "multipleOf": 1e-8
+                },
+                "min_price": {
+                  "type": "number",
+                  "format": "float",
+                  "multipleOf": 1e-8
+                },
+                "to_currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ]
+                }
+              }
             }
           }
         ],
@@ -143,9 +154,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "bid_id": {
-                  "type": "integer",
-                  "format": "int64"
+                "id": {
+                  "type": "string",
+                  "example": "bid_123"
                 }
               }
             }
@@ -179,8 +190,7 @@ func init() {
         "operationId": "get_bid_by_id",
         "parameters": [
           {
-            "type": "integer",
-            "format": "int64",
+            "type": "string",
             "description": "ID of bid to return",
             "name": "bid_id",
             "in": "path",
@@ -214,9 +224,6 @@ func init() {
             "api_key": []
           }
         ],
-        "consumes": [
-          "application/json"
-        ],
         "produces": [
           "application/json"
         ],
@@ -224,8 +231,7 @@ func init() {
         "operationId": "cancel_bid",
         "parameters": [
           {
-            "type": "integer",
-            "format": "int64",
+            "type": "string",
             "description": "ID of bid to cancel",
             "name": "bid_id",
             "in": "path",
@@ -236,7 +242,18 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Result"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "cancelled"
+                  ]
+                }
+              }
             }
           },
           "400": {
@@ -256,6 +273,11 @@ func init() {
     },
     "/metrics": {
       "get": {
+        "security": [
+          {
+            "metrics_key": []
+          }
+        ],
         "description": "Returns Prometheus-compatible metrics for the service",
         "produces": [
           "text/plain; version=0.0.4"
@@ -265,12 +287,14 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "string",
-              "example": "# HELP api_requests_total Total number of API requests\n# TYPE api_requests_total counter\napi_requests_total{method=\"POST\",endpoint=\"/transactions/deposit\"} 100\n"
+              "type": "string"
             }
           },
-          "500": {
-            "description": "Internal server error"
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -305,6 +329,7 @@ func init() {
                 "amount": {
                   "type": "number",
                   "format": "float",
+                  "multipleOf": 1e-8,
                   "example": 100.5
                 },
                 "currency": {
@@ -323,36 +348,7 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "status",
-                "address"
-              ],
-              "properties": {
-                "address": {
-                  "type": "string",
-                  "example": "0x1234567890abcdef1234567890abcdef12345678"
-                },
-                "id": {
-                  "type": "string",
-                  "example": "tx_dep_123456"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "pending"
-                  ],
-                  "example": "pending"
-                }
-              },
-              "example": {
-                "address": "0x1234567890abcdef1234567890abcdef12345678",
-                "id": "tx_dep_123456",
-                "status": "pending"
-              }
+              "$ref": "#/definitions/deposit_response"
             }
           },
           "400": {
@@ -387,7 +383,8 @@ func init() {
             "enum": [
               "finished",
               "processing",
-              "cancelled"
+              "cancelled",
+              "pending"
             ],
             "type": "string",
             "description": "Filter by purchase status",
@@ -395,17 +392,34 @@ func init() {
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter purchases from this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases from this Unix timestamp",
             "name": "date_from",
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter purchases up to this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases up to this Unix timestamp",
             "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
             "in": "query"
           }
         ],
@@ -415,74 +429,8 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "currency_from",
-                  "currency_to",
-                  "amount_from",
-                  "amount_to",
-                  "status",
-                  "date"
-                ],
-                "properties": {
-                  "amount_from": {
-                    "type": "number",
-                    "format": "float",
-                    "example": 100.5
-                  },
-                  "amount_to": {
-                    "type": "number",
-                    "format": "float",
-                    "example": 0.005
-                  },
-                  "currency_from": {
-                    "type": "string",
-                    "enum": [
-                      "USDT",
-                      "BTC"
-                    ],
-                    "example": "USDT"
-                  },
-                  "currency_to": {
-                    "type": "string",
-                    "enum": [
-                      "USDT",
-                      "BTC"
-                    ],
-                    "example": "BTC"
-                  },
-                  "date": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2025-04-13T10:00:00Z"
-                  },
-                  "id": {
-                    "type": "string",
-                    "example": "pur_123456"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "finished",
-                      "processing",
-                      "cancelled"
-                    ],
-                    "example": "finished"
-                  }
-                }
-              },
-              "example": [
-                {
-                  "amount_from": 100.5,
-                  "amount_to": 0.005,
-                  "currency_from": "USDT",
-                  "currency_to": "BTC",
-                  "date": "2025-04-13T10:00:00Z",
-                  "id": "pur_123456",
-                  "status": "finished"
-                }
-              ]
+                "$ref": "#/definitions/purchase"
+              }
             }
           },
           "400": {
@@ -560,17 +508,34 @@ func init() {
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter transactions from this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter transactions from this Unix timestamp",
             "name": "date_from",
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter transactions up to this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter transactions up to this Unix timestamp",
             "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
             "in": "query"
           }
         ],
@@ -580,79 +545,8 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
-                "required": [
-                  "id",
-                  "currency",
-                  "amount",
-                  "operation",
-                  "status",
-                  "date"
-                ],
-                "properties": {
-                  "address": {
-                    "type": "string",
-                    "example": "0x1234567890abcdef1234567890abcdef12345678"
-                  },
-                  "amount": {
-                    "type": "number",
-                    "format": "float",
-                    "example": 100.5
-                  },
-                  "commission": {
-                    "type": "number",
-                    "format": "float",
-                    "example": 0.1
-                  },
-                  "currency": {
-                    "type": "string",
-                    "enum": [
-                      "USDT",
-                      "BTC"
-                    ],
-                    "example": "USDT"
-                  },
-                  "date": {
-                    "type": "string",
-                    "format": "date-time",
-                    "example": "2025-04-13T10:00:00Z"
-                  },
-                  "id": {
-                    "type": "string",
-                    "example": "tx_dep_123456"
-                  },
-                  "operation": {
-                    "type": "string",
-                    "enum": [
-                      "deposit",
-                      "withdrawal"
-                    ],
-                    "example": "deposit"
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "finished",
-                      "processing",
-                      "cancelled",
-                      "pending"
-                    ],
-                    "example": "finished"
-                  }
-                }
-              },
-              "example": [
-                {
-                  "address": "0x1234567890abcdef1234567890abcdef12345678",
-                  "amount": 100.5,
-                  "commission": 0,
-                  "currency": "USDT",
-                  "date": "2025-04-13T10:00:00Z",
-                  "id": "tx_dep_123456",
-                  "operation": "deposit",
-                  "status": "finished"
-                }
-              ]
+                "$ref": "#/definitions/transfer"
+              }
             }
           },
           "400": {
@@ -705,6 +599,7 @@ func init() {
                 "amount": {
                   "type": "number",
                   "format": "float",
+                  "multipleOf": 1e-8,
                   "example": 100.5
                 },
                 "currency": {
@@ -723,42 +618,7 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "status",
-                "tx_hash"
-              ],
-              "properties": {
-                "commission": {
-                  "type": "number",
-                  "format": "float",
-                  "example": 0.1
-                },
-                "id": {
-                  "type": "string",
-                  "example": "tx_with_123456"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "pending"
-                  ],
-                  "example": "pending"
-                },
-                "tx_hash": {
-                  "type": "string",
-                  "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-                }
-              },
-              "example": {
-                "commission": 0.1,
-                "id": "tx_with_123456",
-                "status": "pending",
-                "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-              }
+              "$ref": "#/definitions/withdraw_response"
             }
           },
           "400": {
@@ -785,6 +645,10 @@ func init() {
         "error_status_code"
       ],
       "properties": {
+        "error_code": {
+          "type": "string",
+          "example": "INVALID_INPUT"
+        },
         "error_message": {
           "type": "string",
           "example": "Invalid input data"
@@ -795,47 +659,267 @@ func init() {
         }
       }
     },
-    "Result": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        }
-      }
-    },
     "bid": {
       "type": "object",
+      "required": [
+        "id",
+        "from_currency",
+        "to_currency",
+        "min_price",
+        "max_price",
+        "amount_to_buy",
+        "status",
+        "create_date"
+      ],
       "properties": {
         "amount_to_buy": {
           "type": "number",
-          "multipleOf": 1e-7
+          "format": "float",
+          "multipleOf": 1e-8
         },
-        "bid_id": {
-          "type": "integer",
-          "format": "int64"
+        "avg_price": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8
         },
         "bought_amount": {
           "type": "number",
-          "multipleOf": 1e-7
+          "format": "float",
+          "multipleOf": 1e-8
         },
         "buy_speed": {
           "type": "number",
-          "multipleOf": 1e-7
+          "format": "float",
+          "multipleOf": 1e-8
+        },
+        "complete_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "create_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "from_currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "example": "bid_123"
         },
         "max_price": {
           "type": "number",
-          "multipleOf": 1e-7
+          "format": "float",
+          "multipleOf": 1e-8
         },
         "min_price": {
           "type": "number",
-          "multipleOf": 1e-7
+          "format": "float",
+          "multipleOf": 1e-8
         },
-        "user_id": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "finished",
+            "cancelled"
+          ]
+        },
+        "to_currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ]
+        }
+      }
+    },
+    "deposit_response": {
+      "type": "object",
+      "required": [
+        "id",
+        "status",
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
+        "id": {
+          "type": "string",
+          "example": "tx_dep_123456"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "pending"
+          ],
+          "example": "pending"
+        }
+      }
+    },
+    "purchase": {
+      "type": "object",
+      "required": [
+        "id",
+        "currency_from",
+        "currency_to",
+        "amount_from",
+        "amount_to",
+        "status",
+        "date"
+      ],
+      "properties": {
+        "amount_from": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "amount_to": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 0.005
+        },
+        "currency_from": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        },
+        "currency_to": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "BTC"
+        },
+        "date": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "example": 1747036800
+        },
+        "id": {
+          "type": "string",
+          "example": "bid_123"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "cancelled",
+            "pending"
+          ],
+          "example": "finished"
+        }
+      }
+    },
+    "transfer": {
+      "type": "object",
+      "required": [
+        "id",
+        "currency",
+        "amount",
+        "operation",
+        "status",
+        "date"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "commission": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 0.1
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        },
+        "date": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1747036800
+        },
+        "id": {
+          "type": "string",
+          "example": "tx_dep_123456"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "deposit",
+            "withdraw"
+          ],
+          "example": "deposit"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "cancelled",
+            "pending"
+          ],
+          "example": "finished"
+        }
+      }
+    },
+    "withdraw_response": {
+      "type": "object",
+      "required": [
+        "id",
+        "status"
+      ],
+      "properties": {
+        "commission": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 0.1
+        },
+        "id": {
+          "type": "string",
+          "example": "tx_with_123456"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "pending"
+          ],
+          "example": "pending"
+        },
+        "tx_hash": {
+          "type": "string",
+          "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
         }
       }
     }
@@ -845,12 +929,18 @@ func init() {
       "type": "apiKey",
       "name": "api_key",
       "in": "header"
+    },
+    "metrics_key": {
+      "type": "apiKey",
+      "name": "metrics_key",
+      "in": "header"
     }
   }
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "schemes": [
-    "http"
+    "http",
+    "https"
   ],
   "swagger": "2.0",
   "info": {
@@ -878,17 +968,7 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GetAccountBalanceOKBodyItems0"
-              },
-              "example": [
-                {
-                  "amount": 100.5,
-                  "currency": "USDT"
-                },
-                {
-                  "amount": 0.005,
-                  "currency": "BTC"
-                }
-              ]
+              }
             }
           },
           "401": {
@@ -901,35 +981,6 @@ func init() {
       }
     },
     "/bid": {
-      "get": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get my bids",
-        "operationId": "get_bids",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/bid"
-              }
-            }
-          },
-          "403": {
-            "description": "No access",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      },
       "post": {
         "security": [
           {
@@ -946,10 +997,58 @@ func init() {
         "operationId": "create_bid",
         "parameters": [
           {
-            "name": "object",
+            "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/bid"
+              "type": "object",
+              "required": [
+                "from_currency",
+                "to_currency",
+                "min_price",
+                "max_price",
+                "amount_to_buy"
+              ],
+              "properties": {
+                "amount_to_buy": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "multipleOf": 1e-8
+                },
+                "buy_speed": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "multipleOf": 1e-8
+                },
+                "from_currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ]
+                },
+                "max_price": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "multipleOf": 1e-8
+                },
+                "min_price": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "multipleOf": 1e-8
+                },
+                "to_currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ]
+                }
+              }
             }
           }
         ],
@@ -959,9 +1058,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "bid_id": {
-                  "type": "integer",
-                  "format": "int64"
+                "id": {
+                  "type": "string",
+                  "example": "bid_123"
                 }
               }
             }
@@ -995,8 +1094,7 @@ func init() {
         "operationId": "get_bid_by_id",
         "parameters": [
           {
-            "type": "integer",
-            "format": "int64",
+            "type": "string",
             "description": "ID of bid to return",
             "name": "bid_id",
             "in": "path",
@@ -1030,9 +1128,6 @@ func init() {
             "api_key": []
           }
         ],
-        "consumes": [
-          "application/json"
-        ],
         "produces": [
           "application/json"
         ],
@@ -1040,8 +1135,7 @@ func init() {
         "operationId": "cancel_bid",
         "parameters": [
           {
-            "type": "integer",
-            "format": "int64",
+            "type": "string",
             "description": "ID of bid to cancel",
             "name": "bid_id",
             "in": "path",
@@ -1052,7 +1146,18 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/Result"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "cancelled"
+                  ]
+                }
+              }
             }
           },
           "400": {
@@ -1072,6 +1177,11 @@ func init() {
     },
     "/metrics": {
       "get": {
+        "security": [
+          {
+            "metrics_key": []
+          }
+        ],
         "description": "Returns Prometheus-compatible metrics for the service",
         "produces": [
           "text/plain; version=0.0.4"
@@ -1081,12 +1191,14 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "string",
-              "example": "# HELP api_requests_total Total number of API requests\n# TYPE api_requests_total counter\napi_requests_total{method=\"POST\",endpoint=\"/transactions/deposit\"} 100\n"
+              "type": "string"
             }
           },
-          "500": {
-            "description": "Internal server error"
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -1122,6 +1234,7 @@ func init() {
                   "type": "number",
                   "format": "float",
                   "minimum": 0,
+                  "multipleOf": 1e-8,
                   "example": 100.5
                 },
                 "currency": {
@@ -1140,36 +1253,7 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "status",
-                "address"
-              ],
-              "properties": {
-                "address": {
-                  "type": "string",
-                  "example": "0x1234567890abcdef1234567890abcdef12345678"
-                },
-                "id": {
-                  "type": "string",
-                  "example": "tx_dep_123456"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "pending"
-                  ],
-                  "example": "pending"
-                }
-              },
-              "example": {
-                "address": "0x1234567890abcdef1234567890abcdef12345678",
-                "id": "tx_dep_123456",
-                "status": "pending"
-              }
+              "$ref": "#/definitions/deposit_response"
             }
           },
           "400": {
@@ -1204,7 +1288,8 @@ func init() {
             "enum": [
               "finished",
               "processing",
-              "cancelled"
+              "cancelled",
+              "pending"
             ],
             "type": "string",
             "description": "Filter by purchase status",
@@ -1212,17 +1297,35 @@ func init() {
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter purchases from this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases from this Unix timestamp",
             "name": "date_from",
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter purchases up to this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases up to this Unix timestamp",
             "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
             "in": "query"
           }
         ],
@@ -1232,19 +1335,8 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/GetTransactionsPurchaseOKBodyItems0"
-              },
-              "example": [
-                {
-                  "amount_from": 100.5,
-                  "amount_to": 0.005,
-                  "currency_from": "USDT",
-                  "currency_to": "BTC",
-                  "date": "2025-04-13T10:00:00Z",
-                  "id": "pur_123456",
-                  "status": "finished"
-                }
-              ]
+                "$ref": "#/definitions/purchase"
+              }
             }
           },
           "400": {
@@ -1324,17 +1416,35 @@ func init() {
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter transactions from this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter transactions from this Unix timestamp",
             "name": "date_from",
             "in": "query"
           },
           {
-            "type": "string",
-            "format": "date-time",
-            "description": "Filter transactions up to this date (ISO 8601)",
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter transactions up to this Unix timestamp",
             "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
             "in": "query"
           }
         ],
@@ -1344,20 +1454,8 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/GetTransactionsTransfersOKBodyItems0"
-              },
-              "example": [
-                {
-                  "address": "0x1234567890abcdef1234567890abcdef12345678",
-                  "amount": 100.5,
-                  "commission": 0,
-                  "currency": "USDT",
-                  "date": "2025-04-13T10:00:00Z",
-                  "id": "tx_dep_123456",
-                  "operation": "deposit",
-                  "status": "finished"
-                }
-              ]
+                "$ref": "#/definitions/transfer"
+              }
             }
           },
           "400": {
@@ -1411,6 +1509,7 @@ func init() {
                   "type": "number",
                   "format": "float",
                   "minimum": 0,
+                  "multipleOf": 1e-8,
                   "example": 100.5
                 },
                 "currency": {
@@ -1429,43 +1528,7 @@ func init() {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "type": "object",
-              "required": [
-                "id",
-                "status",
-                "tx_hash"
-              ],
-              "properties": {
-                "commission": {
-                  "type": "number",
-                  "format": "float",
-                  "minimum": 0,
-                  "example": 0.1
-                },
-                "id": {
-                  "type": "string",
-                  "example": "tx_with_123456"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "pending"
-                  ],
-                  "example": "pending"
-                },
-                "tx_hash": {
-                  "type": "string",
-                  "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-                }
-              },
-              "example": {
-                "commission": 0.1,
-                "id": "tx_with_123456",
-                "status": "pending",
-                "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-              }
+              "$ref": "#/definitions/withdraw_response"
             }
           },
           "400": {
@@ -1492,6 +1555,10 @@ func init() {
         "error_status_code"
       ],
       "properties": {
+        "error_code": {
+          "type": "string",
+          "example": "INVALID_INPUT"
+        },
         "error_message": {
           "type": "string",
           "example": "Invalid input data"
@@ -1504,11 +1571,16 @@ func init() {
     },
     "GetAccountBalanceOKBodyItems0": {
       "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
       "properties": {
         "amount": {
           "type": "number",
           "format": "float",
           "minimum": 0,
+          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {
@@ -1521,7 +1593,120 @@ func init() {
         }
       }
     },
-    "GetTransactionsPurchaseOKBodyItems0": {
+    "bid": {
+      "type": "object",
+      "required": [
+        "id",
+        "from_currency",
+        "to_currency",
+        "min_price",
+        "max_price",
+        "amount_to_buy",
+        "status",
+        "create_date"
+      ],
+      "properties": {
+        "amount_to_buy": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "avg_price": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "bought_amount": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "buy_speed": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "complete_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "create_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "from_currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "example": "bid_123"
+        },
+        "max_price": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "min_price": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "processing",
+            "finished",
+            "cancelled"
+          ]
+        },
+        "to_currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ]
+        }
+      }
+    },
+    "deposit_response": {
+      "type": "object",
+      "required": [
+        "id",
+        "status",
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
+        "id": {
+          "type": "string",
+          "example": "tx_dep_123456"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "pending"
+          ],
+          "example": "pending"
+        }
+      }
+    },
+    "purchase": {
       "type": "object",
       "required": [
         "id",
@@ -1537,12 +1722,14 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
+          "multipleOf": 1e-8,
           "example": 100.5
         },
         "amount_to": {
           "type": "number",
           "format": "float",
           "minimum": 0,
+          "multipleOf": 1e-8,
           "example": 0.005
         },
         "currency_from": {
@@ -1562,26 +1749,27 @@ func init() {
           "example": "BTC"
         },
         "date": {
-          "type": "string",
-          "format": "date-time",
-          "example": "2025-04-13T10:00:00Z"
+          "type": "integer",
+          "format": "int64",
+          "example": 1747036800
         },
         "id": {
           "type": "string",
-          "example": "pur_123456"
+          "example": "bid_123"
         },
         "status": {
           "type": "string",
           "enum": [
             "finished",
             "processing",
-            "cancelled"
+            "cancelled",
+            "pending"
           ],
           "example": "finished"
         }
       }
     },
-    "GetTransactionsTransfersOKBodyItems0": {
+    "transfer": {
       "type": "object",
       "required": [
         "id",
@@ -1600,12 +1788,14 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
+          "multipleOf": 1e-8,
           "example": 100.5
         },
         "commission": {
           "type": "number",
           "format": "float",
           "minimum": 0,
+          "multipleOf": 1e-8,
           "example": 0.1
         },
         "currency": {
@@ -1617,9 +1807,9 @@ func init() {
           "example": "USDT"
         },
         "date": {
-          "type": "string",
-          "format": "date-time",
-          "example": "2025-04-13T10:00:00Z"
+          "type": "integer",
+          "format": "int64",
+          "example": 1747036800
         },
         "id": {
           "type": "string",
@@ -1629,7 +1819,7 @@ func init() {
           "type": "string",
           "enum": [
             "deposit",
-            "withdrawal"
+            "withdraw"
           ],
           "example": "deposit"
         },
@@ -1645,47 +1835,36 @@ func init() {
         }
       }
     },
-    "Result": {
+    "withdraw_response": {
       "type": "object",
+      "required": [
+        "id",
+        "status"
+      ],
       "properties": {
-        "message": {
-          "type": "string"
+        "commission": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8,
+          "example": 0.1
+        },
+        "id": {
+          "type": "string",
+          "example": "tx_with_123456"
         },
         "status": {
-          "type": "string"
-        }
-      }
-    },
-    "bid": {
-      "type": "object",
-      "properties": {
-        "amount_to_buy": {
-          "type": "number",
-          "multipleOf": 1e-7
+          "type": "string",
+          "enum": [
+            "finished",
+            "processing",
+            "pending"
+          ],
+          "example": "pending"
         },
-        "bid_id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "bought_amount": {
-          "type": "number",
-          "multipleOf": 1e-7
-        },
-        "buy_speed": {
-          "type": "number",
-          "multipleOf": 1e-7
-        },
-        "max_price": {
-          "type": "number",
-          "multipleOf": 1e-7
-        },
-        "min_price": {
-          "type": "number",
-          "multipleOf": 1e-7
-        },
-        "user_id": {
-          "type": "integer",
-          "format": "int64"
+        "tx_hash": {
+          "type": "string",
+          "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
         }
       }
     }
@@ -1694,6 +1873,11 @@ func init() {
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
+      "in": "header"
+    },
+    "metrics_key": {
+      "type": "apiKey",
+      "name": "metrics_key",
       "in": "header"
     }
   }
