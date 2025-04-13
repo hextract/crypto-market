@@ -16,8 +16,8 @@ COPY ../pkg ../pkg
 
 RUN go build -o main cmd/main.go
 
-EXPOSE $CONNECTOR_REST_PORT
+EXPOSE $MAIN_REST_PORT
 
-ENTRYPOINT ["./main", "--port=8880", "--host=0.0.0.0"]
+ENTRYPOINT ["./main", "--port=$MAIN_REST_PORT", "--host=$MAIN_HOST"]
 
 

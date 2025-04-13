@@ -28,7 +28,7 @@
       db:
         condition: service_healthy
     ports:
-      - "${CONNECTOR_REST_PORT}:${CONNECTOR_REST_PORT}"
+      - "${MAIN_REST_PORT}:${MAIN_REST_PORT}"
   auth:
     container_name: auth-svc
     build:
