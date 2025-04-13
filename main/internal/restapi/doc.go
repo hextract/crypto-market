@@ -2,7 +2,7 @@
 
 // Package restapi market.main
 //
-//	continuous market
+//	Continuous market API for cryptocurrency trading and account management
 //	Schemes:
 //	  http
 //	Host: localhost
@@ -14,6 +14,7 @@
 //
 //	Produces:
 //	  - application/json
+//	  - text/plain
 //
 // swagger:meta
 package restapi

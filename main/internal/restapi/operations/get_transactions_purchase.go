@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetTransactionsPurchaseHandlerFunc turns a function with the right signature into a get transactions purchase handler
-type GetTransactionsPurchaseHandlerFunc func(GetTransactionsPurchaseParams, interface{}) middleware.Responder
+type GetTransactionsPurchaseHandlerFunc func(GetTransactionsPurchaseParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetTransactionsPurchaseHandlerFunc) Handle(params GetTransactionsPurchaseParams, principal interface{}) middleware.Responder {
+func (fn GetTransactionsPurchaseHandlerFunc) Handle(params GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetTransactionsPurchaseHandler interface for that can handle valid get transactions purchase params
 type GetTransactionsPurchaseHandler interface {
-	Handle(GetTransactionsPurchaseParams, interface{}) middleware.Responder
+	Handle(GetTransactionsPurchaseParams, *models.User) middleware.Responder
 }
 
 // NewGetTransactionsPurchase creates a new http.Handler for the get transactions purchase operation
@@ -40,7 +42,7 @@ func NewGetTransactionsPurchase(ctx *middleware.Context, handler GetTransactions
 
 # Get purchase history
 
-Returns all user's purchase
+Returns the user's purchase history with optional filters
 */
 type GetTransactionsPurchase struct {
 	Context *middleware.Context
@@ -61,9 +63,9 @@ func (o *GetTransactionsPurchase) ServeHTTP(rw http.ResponseWriter, r *http.Requ
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
@@ -76,135 +78,80 @@ func (o *GetTransactionsPurchase) ServeHTTP(rw http.ResponseWriter, r *http.Requ
 
 }
 
-// GetTransactionsPurchaseBody get transactions purchase body
-//
-// swagger:model GetTransactionsPurchaseBody
-type GetTransactionsPurchaseBody struct {
-
-	// date from
-	DateFrom string `json:"date_from,omitempty"`
-
-	// date to
-	DateTo string `json:"date_to,omitempty"`
-
-	// status
-	// Enum: ["finished","processing","cancelled"]
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get transactions purchase body
-func (o *GetTransactionsPurchaseBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-var getTransactionsPurchaseBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","cancelled"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		getTransactionsPurchaseBodyTypeStatusPropEnum = append(getTransactionsPurchaseBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// GetTransactionsPurchaseBodyStatusFinished captures enum value "finished"
-	GetTransactionsPurchaseBodyStatusFinished string = "finished"
-
-	// GetTransactionsPurchaseBodyStatusProcessing captures enum value "processing"
-	GetTransactionsPurchaseBodyStatusProcessing string = "processing"
-
-	// GetTransactionsPurchaseBodyStatusCancelled captures enum value "cancelled"
-	GetTransactionsPurchaseBodyStatusCancelled string = "cancelled"
-)
-
-// prop value enum
-func (o *GetTransactionsPurchaseBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getTransactionsPurchaseBodyTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *GetTransactionsPurchaseBody) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(o.Status) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("body"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this get transactions purchase body based on context it is used
-func (o *GetTransactionsPurchaseBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetTransactionsPurchaseBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetTransactionsPurchaseBody) UnmarshalBinary(b []byte) error {
-	var res GetTransactionsPurchaseBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
 // GetTransactionsPurchaseOKBodyItems0 get transactions purchase o k body items0
 //
 // swagger:model GetTransactionsPurchaseOKBodyItems0
 type GetTransactionsPurchaseOKBodyItems0 struct {
 
 	// amount from
-	AmountFrom string `json:"amount_from,omitempty"`
+	// Example: 100.5
+	// Required: true
+	// Minimum: 0
+	AmountFrom *float32 `json:"amount_from"`
 
 	// amount to
-	AmountTo string `json:"amount_to,omitempty"`
+	// Example: 0.005
+	// Required: true
+	// Minimum: 0
+	AmountTo *float32 `json:"amount_to"`
 
 	// currency from
-	CurrencyFrom string `json:"currency_from,omitempty"`
+	// Example: USDT
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	CurrencyFrom *string `json:"currency_from"`
 
 	// currency to
-	CurrencyTo string `json:"currency_to,omitempty"`
+	// Example: BTC
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	CurrencyTo *string `json:"currency_to"`
 
 	// date
-	Date string `json:"date,omitempty"`
+	// Example: 2025-04-13T10:00:00Z
+	// Required: true
+	// Format: date-time
+	Date *strfmt.DateTime `json:"date"`
 
 	// id
-	ID string `json:"id,omitempty"`
+	// Example: pur_123456
+	// Required: true
+	ID *string `json:"id"`
 
 	// status
+	// Example: finished
+	// Required: true
 	// Enum: ["finished","processing","cancelled"]
-	Status string `json:"status,omitempty"`
+	Status *string `json:"status"`
 }
 
 // Validate validates this get transactions purchase o k body items0
 func (o *GetTransactionsPurchaseOKBodyItems0) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := o.validateAmountFrom(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateAmountTo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrencyFrom(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrencyTo(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := o.validateStatus(formats); err != nil {
 		res = append(res, err)
@@ -213,6 +160,140 @@ func (o *GetTransactionsPurchaseOKBodyItems0) Validate(formats strfmt.Registry) 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateAmountFrom(formats strfmt.Registry) error {
+
+	if err := validate.Required("amount_from", "body", o.AmountFrom); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("amount_from", "body", float64(*o.AmountFrom), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateAmountTo(formats strfmt.Registry) error {
+
+	if err := validate.Required("amount_to", "body", o.AmountTo); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("amount_to", "body", float64(*o.AmountTo), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getTransactionsPurchaseOKBodyItems0TypeCurrencyFromPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getTransactionsPurchaseOKBodyItems0TypeCurrencyFromPropEnum = append(getTransactionsPurchaseOKBodyItems0TypeCurrencyFromPropEnum, v)
+	}
+}
+
+const (
+
+	// GetTransactionsPurchaseOKBodyItems0CurrencyFromUSDT captures enum value "USDT"
+	GetTransactionsPurchaseOKBodyItems0CurrencyFromUSDT string = "USDT"
+
+	// GetTransactionsPurchaseOKBodyItems0CurrencyFromBTC captures enum value "BTC"
+	GetTransactionsPurchaseOKBodyItems0CurrencyFromBTC string = "BTC"
+)
+
+// prop value enum
+func (o *GetTransactionsPurchaseOKBodyItems0) validateCurrencyFromEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getTransactionsPurchaseOKBodyItems0TypeCurrencyFromPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateCurrencyFrom(formats strfmt.Registry) error {
+
+	if err := validate.Required("currency_from", "body", o.CurrencyFrom); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCurrencyFromEnum("currency_from", "body", *o.CurrencyFrom); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getTransactionsPurchaseOKBodyItems0TypeCurrencyToPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getTransactionsPurchaseOKBodyItems0TypeCurrencyToPropEnum = append(getTransactionsPurchaseOKBodyItems0TypeCurrencyToPropEnum, v)
+	}
+}
+
+const (
+
+	// GetTransactionsPurchaseOKBodyItems0CurrencyToUSDT captures enum value "USDT"
+	GetTransactionsPurchaseOKBodyItems0CurrencyToUSDT string = "USDT"
+
+	// GetTransactionsPurchaseOKBodyItems0CurrencyToBTC captures enum value "BTC"
+	GetTransactionsPurchaseOKBodyItems0CurrencyToBTC string = "BTC"
+)
+
+// prop value enum
+func (o *GetTransactionsPurchaseOKBodyItems0) validateCurrencyToEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getTransactionsPurchaseOKBodyItems0TypeCurrencyToPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateCurrencyTo(formats strfmt.Registry) error {
+
+	if err := validate.Required("currency_to", "body", o.CurrencyTo); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCurrencyToEnum("currency_to", "body", *o.CurrencyTo); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("date", "body", o.Date); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("date", "body", "date-time", o.Date.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsPurchaseOKBodyItems0) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", o.ID); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -249,12 +330,13 @@ func (o *GetTransactionsPurchaseOKBodyItems0) validateStatusEnum(path, location 
 }
 
 func (o *GetTransactionsPurchaseOKBodyItems0) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(o.Status) { // not required
-		return nil
+
+	if err := validate.Required("status", "body", o.Status); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateStatusEnum("status", "body", o.Status); err != nil {
+	if err := o.validateStatusEnum("status", "body", *o.Status); err != nil {
 		return err
 	}
 

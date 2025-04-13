@@ -10,14 +10,14 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/h4x4d/crypto-market/stack_connector/internal/models"
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // CancelBidOKCode is the HTTP code returned for type CancelBidOK
 const CancelBidOKCode int = 200
 
 /*
-CancelBidOK successful operation
+CancelBidOK Successful operation
 
 swagger:response cancelBidOK
 */

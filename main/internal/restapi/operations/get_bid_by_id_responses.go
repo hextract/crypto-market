@@ -10,14 +10,14 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/h4x4d/crypto-market/stack_connector/internal/models"
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetBidByIDOKCode is the HTTP code returned for type GetBidByIDOK
 const GetBidByIDOKCode int = 200
 
 /*
-GetBidByIDOK successful operation
+GetBidByIDOK Successful operation
 
 swagger:response getBidByIdOK
 */

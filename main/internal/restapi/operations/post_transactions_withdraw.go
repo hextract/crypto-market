@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // PostTransactionsWithdrawHandlerFunc turns a function with the right signature into a post transactions withdraw handler
-type PostTransactionsWithdrawHandlerFunc func(PostTransactionsWithdrawParams, interface{}) middleware.Responder
+type PostTransactionsWithdrawHandlerFunc func(PostTransactionsWithdrawParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn PostTransactionsWithdrawHandlerFunc) Handle(params PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
+func (fn PostTransactionsWithdrawHandlerFunc) Handle(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // PostTransactionsWithdrawHandler interface for that can handle valid post transactions withdraw params
 type PostTransactionsWithdrawHandler interface {
-	Handle(PostTransactionsWithdrawParams, interface{}) middleware.Responder
+	Handle(PostTransactionsWithdrawParams, *models.User) middleware.Responder
 }
 
 // NewPostTransactionsWithdraw creates a new http.Handler for the post transactions withdraw operation
@@ -40,7 +42,7 @@ func NewPostTransactionsWithdraw(ctx *middleware.Context, handler PostTransactio
 
 # Withdrawal request
 
-Creates a request to withdraw cryptocurrency from the user's account.
+Creates a request to withdraw cryptocurrency from the user's account
 */
 type PostTransactionsWithdraw struct {
 	Context *middleware.Context
@@ -61,9 +63,9 @@ func (o *PostTransactionsWithdraw) ServeHTTP(rw http.ResponseWriter, r *http.Req
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
@@ -82,17 +84,107 @@ func (o *PostTransactionsWithdraw) ServeHTTP(rw http.ResponseWriter, r *http.Req
 type PostTransactionsWithdrawBody struct {
 
 	// address
-	Address string `json:"address,omitempty"`
+	// Example: 0x1234567890abcdef1234567890abcdef12345678
+	// Required: true
+	Address *string `json:"address"`
 
 	// amount
-	Amount string `json:"amount,omitempty"`
+	// Example: 100.5
+	// Required: true
+	// Minimum: 0
+	Amount *float32 `json:"amount"`
 
 	// currency
-	Currency string `json:"currency,omitempty"`
+	// Example: USDT
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	Currency *string `json:"currency"`
 }
 
 // Validate validates this post transactions withdraw body
 func (o *PostTransactionsWithdrawBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAddress(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateAmount(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrency(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *PostTransactionsWithdrawBody) validateAddress(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"address", "body", o.Address); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PostTransactionsWithdrawBody) validateAmount(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"amount", "body", o.Amount); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("body"+"."+"amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var postTransactionsWithdrawBodyTypeCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		postTransactionsWithdrawBodyTypeCurrencyPropEnum = append(postTransactionsWithdrawBodyTypeCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// PostTransactionsWithdrawBodyCurrencyUSDT captures enum value "USDT"
+	PostTransactionsWithdrawBodyCurrencyUSDT string = "USDT"
+
+	// PostTransactionsWithdrawBodyCurrencyBTC captures enum value "BTC"
+	PostTransactionsWithdrawBodyCurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (o *PostTransactionsWithdrawBody) validateCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, postTransactionsWithdrawBodyTypeCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *PostTransactionsWithdrawBody) validateCurrency(formats strfmt.Registry) error {
+
+	if err := validate.Required("body"+"."+"currency", "body", o.Currency); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCurrencyEnum("body"+"."+"currency", "body", *o.Currency); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -120,32 +212,77 @@ func (o *PostTransactionsWithdrawBody) UnmarshalBinary(b []byte) error {
 }
 
 // PostTransactionsWithdrawOKBody post transactions withdraw o k body
+// Example: {"commission":0.1,"id":"tx_with_123456","status":"pending","tx_hash":"0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"}
 //
 // swagger:model PostTransactionsWithdrawOKBody
 type PostTransactionsWithdrawOKBody struct {
 
+	// commission
+	// Example: 0.1
+	// Minimum: 0
+	Commission *float32 `json:"commission,omitempty"`
+
 	// id
-	ID string `json:"id,omitempty"`
+	// Example: tx_with_123456
+	// Required: true
+	ID *string `json:"id"`
 
 	// status
+	// Example: pending
+	// Required: true
 	// Enum: ["finished","processing","pending"]
-	Status string `json:"status,omitempty"`
+	Status *string `json:"status"`
 
 	// tx hash
-	TxHash string `json:"txHash,omitempty"`
+	// Example: 0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+	// Required: true
+	TxHash *string `json:"tx_hash"`
 }
 
 // Validate validates this post transactions withdraw o k body
 func (o *PostTransactionsWithdrawOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateCommission(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateTxHash(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *PostTransactionsWithdrawOKBody) validateCommission(formats strfmt.Registry) error {
+	if swag.IsZero(o.Commission) { // not required
+		return nil
+	}
+
+	if err := validate.Minimum("postTransactionsWithdrawOK"+"."+"commission", "body", float64(*o.Commission), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PostTransactionsWithdrawOKBody) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("postTransactionsWithdrawOK"+"."+"id", "body", o.ID); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -182,12 +319,22 @@ func (o *PostTransactionsWithdrawOKBody) validateStatusEnum(path, location strin
 }
 
 func (o *PostTransactionsWithdrawOKBody) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(o.Status) { // not required
-		return nil
+
+	if err := validate.Required("postTransactionsWithdrawOK"+"."+"status", "body", o.Status); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateStatusEnum("postTransactionsWithdrawOK"+"."+"status", "body", o.Status); err != nil {
+	if err := o.validateStatusEnum("postTransactionsWithdrawOK"+"."+"status", "body", *o.Status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *PostTransactionsWithdrawOKBody) validateTxHash(formats strfmt.Registry) error {
+
+	if err := validate.Required("postTransactionsWithdrawOK"+"."+"tx_hash", "body", o.TxHash); err != nil {
 		return err
 	}
 

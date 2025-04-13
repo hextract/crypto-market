@@ -7,24 +7,29 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetAccountBalanceHandlerFunc turns a function with the right signature into a get account balance handler
-type GetAccountBalanceHandlerFunc func(GetAccountBalanceParams, interface{}) middleware.Responder
+type GetAccountBalanceHandlerFunc func(GetAccountBalanceParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn GetAccountBalanceHandlerFunc) Handle(params GetAccountBalanceParams, principal interface{}) middleware.Responder {
+func (fn GetAccountBalanceHandlerFunc) Handle(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // GetAccountBalanceHandler interface for that can handle valid get account balance params
 type GetAccountBalanceHandler interface {
-	Handle(GetAccountBalanceParams, interface{}) middleware.Responder
+	Handle(GetAccountBalanceParams, *models.User) middleware.Responder
 }
 
 // NewGetAccountBalance creates a new http.Handler for the get account balance operation
@@ -37,7 +42,7 @@ func NewGetAccountBalance(ctx *middleware.Context, handler GetAccountBalanceHand
 
 # Get user's balance
 
-Returns balance of all cryptocurrencies
+Returns balance of all cryptocurrencies for the authenticated user
 */
 type GetAccountBalance struct {
 	Context *middleware.Context
@@ -58,9 +63,9 @@ func (o *GetAccountBalance) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
@@ -79,14 +84,85 @@ func (o *GetAccountBalance) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type GetAccountBalanceOKBodyItems0 struct {
 
 	// amount
-	Amount string `json:"amount,omitempty"`
+	// Example: 100.5
+	// Minimum: 0
+	Amount *float32 `json:"amount,omitempty"`
 
 	// currency
+	// Example: USDT
+	// Enum: ["USDT","BTC"]
 	Currency string `json:"currency,omitempty"`
 }
 
 // Validate validates this get account balance o k body items0
 func (o *GetAccountBalanceOKBodyItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAmount(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrency(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetAccountBalanceOKBodyItems0) validateAmount(formats strfmt.Registry) error {
+	if swag.IsZero(o.Amount) { // not required
+		return nil
+	}
+
+	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getAccountBalanceOKBodyItems0TypeCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getAccountBalanceOKBodyItems0TypeCurrencyPropEnum = append(getAccountBalanceOKBodyItems0TypeCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// GetAccountBalanceOKBodyItems0CurrencyUSDT captures enum value "USDT"
+	GetAccountBalanceOKBodyItems0CurrencyUSDT string = "USDT"
+
+	// GetAccountBalanceOKBodyItems0CurrencyBTC captures enum value "BTC"
+	GetAccountBalanceOKBodyItems0CurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (o *GetAccountBalanceOKBodyItems0) validateCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getAccountBalanceOKBodyItems0TypeCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetAccountBalanceOKBodyItems0) validateCurrency(formats strfmt.Registry) error {
+	if swag.IsZero(o.Currency) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateCurrencyEnum("currency", "body", o.Currency); err != nil {
+		return err
+	}
+
 	return nil
 }
 

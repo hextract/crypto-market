@@ -10,14 +10,14 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"github.com/h4x4d/crypto-market/stack_connector/internal/models"
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // GetTransactionsTransfersOKCode is the HTTP code returned for type GetTransactionsTransfersOK
 const GetTransactionsTransfersOKCode int = 200
 
 /*
-GetTransactionsTransfersOK Success operation
+GetTransactionsTransfersOK Successful operation
 
 swagger:response getTransactionsTransfersOK
 */
@@ -61,6 +61,51 @@ func (o *GetTransactionsTransfersOK) WriteResponse(rw http.ResponseWriter, produ
 	}
 }
 
+// GetTransactionsTransfersBadRequestCode is the HTTP code returned for type GetTransactionsTransfersBadRequest
+const GetTransactionsTransfersBadRequestCode int = 400
+
+/*
+GetTransactionsTransfersBadRequest Incorrect data
+
+swagger:response getTransactionsTransfersBadRequest
+*/
+type GetTransactionsTransfersBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetTransactionsTransfersBadRequest creates GetTransactionsTransfersBadRequest with default headers values
+func NewGetTransactionsTransfersBadRequest() *GetTransactionsTransfersBadRequest {
+
+	return &GetTransactionsTransfersBadRequest{}
+}
+
+// WithPayload adds the payload to the get transactions transfers bad request response
+func (o *GetTransactionsTransfersBadRequest) WithPayload(payload *models.Error) *GetTransactionsTransfersBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get transactions transfers bad request response
+func (o *GetTransactionsTransfersBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTransactionsTransfersBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetTransactionsTransfersUnauthorizedCode is the HTTP code returned for type GetTransactionsTransfersUnauthorized
 const GetTransactionsTransfersUnauthorizedCode int = 401
 
@@ -98,51 +143,6 @@ func (o *GetTransactionsTransfersUnauthorized) SetPayload(payload *models.Error)
 func (o *GetTransactionsTransfersUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(401)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// GetTransactionsTransfersConflictCode is the HTTP code returned for type GetTransactionsTransfersConflict
-const GetTransactionsTransfersConflictCode int = 409
-
-/*
-GetTransactionsTransfersConflict Incorrect data
-
-swagger:response getTransactionsTransfersConflict
-*/
-type GetTransactionsTransfersConflict struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *models.Error `json:"body,omitempty"`
-}
-
-// NewGetTransactionsTransfersConflict creates GetTransactionsTransfersConflict with default headers values
-func NewGetTransactionsTransfersConflict() *GetTransactionsTransfersConflict {
-
-	return &GetTransactionsTransfersConflict{}
-}
-
-// WithPayload adds the payload to the get transactions transfers conflict response
-func (o *GetTransactionsTransfersConflict) WithPayload(payload *models.Error) *GetTransactionsTransfersConflict {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the get transactions transfers conflict response
-func (o *GetTransactionsTransfersConflict) SetPayload(payload *models.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *GetTransactionsTransfersConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(409)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

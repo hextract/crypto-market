@@ -6,12 +6,12 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -32,11 +32,18 @@ type GetTransactionsPurchaseParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*
-	  Required: true
-	  In: body
+	/*Filter purchases from this date (ISO 8601)
+	  In: query
 	*/
-	Body GetTransactionsPurchaseBody
+	DateFrom *strfmt.DateTime
+	/*Filter purchases up to this date (ISO 8601)
+	  In: query
+	*/
+	DateTo *strfmt.DateTime
+	/*Filter by purchase status
+	  In: query
+	*/
+	Status *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -48,35 +55,130 @@ func (o *GetTransactionsPurchaseParams) BindRequest(r *http.Request, route *midd
 
 	o.HTTPRequest = r
 
-	if runtime.HasBody(r) {
-		defer r.Body.Close()
-		var body GetTransactionsPurchaseBody
-		if err := route.Consumer.Consume(r.Body, &body); err != nil {
-			if err == io.EOF {
-				res = append(res, errors.Required("body", "body", ""))
-			} else {
-				res = append(res, errors.NewParseError("body", "body", "", err))
-			}
-		} else {
-			// validate body object
-			if err := body.Validate(route.Formats); err != nil {
-				res = append(res, err)
-			}
+	qs := runtime.Values(r.URL.Query())
 
-			ctx := validate.WithOperationRequest(r.Context())
-			if err := body.ContextValidate(ctx, route.Formats); err != nil {
-				res = append(res, err)
-			}
+	qDateFrom, qhkDateFrom, _ := qs.GetOK("date_from")
+	if err := o.bindDateFrom(qDateFrom, qhkDateFrom, route.Formats); err != nil {
+		res = append(res, err)
+	}
 
-			if len(res) == 0 {
-				o.Body = body
-			}
-		}
-	} else {
-		res = append(res, errors.Required("body", "body", ""))
+	qDateTo, qhkDateTo, _ := qs.GetOK("date_to")
+	if err := o.bindDateTo(qDateTo, qhkDateTo, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qStatus, qhkStatus, _ := qs.GetOK("status")
+	if err := o.bindStatus(qStatus, qhkStatus, route.Formats); err != nil {
+		res = append(res, err)
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindDateFrom binds and validates parameter DateFrom from query.
+func (o *GetTransactionsPurchaseParams) bindDateFrom(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	// Format: date-time
+	value, err := formats.Parse("date-time", raw)
+	if err != nil {
+		return errors.InvalidType("date_from", "query", "strfmt.DateTime", raw)
+	}
+	o.DateFrom = (value.(*strfmt.DateTime))
+
+	if err := o.validateDateFrom(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateDateFrom carries on validations for parameter DateFrom
+func (o *GetTransactionsPurchaseParams) validateDateFrom(formats strfmt.Registry) error {
+
+	if err := validate.FormatOf("date_from", "query", "date-time", o.DateFrom.String(), formats); err != nil {
+		return err
+	}
+	return nil
+}
+
+// bindDateTo binds and validates parameter DateTo from query.
+func (o *GetTransactionsPurchaseParams) bindDateTo(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	// Format: date-time
+	value, err := formats.Parse("date-time", raw)
+	if err != nil {
+		return errors.InvalidType("date_to", "query", "strfmt.DateTime", raw)
+	}
+	o.DateTo = (value.(*strfmt.DateTime))
+
+	if err := o.validateDateTo(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateDateTo carries on validations for parameter DateTo
+func (o *GetTransactionsPurchaseParams) validateDateTo(formats strfmt.Registry) error {
+
+	if err := validate.FormatOf("date_to", "query", "date-time", o.DateTo.String(), formats); err != nil {
+		return err
+	}
+	return nil
+}
+
+// bindStatus binds and validates parameter Status from query.
+func (o *GetTransactionsPurchaseParams) bindStatus(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Status = &raw
+
+	if err := o.validateStatus(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateStatus carries on validations for parameter Status
+func (o *GetTransactionsPurchaseParams) validateStatus(formats strfmt.Registry) error {
+
+	if err := validate.EnumCase("status", "query", *o.Status, []interface{}{"finished", "processing", "cancelled"}, true); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -15,11 +15,16 @@ import (
 const GetMetricsOKCode int = 200
 
 /*
-GetMetricsOK ok
+GetMetricsOK Successful operation
 
 swagger:response getMetricsOK
 */
 type GetMetricsOK struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetMetricsOK creates GetMetricsOK with default headers values
@@ -28,10 +33,48 @@ func NewGetMetricsOK() *GetMetricsOK {
 	return &GetMetricsOK{}
 }
 
+// WithPayload adds the payload to the get metrics o k response
+func (o *GetMetricsOK) WithPayload(payload string) *GetMetricsOK {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get metrics o k response
+func (o *GetMetricsOK) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetMetricsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
+	rw.WriteHeader(200)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+}
+
+// GetMetricsInternalServerErrorCode is the HTTP code returned for type GetMetricsInternalServerError
+const GetMetricsInternalServerErrorCode int = 500
+
+/*
+GetMetricsInternalServerError Internal server error
+
+swagger:response getMetricsInternalServerError
+*/
+type GetMetricsInternalServerError struct {
+}
+
+// NewGetMetricsInternalServerError creates GetMetricsInternalServerError with default headers values
+func NewGetMetricsInternalServerError() *GetMetricsInternalServerError {
+
+	return &GetMetricsInternalServerError{}
+}
+
+// WriteResponse to the client
+func (o *GetMetricsInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
 	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
 
-	rw.WriteHeader(200)
+	rw.WriteHeader(500)
 }

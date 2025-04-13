@@ -23,7 +23,7 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "continuous market",
+    "description": "Continuous market API for cryptocurrency trading and account management",
     "title": "market.main",
     "version": "0.1.0"
   },
@@ -35,30 +35,44 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns balance of all cryptocurrencies",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns balance of all cryptocurrencies for the authenticated user",
         "produces": [
           "application/json"
         ],
         "summary": "Get user's balance",
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
                   "amount": {
-                    "type": "string"
+                    "type": "number",
+                    "format": "float",
+                    "example": 100.5
                   },
                   "currency": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "USDT",
+                      "BTC"
+                    ],
+                    "example": "USDT"
                   }
                 }
-              }
+              },
+              "example": [
+                {
+                  "amount": 100.5,
+                  "currency": "USDT"
+                },
+                {
+                  "amount": 0.005,
+                  "currency": "BTC"
+                }
+              ]
             }
           },
           "401": {
@@ -84,7 +98,7 @@ func init() {
         "operationId": "get_bids",
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
@@ -125,7 +139,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "type": "object",
               "properties": {
@@ -175,7 +189,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/bid"
             }
@@ -220,7 +234,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/Result"
             }
@@ -242,13 +256,116 @@ func init() {
     },
     "/metrics": {
       "get": {
+        "description": "Returns Prometheus-compatible metrics for the service",
         "produces": [
-          "application/json"
+          "text/plain; version=0.0.4"
         ],
         "summary": "Prometheus metrics",
         "responses": {
           "200": {
-            "description": "ok"
+            "description": "Successful operation",
+            "schema": {
+              "type": "string",
+              "example": "# HELP api_requests_total Total number of API requests\n# TYPE api_requests_total counter\napi_requests_total{method=\"POST\",endpoint=\"/transactions/deposit\"} 100\n"
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/transactions/deposit": {
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Creates a request to deposit cryptocurrency to the user's account",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Deposit request",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "currency",
+                "amount"
+              ],
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "example": 100.5
+                },
+                "currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ],
+                  "example": "USDT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "required": [
+                "id",
+                "status",
+                "address"
+              ],
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "example": "0x1234567890abcdef1234567890abcdef12345678"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "tx_dep_123456"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "finished",
+                    "processing",
+                    "pending"
+                  ],
+                  "example": "pending"
+                }
+              },
+              "example": {
+                "address": "0x1234567890abcdef1234567890abcdef12345678",
+                "id": "tx_dep_123456",
+                "status": "pending"
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -260,65 +377,89 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns all user's purchase",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns the user's purchase history with optional filters",
         "produces": [
           "application/json"
         ],
         "summary": "Get purchase history",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "date_from": {
-                  "type": "string"
-                },
-                "date_to": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "cancelled"
-                  ]
-                }
-              }
-            }
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled"
+            ],
+            "type": "string",
+            "description": "Filter by purchase status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter purchases from this date (ISO 8601)",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter purchases up to this date (ISO 8601)",
+            "name": "date_to",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "id",
+                  "currency_from",
+                  "currency_to",
+                  "amount_from",
+                  "amount_to",
+                  "status",
+                  "date"
+                ],
                 "properties": {
                   "amount_from": {
-                    "type": "string"
+                    "type": "number",
+                    "format": "float",
+                    "example": 100.5
                   },
                   "amount_to": {
-                    "type": "string"
+                    "type": "number",
+                    "format": "float",
+                    "example": 0.005
                   },
                   "currency_from": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "USDT",
+                      "BTC"
+                    ],
+                    "example": "USDT"
                   },
                   "currency_to": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "USDT",
+                      "BTC"
+                    ],
+                    "example": "BTC"
                   },
                   "date": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-13T10:00:00Z"
                   },
                   "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "pur_123456"
                   },
                   "status": {
                     "type": "string",
@@ -326,20 +467,32 @@ func init() {
                       "finished",
                       "processing",
                       "cancelled"
-                    ]
+                    ],
+                    "example": "finished"
                   }
                 }
-              }
+              },
+              "example": [
+                {
+                  "amount_from": 100.5,
+                  "amount_to": 0.005,
+                  "currency_from": "USDT",
+                  "currency_to": "BTC",
+                  "date": "2025-04-13T10:00:00Z",
+                  "id": "pur_123456",
+                  "status": "finished"
+                }
+              ]
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -354,106 +507,162 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns all user's withdrawal and deposits",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns the user's withdrawal and deposit history with optional filters",
         "produces": [
           "application/json"
         ],
-        "summary": "Get withdrawal and deposits history",
+        "summary": "Get withdrawal and deposit history",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "currency": {
-                  "type": "string"
-                },
-                "date_from": {
-                  "type": "string"
-                },
-                "date_to": {
-                  "type": "string"
-                },
-                "max_amount": {
-                  "type": "string"
-                },
-                "min_amount": {
-                  "type": "string"
-                },
-                "operation": {
-                  "type": "string",
-                  "enum": [
-                    "deposit",
-                    "withdrawal"
-                  ]
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "cancelled"
-                  ]
-                }
-              }
-            }
+            "type": "number",
+            "format": "float",
+            "description": "Minimum transaction amount",
+            "name": "min_amount",
+            "in": "query"
+          },
+          {
+            "type": "number",
+            "format": "float",
+            "description": "Maximum transaction amount",
+            "name": "max_amount",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled",
+              "pending"
+            ],
+            "type": "string",
+            "description": "Filter by transaction status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "USDT",
+              "BTC"
+            ],
+            "type": "string",
+            "description": "Filter by currency",
+            "name": "currency",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ],
+            "type": "string",
+            "description": "Filter by operation type",
+            "name": "operation",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter transactions from this date (ISO 8601)",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter transactions up to this date (ISO 8601)",
+            "name": "date_to",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "type": "object",
+                "required": [
+                  "id",
+                  "currency",
+                  "amount",
+                  "operation",
+                  "status",
+                  "date"
+                ],
                 "properties": {
+                  "address": {
+                    "type": "string",
+                    "example": "0x1234567890abcdef1234567890abcdef12345678"
+                  },
                   "amount": {
-                    "type": "string"
+                    "type": "number",
+                    "format": "float",
+                    "example": 100.5
                   },
                   "commission": {
-                    "type": "string"
+                    "type": "number",
+                    "format": "float",
+                    "example": 0.1
                   },
                   "currency": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "USDT",
+                      "BTC"
+                    ],
+                    "example": "USDT"
                   },
                   "date": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-04-13T10:00:00Z"
                   },
                   "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "tx_dep_123456"
                   },
                   "operation": {
                     "type": "string",
                     "enum": [
                       "deposit",
                       "withdrawal"
-                    ]
+                    ],
+                    "example": "deposit"
                   },
                   "status": {
                     "type": "string",
                     "enum": [
                       "finished",
                       "processing",
-                      "cancelled"
-                    ]
+                      "cancelled",
+                      "pending"
+                    ],
+                    "example": "finished"
                   }
                 }
-              }
+              },
+              "example": [
+                {
+                  "address": "0x1234567890abcdef1234567890abcdef12345678",
+                  "amount": 100.5,
+                  "commission": 0,
+                  "currency": "USDT",
+                  "date": "2025-04-13T10:00:00Z",
+                  "id": "tx_dep_123456",
+                  "operation": "deposit",
+                  "status": "finished"
+                }
+              ]
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -468,7 +677,7 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Creates a request to withdraw cryptocurrency from the user's account.",
+        "description": "Creates a request to withdraw cryptocurrency from the user's account",
         "consumes": [
           "application/json"
         ],
@@ -483,15 +692,28 @@ func init() {
             "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "currency",
+                "amount",
+                "address"
+              ],
               "properties": {
                 "address": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "0x1234567890abcdef1234567890abcdef12345678"
                 },
                 "amount": {
-                  "type": "string"
+                  "type": "number",
+                  "format": "float",
+                  "example": 100.5
                 },
                 "currency": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ],
+                  "example": "USDT"
                 }
               }
             }
@@ -499,12 +721,23 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "object",
+              "required": [
+                "id",
+                "status",
+                "tx_hash"
+              ],
               "properties": {
+                "commission": {
+                  "type": "number",
+                  "format": "float",
+                  "example": 0.1
+                },
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "tx_with_123456"
                 },
                 "status": {
                   "type": "string",
@@ -512,22 +745,30 @@ func init() {
                     "finished",
                     "processing",
                     "pending"
-                  ]
+                  ],
+                  "example": "pending"
                 },
-                "txHash": {
-                  "type": "string"
+                "tx_hash": {
+                  "type": "string",
+                  "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
                 }
+              },
+              "example": {
+                "commission": 0.1,
+                "id": "tx_with_123456",
+                "status": "pending",
+                "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data or insufficient balance",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -539,12 +780,18 @@ func init() {
   "definitions": {
     "Error": {
       "type": "object",
+      "required": [
+        "error_message",
+        "error_status_code"
+      ],
       "properties": {
         "error_message": {
-          "type": "string"
+          "type": "string",
+          "example": "Invalid input data"
         },
         "error_status_code": {
-          "type": "integer"
+          "type": "integer",
+          "example": 400
         }
       }
     },
@@ -607,7 +854,7 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "continuous market",
+    "description": "Continuous market API for cryptocurrency trading and account management",
     "title": "market.main",
     "version": "0.1.0"
   },
@@ -619,22 +866,29 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns balance of all cryptocurrencies",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns balance of all cryptocurrencies for the authenticated user",
         "produces": [
           "application/json"
         ],
         "summary": "Get user's balance",
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GetAccountBalanceOKBodyItems0"
-              }
+              },
+              "example": [
+                {
+                  "amount": 100.5,
+                  "currency": "USDT"
+                },
+                {
+                  "amount": 0.005,
+                  "currency": "BTC"
+                }
+              ]
             }
           },
           "401": {
@@ -660,7 +914,7 @@ func init() {
         "operationId": "get_bids",
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
@@ -701,7 +955,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "type": "object",
               "properties": {
@@ -751,7 +1005,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/bid"
             }
@@ -796,7 +1050,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/Result"
             }
@@ -818,13 +1072,117 @@ func init() {
     },
     "/metrics": {
       "get": {
+        "description": "Returns Prometheus-compatible metrics for the service",
         "produces": [
-          "application/json"
+          "text/plain; version=0.0.4"
         ],
         "summary": "Prometheus metrics",
         "responses": {
           "200": {
-            "description": "ok"
+            "description": "Successful operation",
+            "schema": {
+              "type": "string",
+              "example": "# HELP api_requests_total Total number of API requests\n# TYPE api_requests_total counter\napi_requests_total{method=\"POST\",endpoint=\"/transactions/deposit\"} 100\n"
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/transactions/deposit": {
+      "post": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Creates a request to deposit cryptocurrency to the user's account",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Deposit request",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "currency",
+                "amount"
+              ],
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "example": 100.5
+                },
+                "currency": {
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ],
+                  "example": "USDT"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "required": [
+                "id",
+                "status",
+                "address"
+              ],
+              "properties": {
+                "address": {
+                  "type": "string",
+                  "example": "0x1234567890abcdef1234567890abcdef12345678"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "tx_dep_123456"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "finished",
+                    "processing",
+                    "pending"
+                  ],
+                  "example": "pending"
+                }
+              },
+              "example": {
+                "address": "0x1234567890abcdef1234567890abcdef12345678",
+                "id": "tx_dep_123456",
+                "status": "pending"
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -836,58 +1194,67 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns all user's purchase",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns the user's purchase history with optional filters",
         "produces": [
           "application/json"
         ],
         "summary": "Get purchase history",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "date_from": {
-                  "type": "string"
-                },
-                "date_to": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "cancelled"
-                  ]
-                }
-              }
-            }
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled"
+            ],
+            "type": "string",
+            "description": "Filter by purchase status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter purchases from this date (ISO 8601)",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter purchases up to this date (ISO 8601)",
+            "name": "date_to",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GetTransactionsPurchaseOKBodyItems0"
-              }
+              },
+              "example": [
+                {
+                  "amount_from": 100.5,
+                  "amount_to": 0.005,
+                  "currency_from": "USDT",
+                  "currency_to": "BTC",
+                  "date": "2025-04-13T10:00:00Z",
+                  "id": "pur_123456",
+                  "status": "finished"
+                }
+              ]
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -902,74 +1269,105 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Returns all user's withdrawal and deposits",
-        "consumes": [
-          "application/json"
-        ],
+        "description": "Returns the user's withdrawal and deposit history with optional filters",
         "produces": [
           "application/json"
         ],
-        "summary": "Get withdrawal and deposits history",
+        "summary": "Get withdrawal and deposit history",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "currency": {
-                  "type": "string"
-                },
-                "date_from": {
-                  "type": "string"
-                },
-                "date_to": {
-                  "type": "string"
-                },
-                "max_amount": {
-                  "type": "string"
-                },
-                "min_amount": {
-                  "type": "string"
-                },
-                "operation": {
-                  "type": "string",
-                  "enum": [
-                    "deposit",
-                    "withdrawal"
-                  ]
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "processing",
-                    "cancelled"
-                  ]
-                }
-              }
-            }
+            "minimum": 0,
+            "type": "number",
+            "format": "float",
+            "description": "Minimum transaction amount",
+            "name": "min_amount",
+            "in": "query"
+          },
+          {
+            "minimum": 0,
+            "type": "number",
+            "format": "float",
+            "description": "Maximum transaction amount",
+            "name": "max_amount",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled",
+              "pending"
+            ],
+            "type": "string",
+            "description": "Filter by transaction status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "USDT",
+              "BTC"
+            ],
+            "type": "string",
+            "description": "Filter by currency",
+            "name": "currency",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "deposit",
+              "withdrawal"
+            ],
+            "type": "string",
+            "description": "Filter by operation type",
+            "name": "operation",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter transactions from this date (ISO 8601)",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter transactions up to this date (ISO 8601)",
+            "name": "date_to",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/GetTransactionsTransfersOKBodyItems0"
-              }
+              },
+              "example": [
+                {
+                  "address": "0x1234567890abcdef1234567890abcdef12345678",
+                  "amount": 100.5,
+                  "commission": 0,
+                  "currency": "USDT",
+                  "date": "2025-04-13T10:00:00Z",
+                  "id": "tx_dep_123456",
+                  "operation": "deposit",
+                  "status": "finished"
+                }
+              ]
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -984,7 +1382,7 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Creates a request to withdraw cryptocurrency from the user's account.",
+        "description": "Creates a request to withdraw cryptocurrency from the user's account",
         "consumes": [
           "application/json"
         ],
@@ -999,15 +1397,29 @@ func init() {
             "required": true,
             "schema": {
               "type": "object",
+              "required": [
+                "currency",
+                "amount",
+                "address"
+              ],
               "properties": {
                 "address": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "0x1234567890abcdef1234567890abcdef12345678"
                 },
                 "amount": {
-                  "type": "string"
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "example": 100.5
                 },
                 "currency": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "USDT",
+                    "BTC"
+                  ],
+                  "example": "USDT"
                 }
               }
             }
@@ -1015,12 +1427,24 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Success operation",
+            "description": "Successful operation",
             "schema": {
               "type": "object",
+              "required": [
+                "id",
+                "status",
+                "tx_hash"
+              ],
               "properties": {
+                "commission": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0,
+                  "example": 0.1
+                },
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "tx_with_123456"
                 },
                 "status": {
                   "type": "string",
@@ -1028,22 +1452,30 @@ func init() {
                     "finished",
                     "processing",
                     "pending"
-                  ]
+                  ],
+                  "example": "pending"
                 },
-                "txHash": {
-                  "type": "string"
+                "tx_hash": {
+                  "type": "string",
+                  "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
                 }
+              },
+              "example": {
+                "commission": 0.1,
+                "id": "tx_with_123456",
+                "status": "pending",
+                "tx_hash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "400": {
+            "description": "Incorrect data or insufficient balance",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "409": {
-            "description": "Incorrect data",
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1055,12 +1487,18 @@ func init() {
   "definitions": {
     "Error": {
       "type": "object",
+      "required": [
+        "error_message",
+        "error_status_code"
+      ],
       "properties": {
         "error_message": {
-          "type": "string"
+          "type": "string",
+          "example": "Invalid input data"
         },
         "error_status_code": {
-          "type": "integer"
+          "type": "integer",
+          "example": 400
         }
       }
     },
@@ -1068,33 +1506,69 @@ func init() {
       "type": "object",
       "properties": {
         "amount": {
-          "type": "string"
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "example": 100.5
         },
         "currency": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
         }
       }
     },
     "GetTransactionsPurchaseOKBodyItems0": {
       "type": "object",
+      "required": [
+        "id",
+        "currency_from",
+        "currency_to",
+        "amount_from",
+        "amount_to",
+        "status",
+        "date"
+      ],
       "properties": {
         "amount_from": {
-          "type": "string"
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "example": 100.5
         },
         "amount_to": {
-          "type": "string"
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "example": 0.005
         },
         "currency_from": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
         },
         "currency_to": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "BTC"
         },
         "date": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time",
+          "example": "2025-04-13T10:00:00Z"
         },
         "id": {
-          "type": "string"
+          "type": "string",
+          "example": "pur_123456"
         },
         "status": {
           "type": "string",
@@ -1102,42 +1576,72 @@ func init() {
             "finished",
             "processing",
             "cancelled"
-          ]
+          ],
+          "example": "finished"
         }
       }
     },
     "GetTransactionsTransfersOKBodyItems0": {
       "type": "object",
+      "required": [
+        "id",
+        "currency",
+        "amount",
+        "operation",
+        "status",
+        "date"
+      ],
       "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
         "amount": {
-          "type": "string"
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "example": 100.5
         },
         "commission": {
-          "type": "string"
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "example": 0.1
         },
         "currency": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
         },
         "date": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time",
+          "example": "2025-04-13T10:00:00Z"
         },
         "id": {
-          "type": "string"
+          "type": "string",
+          "example": "tx_dep_123456"
         },
         "operation": {
           "type": "string",
           "enum": [
             "deposit",
             "withdrawal"
-          ]
+          ],
+          "example": "deposit"
         },
         "status": {
           "type": "string",
           "enum": [
             "finished",
             "processing",
-            "cancelled"
-          ]
+            "cancelled",
+            "pending"
+          ],
+          "example": "finished"
         }
       }
     },

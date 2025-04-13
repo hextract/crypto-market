@@ -6,12 +6,13 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
@@ -32,11 +33,36 @@ type GetTransactionsTransfersParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*
-	  Required: true
-	  In: body
+	/*Filter by currency
+	  In: query
 	*/
-	Body GetTransactionsTransfersBody
+	Currency *string
+	/*Filter transactions from this date (ISO 8601)
+	  In: query
+	*/
+	DateFrom *strfmt.DateTime
+	/*Filter transactions up to this date (ISO 8601)
+	  In: query
+	*/
+	DateTo *strfmt.DateTime
+	/*Maximum transaction amount
+	  Minimum: 0
+	  In: query
+	*/
+	MaxAmount *float32
+	/*Minimum transaction amount
+	  Minimum: 0
+	  In: query
+	*/
+	MinAmount *float32
+	/*Filter by operation type
+	  In: query
+	*/
+	Operation *string
+	/*Filter by transaction status
+	  In: query
+	*/
+	Status *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -48,35 +74,288 @@ func (o *GetTransactionsTransfersParams) BindRequest(r *http.Request, route *mid
 
 	o.HTTPRequest = r
 
-	if runtime.HasBody(r) {
-		defer r.Body.Close()
-		var body GetTransactionsTransfersBody
-		if err := route.Consumer.Consume(r.Body, &body); err != nil {
-			if err == io.EOF {
-				res = append(res, errors.Required("body", "body", ""))
-			} else {
-				res = append(res, errors.NewParseError("body", "body", "", err))
-			}
-		} else {
-			// validate body object
-			if err := body.Validate(route.Formats); err != nil {
-				res = append(res, err)
-			}
+	qs := runtime.Values(r.URL.Query())
 
-			ctx := validate.WithOperationRequest(r.Context())
-			if err := body.ContextValidate(ctx, route.Formats); err != nil {
-				res = append(res, err)
-			}
+	qCurrency, qhkCurrency, _ := qs.GetOK("currency")
+	if err := o.bindCurrency(qCurrency, qhkCurrency, route.Formats); err != nil {
+		res = append(res, err)
+	}
 
-			if len(res) == 0 {
-				o.Body = body
-			}
-		}
-	} else {
-		res = append(res, errors.Required("body", "body", ""))
+	qDateFrom, qhkDateFrom, _ := qs.GetOK("date_from")
+	if err := o.bindDateFrom(qDateFrom, qhkDateFrom, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qDateTo, qhkDateTo, _ := qs.GetOK("date_to")
+	if err := o.bindDateTo(qDateTo, qhkDateTo, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMaxAmount, qhkMaxAmount, _ := qs.GetOK("max_amount")
+	if err := o.bindMaxAmount(qMaxAmount, qhkMaxAmount, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qMinAmount, qhkMinAmount, _ := qs.GetOK("min_amount")
+	if err := o.bindMinAmount(qMinAmount, qhkMinAmount, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qOperation, qhkOperation, _ := qs.GetOK("operation")
+	if err := o.bindOperation(qOperation, qhkOperation, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qStatus, qhkStatus, _ := qs.GetOK("status")
+	if err := o.bindStatus(qStatus, qhkStatus, route.Formats); err != nil {
+		res = append(res, err)
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindCurrency binds and validates parameter Currency from query.
+func (o *GetTransactionsTransfersParams) bindCurrency(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Currency = &raw
+
+	if err := o.validateCurrency(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateCurrency carries on validations for parameter Currency
+func (o *GetTransactionsTransfersParams) validateCurrency(formats strfmt.Registry) error {
+
+	if err := validate.EnumCase("currency", "query", *o.Currency, []interface{}{"USDT", "BTC"}, true); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindDateFrom binds and validates parameter DateFrom from query.
+func (o *GetTransactionsTransfersParams) bindDateFrom(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	// Format: date-time
+	value, err := formats.Parse("date-time", raw)
+	if err != nil {
+		return errors.InvalidType("date_from", "query", "strfmt.DateTime", raw)
+	}
+	o.DateFrom = (value.(*strfmt.DateTime))
+
+	if err := o.validateDateFrom(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateDateFrom carries on validations for parameter DateFrom
+func (o *GetTransactionsTransfersParams) validateDateFrom(formats strfmt.Registry) error {
+
+	if err := validate.FormatOf("date_from", "query", "date-time", o.DateFrom.String(), formats); err != nil {
+		return err
+	}
+	return nil
+}
+
+// bindDateTo binds and validates parameter DateTo from query.
+func (o *GetTransactionsTransfersParams) bindDateTo(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	// Format: date-time
+	value, err := formats.Parse("date-time", raw)
+	if err != nil {
+		return errors.InvalidType("date_to", "query", "strfmt.DateTime", raw)
+	}
+	o.DateTo = (value.(*strfmt.DateTime))
+
+	if err := o.validateDateTo(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateDateTo carries on validations for parameter DateTo
+func (o *GetTransactionsTransfersParams) validateDateTo(formats strfmt.Registry) error {
+
+	if err := validate.FormatOf("date_to", "query", "date-time", o.DateTo.String(), formats); err != nil {
+		return err
+	}
+	return nil
+}
+
+// bindMaxAmount binds and validates parameter MaxAmount from query.
+func (o *GetTransactionsTransfersParams) bindMaxAmount(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertFloat32(raw)
+	if err != nil {
+		return errors.InvalidType("max_amount", "query", "float32", raw)
+	}
+	o.MaxAmount = &value
+
+	if err := o.validateMaxAmount(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateMaxAmount carries on validations for parameter MaxAmount
+func (o *GetTransactionsTransfersParams) validateMaxAmount(formats strfmt.Registry) error {
+
+	if err := validate.Minimum("max_amount", "query", float64(*o.MaxAmount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindMinAmount binds and validates parameter MinAmount from query.
+func (o *GetTransactionsTransfersParams) bindMinAmount(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertFloat32(raw)
+	if err != nil {
+		return errors.InvalidType("min_amount", "query", "float32", raw)
+	}
+	o.MinAmount = &value
+
+	if err := o.validateMinAmount(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateMinAmount carries on validations for parameter MinAmount
+func (o *GetTransactionsTransfersParams) validateMinAmount(formats strfmt.Registry) error {
+
+	if err := validate.Minimum("min_amount", "query", float64(*o.MinAmount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindOperation binds and validates parameter Operation from query.
+func (o *GetTransactionsTransfersParams) bindOperation(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Operation = &raw
+
+	if err := o.validateOperation(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateOperation carries on validations for parameter Operation
+func (o *GetTransactionsTransfersParams) validateOperation(formats strfmt.Registry) error {
+
+	if err := validate.EnumCase("operation", "query", *o.Operation, []interface{}{"deposit", "withdrawal"}, true); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindStatus binds and validates parameter Status from query.
+func (o *GetTransactionsTransfersParams) bindStatus(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Status = &raw
+
+	if err := o.validateStatus(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateStatus carries on validations for parameter Status
+func (o *GetTransactionsTransfersParams) validateStatus(formats strfmt.Registry) error {
+
+	if err := validate.EnumCase("status", "query", *o.Status, []interface{}{"finished", "processing", "cancelled", "pending"}, true); err != nil {
+		return err
+	}
+
 	return nil
 }

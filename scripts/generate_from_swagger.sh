@@ -1,6 +1,6 @@
 #!/bin/bash
 
-swagger generate server -f main/api/swagger/main.yaml -t main/internal --exclude-main # --principal models.User
+swagger generate server -f main/api/swagger/main.yaml -t main/internal --exclude-main --principal models.User
 
 #swagger generate server -f payment/api/swagger/payment.yaml -t payment/internal --exclude-main
 #

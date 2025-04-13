@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/h4x4d/go_hsse_hotels/pkg/models"
+	"github.com/h4x4d/crypto-market/pkg/models"
 )
 
 func (c Client) CheckToken(token string) (user *models.User, err error) {
