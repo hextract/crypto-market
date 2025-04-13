@@ -17,7 +17,7 @@ import (
 const CreateBidOKCode int = 200
 
 /*
-CreateBidOK successful operation
+CreateBidOK Successful operation
 
 swagger:response createBidOK
 */

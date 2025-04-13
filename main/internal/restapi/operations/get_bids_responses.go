@@ -17,7 +17,7 @@ import (
 const GetBidsOKCode int = 200
 
 /*
-GetBidsOK successful operation
+GetBidsOK Successful operation
 
 swagger:response getBidsOK
 */

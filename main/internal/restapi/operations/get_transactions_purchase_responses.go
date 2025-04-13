@@ -17,7 +17,7 @@ import (
 const GetTransactionsPurchaseOKCode int = 200
 
 /*
-GetTransactionsPurchaseOK Success operation
+GetTransactionsPurchaseOK Successful operation
 
 swagger:response getTransactionsPurchaseOK
 */
@@ -61,6 +61,51 @@ func (o *GetTransactionsPurchaseOK) WriteResponse(rw http.ResponseWriter, produc
 	}
 }
 
+// GetTransactionsPurchaseBadRequestCode is the HTTP code returned for type GetTransactionsPurchaseBadRequest
+const GetTransactionsPurchaseBadRequestCode int = 400
+
+/*
+GetTransactionsPurchaseBadRequest Incorrect data
+
+swagger:response getTransactionsPurchaseBadRequest
+*/
+type GetTransactionsPurchaseBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetTransactionsPurchaseBadRequest creates GetTransactionsPurchaseBadRequest with default headers values
+func NewGetTransactionsPurchaseBadRequest() *GetTransactionsPurchaseBadRequest {
+
+	return &GetTransactionsPurchaseBadRequest{}
+}
+
+// WithPayload adds the payload to the get transactions purchase bad request response
+func (o *GetTransactionsPurchaseBadRequest) WithPayload(payload *models.Error) *GetTransactionsPurchaseBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get transactions purchase bad request response
+func (o *GetTransactionsPurchaseBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetTransactionsPurchaseBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetTransactionsPurchaseUnauthorizedCode is the HTTP code returned for type GetTransactionsPurchaseUnauthorized
 const GetTransactionsPurchaseUnauthorizedCode int = 401
 
@@ -98,51 +143,6 @@ func (o *GetTransactionsPurchaseUnauthorized) SetPayload(payload *models.Error) 
 func (o *GetTransactionsPurchaseUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(401)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// GetTransactionsPurchaseConflictCode is the HTTP code returned for type GetTransactionsPurchaseConflict
-const GetTransactionsPurchaseConflictCode int = 409
-
-/*
-GetTransactionsPurchaseConflict Incorrect data
-
-swagger:response getTransactionsPurchaseConflict
-*/
-type GetTransactionsPurchaseConflict struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *models.Error `json:"body,omitempty"`
-}
-
-// NewGetTransactionsPurchaseConflict creates GetTransactionsPurchaseConflict with default headers values
-func NewGetTransactionsPurchaseConflict() *GetTransactionsPurchaseConflict {
-
-	return &GetTransactionsPurchaseConflict{}
-}
-
-// WithPayload adds the payload to the get transactions purchase conflict response
-func (o *GetTransactionsPurchaseConflict) WithPayload(payload *models.Error) *GetTransactionsPurchaseConflict {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the get transactions purchase conflict response
-func (o *GetTransactionsPurchaseConflict) SetPayload(payload *models.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *GetTransactionsPurchaseConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(409)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

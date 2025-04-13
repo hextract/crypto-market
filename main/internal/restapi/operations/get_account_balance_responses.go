@@ -17,7 +17,7 @@ import (
 const GetAccountBalanceOKCode int = 200
 
 /*
-GetAccountBalanceOK Success operation
+GetAccountBalanceOK Successful operation
 
 swagger:response getAccountBalanceOK
 */

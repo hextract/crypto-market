@@ -9,11 +9,24 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // GetTransactionsTransfersURL generates an URL for the get transactions transfers operation
 type GetTransactionsTransfersURL struct {
+	Currency  *string
+	DateFrom  *strfmt.DateTime
+	DateTo    *strfmt.DateTime
+	MaxAmount *float32
+	MinAmount *float32
+	Operation *string
+	Status    *string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -39,6 +52,66 @@ func (o *GetTransactionsTransfersURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var currencyQ string
+	if o.Currency != nil {
+		currencyQ = *o.Currency
+	}
+	if currencyQ != "" {
+		qs.Set("currency", currencyQ)
+	}
+
+	var dateFromQ string
+	if o.DateFrom != nil {
+		dateFromQ = o.DateFrom.String()
+	}
+	if dateFromQ != "" {
+		qs.Set("date_from", dateFromQ)
+	}
+
+	var dateToQ string
+	if o.DateTo != nil {
+		dateToQ = o.DateTo.String()
+	}
+	if dateToQ != "" {
+		qs.Set("date_to", dateToQ)
+	}
+
+	var maxAmountQ string
+	if o.MaxAmount != nil {
+		maxAmountQ = swag.FormatFloat32(*o.MaxAmount)
+	}
+	if maxAmountQ != "" {
+		qs.Set("max_amount", maxAmountQ)
+	}
+
+	var minAmountQ string
+	if o.MinAmount != nil {
+		minAmountQ = swag.FormatFloat32(*o.MinAmount)
+	}
+	if minAmountQ != "" {
+		qs.Set("min_amount", minAmountQ)
+	}
+
+	var operationQ string
+	if o.Operation != nil {
+		operationQ = *o.Operation
+	}
+	if operationQ != "" {
+		qs.Set("operation", operationQ)
+	}
+
+	var statusQ string
+	if o.Status != nil {
+		statusQ = *o.Status
+	}
+	if statusQ != "" {
+		qs.Set("status", statusQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

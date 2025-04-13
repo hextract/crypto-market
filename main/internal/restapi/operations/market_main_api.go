@@ -41,6 +41,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
+		TxtProducer:  runtime.TextProducer(),
 
 		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
@@ -53,6 +54,9 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		}),
 		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
+		}),
+		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
 		}),
 		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
@@ -79,7 +83,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 	}
 }
 
-/*MarketMainAPI continuous market */
+/*MarketMainAPI Continuous market API for cryptocurrency trading and account management */
 type MarketMainAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
@@ -111,6 +115,9 @@ type MarketMainAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
+	// TxtProducer registers a producer for the following mime types:
+	//   - text/plain
+	TxtProducer runtime.Producer
 
 	// APIKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key api_key provided in the header
@@ -127,6 +134,8 @@ type MarketMainAPI struct {
 	GetTransactionsPurchaseHandler GetTransactionsPurchaseHandler
 	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
 	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
+	// PostTransactionsDepositHandler sets the operation handler for the post transactions deposit operation
+	PostTransactionsDepositHandler PostTransactionsDepositHandler
 	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
 	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
@@ -213,6 +222,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
+	if o.TxtProducer == nil {
+		unregistered = append(unregistered, "TxtProducer")
+	}
 
 	if o.APIKeyAuth == nil {
 		unregistered = append(unregistered, "APIKeyAuth")
@@ -229,6 +241,9 @@ func (o *MarketMainAPI) Validate() error {
 	}
 	if o.GetTransactionsTransfersHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
+	}
+	if o.PostTransactionsDepositHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsDepositHandler")
 	}
 	if o.PostTransactionsWithdrawHandler == nil {
 		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
@@ -302,6 +317,8 @@ func (o *MarketMainAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pro
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
+		case "text/plain":
+			result["text/plain"] = o.TxtProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -358,6 +375,10 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/transactions/transfers"] = NewGetTransactionsTransfers(o.context, o.GetTransactionsTransfersHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transactions/deposit"] = NewPostTransactionsDeposit(o.context, o.PostTransactionsDepositHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

@@ -17,7 +17,7 @@ import (
 const CancelBidOKCode int = 200
 
 /*
-CancelBidOK successful operation
+CancelBidOK Successful operation
 
 swagger:response cancelBidOK
 */

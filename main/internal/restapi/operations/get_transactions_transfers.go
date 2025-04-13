@@ -38,9 +38,9 @@ func NewGetTransactionsTransfers(ctx *middleware.Context, handler GetTransaction
 /*
 	GetTransactionsTransfers swagger:route GET /transactions/transfers getTransactionsTransfers
 
-# Get withdrawal and deposits history
+# Get withdrawal and deposit history
 
-Returns all user's withdrawal and deposits
+Returns the user's withdrawal and deposit history with optional filters
 */
 type GetTransactionsTransfers struct {
 	Context *middleware.Context
@@ -76,196 +76,80 @@ func (o *GetTransactionsTransfers) ServeHTTP(rw http.ResponseWriter, r *http.Req
 
 }
 
-// GetTransactionsTransfersBody get transactions transfers body
-//
-// swagger:model GetTransactionsTransfersBody
-type GetTransactionsTransfersBody struct {
-
-	// currency
-	Currency string `json:"currency,omitempty"`
-
-	// date from
-	DateFrom string `json:"date_from,omitempty"`
-
-	// date to
-	DateTo string `json:"date_to,omitempty"`
-
-	// max amount
-	MaxAmount string `json:"max_amount,omitempty"`
-
-	// min amount
-	MinAmount string `json:"min_amount,omitempty"`
-
-	// operation
-	// Enum: ["deposit","withdrawal"]
-	Operation string `json:"operation,omitempty"`
-
-	// status
-	// Enum: ["finished","processing","cancelled"]
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get transactions transfers body
-func (o *GetTransactionsTransfersBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateOperation(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-var getTransactionsTransfersBodyTypeOperationPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["deposit","withdrawal"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		getTransactionsTransfersBodyTypeOperationPropEnum = append(getTransactionsTransfersBodyTypeOperationPropEnum, v)
-	}
-}
-
-const (
-
-	// GetTransactionsTransfersBodyOperationDeposit captures enum value "deposit"
-	GetTransactionsTransfersBodyOperationDeposit string = "deposit"
-
-	// GetTransactionsTransfersBodyOperationWithdrawal captures enum value "withdrawal"
-	GetTransactionsTransfersBodyOperationWithdrawal string = "withdrawal"
-)
-
-// prop value enum
-func (o *GetTransactionsTransfersBody) validateOperationEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getTransactionsTransfersBodyTypeOperationPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *GetTransactionsTransfersBody) validateOperation(formats strfmt.Registry) error {
-	if swag.IsZero(o.Operation) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateOperationEnum("body"+"."+"operation", "body", o.Operation); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var getTransactionsTransfersBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","cancelled"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		getTransactionsTransfersBodyTypeStatusPropEnum = append(getTransactionsTransfersBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// GetTransactionsTransfersBodyStatusFinished captures enum value "finished"
-	GetTransactionsTransfersBodyStatusFinished string = "finished"
-
-	// GetTransactionsTransfersBodyStatusProcessing captures enum value "processing"
-	GetTransactionsTransfersBodyStatusProcessing string = "processing"
-
-	// GetTransactionsTransfersBodyStatusCancelled captures enum value "cancelled"
-	GetTransactionsTransfersBodyStatusCancelled string = "cancelled"
-)
-
-// prop value enum
-func (o *GetTransactionsTransfersBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, getTransactionsTransfersBodyTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *GetTransactionsTransfersBody) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(o.Status) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("body"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this get transactions transfers body based on context it is used
-func (o *GetTransactionsTransfersBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetTransactionsTransfersBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetTransactionsTransfersBody) UnmarshalBinary(b []byte) error {
-	var res GetTransactionsTransfersBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
 // GetTransactionsTransfersOKBodyItems0 get transactions transfers o k body items0
 //
 // swagger:model GetTransactionsTransfersOKBodyItems0
 type GetTransactionsTransfersOKBodyItems0 struct {
 
+	// address
+	// Example: 0x1234567890abcdef1234567890abcdef12345678
+	Address string `json:"address,omitempty"`
+
 	// amount
-	Amount string `json:"amount,omitempty"`
+	// Example: 100.5
+	// Required: true
+	// Minimum: 0
+	Amount *float32 `json:"amount"`
 
 	// commission
-	Commission string `json:"commission,omitempty"`
+	// Example: 0.1
+	// Minimum: 0
+	Commission *float32 `json:"commission,omitempty"`
 
 	// currency
-	Currency string `json:"currency,omitempty"`
+	// Example: USDT
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	Currency *string `json:"currency"`
 
 	// date
-	Date string `json:"date,omitempty"`
+	// Example: 2025-04-13T10:00:00Z
+	// Required: true
+	// Format: date-time
+	Date *strfmt.DateTime `json:"date"`
 
 	// id
-	ID string `json:"id,omitempty"`
+	// Example: tx_dep_123456
+	// Required: true
+	ID *string `json:"id"`
 
 	// operation
+	// Example: deposit
+	// Required: true
 	// Enum: ["deposit","withdrawal"]
-	Operation string `json:"operation,omitempty"`
+	Operation *string `json:"operation"`
 
 	// status
-	// Enum: ["finished","processing","cancelled"]
-	Status string `json:"status,omitempty"`
+	// Example: finished
+	// Required: true
+	// Enum: ["finished","processing","cancelled","pending"]
+	Status *string `json:"status"`
 }
 
 // Validate validates this get transactions transfers o k body items0
 func (o *GetTransactionsTransfersOKBodyItems0) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := o.validateAmount(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCommission(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrency(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateDate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := o.validateOperation(formats); err != nil {
 		res = append(res, err)
 	}
@@ -277,6 +161,96 @@ func (o *GetTransactionsTransfersOKBodyItems0) Validate(formats strfmt.Registry)
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *GetTransactionsTransfersOKBodyItems0) validateAmount(formats strfmt.Registry) error {
+
+	if err := validate.Required("amount", "body", o.Amount); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsTransfersOKBodyItems0) validateCommission(formats strfmt.Registry) error {
+	if swag.IsZero(o.Commission) { // not required
+		return nil
+	}
+
+	if err := validate.Minimum("commission", "body", float64(*o.Commission), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getTransactionsTransfersOKBodyItems0TypeCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getTransactionsTransfersOKBodyItems0TypeCurrencyPropEnum = append(getTransactionsTransfersOKBodyItems0TypeCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// GetTransactionsTransfersOKBodyItems0CurrencyUSDT captures enum value "USDT"
+	GetTransactionsTransfersOKBodyItems0CurrencyUSDT string = "USDT"
+
+	// GetTransactionsTransfersOKBodyItems0CurrencyBTC captures enum value "BTC"
+	GetTransactionsTransfersOKBodyItems0CurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (o *GetTransactionsTransfersOKBodyItems0) validateCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getTransactionsTransfersOKBodyItems0TypeCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetTransactionsTransfersOKBodyItems0) validateCurrency(formats strfmt.Registry) error {
+
+	if err := validate.Required("currency", "body", o.Currency); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCurrencyEnum("currency", "body", *o.Currency); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsTransfersOKBodyItems0) validateDate(formats strfmt.Registry) error {
+
+	if err := validate.Required("date", "body", o.Date); err != nil {
+		return err
+	}
+
+	if err := validate.FormatOf("date", "body", "date-time", o.Date.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *GetTransactionsTransfersOKBodyItems0) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", o.ID); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -310,12 +284,13 @@ func (o *GetTransactionsTransfersOKBodyItems0) validateOperationEnum(path, locat
 }
 
 func (o *GetTransactionsTransfersOKBodyItems0) validateOperation(formats strfmt.Registry) error {
-	if swag.IsZero(o.Operation) { // not required
-		return nil
+
+	if err := validate.Required("operation", "body", o.Operation); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateOperationEnum("operation", "body", o.Operation); err != nil {
+	if err := o.validateOperationEnum("operation", "body", *o.Operation); err != nil {
 		return err
 	}
 
@@ -326,7 +301,7 @@ var getTransactionsTransfersOKBodyItems0TypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","cancelled"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["finished","processing","cancelled","pending"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -344,6 +319,9 @@ const (
 
 	// GetTransactionsTransfersOKBodyItems0StatusCancelled captures enum value "cancelled"
 	GetTransactionsTransfersOKBodyItems0StatusCancelled string = "cancelled"
+
+	// GetTransactionsTransfersOKBodyItems0StatusPending captures enum value "pending"
+	GetTransactionsTransfersOKBodyItems0StatusPending string = "pending"
 )
 
 // prop value enum
@@ -355,12 +333,13 @@ func (o *GetTransactionsTransfersOKBodyItems0) validateStatusEnum(path, location
 }
 
 func (o *GetTransactionsTransfersOKBodyItems0) validateStatus(formats strfmt.Registry) error {
-	if swag.IsZero(o.Status) { // not required
-		return nil
+
+	if err := validate.Required("status", "body", o.Status); err != nil {
+		return err
 	}
 
 	// value enum
-	if err := o.validateStatusEnum("status", "body", o.Status); err != nil {
+	if err := o.validateStatusEnum("status", "body", *o.Status); err != nil {
 		return err
 	}
 

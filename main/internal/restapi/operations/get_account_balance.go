@@ -7,11 +7,14 @@ package operations
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // GetAccountBalanceHandlerFunc turns a function with the right signature into a get account balance handler
@@ -37,7 +40,7 @@ func NewGetAccountBalance(ctx *middleware.Context, handler GetAccountBalanceHand
 
 # Get user's balance
 
-Returns balance of all cryptocurrencies
+Returns balance of all cryptocurrencies for the authenticated user
 */
 type GetAccountBalance struct {
 	Context *middleware.Context
@@ -79,14 +82,89 @@ func (o *GetAccountBalance) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 type GetAccountBalanceOKBodyItems0 struct {
 
 	// amount
-	Amount string `json:"amount,omitempty"`
+	// Example: 100.5
+	// Required: true
+	// Minimum: 0
+	Amount *float32 `json:"amount"`
 
 	// currency
-	Currency string `json:"currency,omitempty"`
+	// Example: USDT
+	// Required: true
+	// Enum: ["USDT","BTC"]
+	Currency *string `json:"currency"`
 }
 
 // Validate validates this get account balance o k body items0
 func (o *GetAccountBalanceOKBodyItems0) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateAmount(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := o.validateCurrency(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (o *GetAccountBalanceOKBodyItems0) validateAmount(formats strfmt.Registry) error {
+
+	if err := validate.Required("amount", "body", o.Amount); err != nil {
+		return err
+	}
+
+	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var getAccountBalanceOKBodyItems0TypeCurrencyPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		getAccountBalanceOKBodyItems0TypeCurrencyPropEnum = append(getAccountBalanceOKBodyItems0TypeCurrencyPropEnum, v)
+	}
+}
+
+const (
+
+	// GetAccountBalanceOKBodyItems0CurrencyUSDT captures enum value "USDT"
+	GetAccountBalanceOKBodyItems0CurrencyUSDT string = "USDT"
+
+	// GetAccountBalanceOKBodyItems0CurrencyBTC captures enum value "BTC"
+	GetAccountBalanceOKBodyItems0CurrencyBTC string = "BTC"
+)
+
+// prop value enum
+func (o *GetAccountBalanceOKBodyItems0) validateCurrencyEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, getAccountBalanceOKBodyItems0TypeCurrencyPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *GetAccountBalanceOKBodyItems0) validateCurrency(formats strfmt.Registry) error {
+
+	if err := validate.Required("currency", "body", o.Currency); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := o.validateCurrencyEnum("currency", "body", *o.Currency); err != nil {
+		return err
+	}
+
 	return nil
 }
 

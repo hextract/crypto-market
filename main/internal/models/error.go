@@ -8,8 +8,10 @@ package models
 import (
 	"context"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // Error error
@@ -18,14 +20,49 @@ import (
 type Error struct {
 
 	// error message
-	ErrorMessage string `json:"error_message,omitempty"`
+	// Example: Invalid input data
+	// Required: true
+	ErrorMessage *string `json:"error_message"`
 
 	// error status code
-	ErrorStatusCode int64 `json:"error_status_code,omitempty"`
+	// Example: 400
+	// Required: true
+	ErrorStatusCode *int64 `json:"error_status_code"`
 }
 
 // Validate validates this error
 func (m *Error) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateErrorMessage(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateErrorStatusCode(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *Error) validateErrorMessage(formats strfmt.Registry) error {
+
+	if err := validate.Required("error_message", "body", m.ErrorMessage); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Error) validateErrorStatusCode(formats strfmt.Registry) error {
+
+	if err := validate.Required("error_status_code", "body", m.ErrorStatusCode); err != nil {
+		return err
+	}
+
 	return nil
 }
 

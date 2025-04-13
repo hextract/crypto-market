@@ -36,6 +36,7 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
+	api.TxtProducer = runtime.TextProducer()
 
 	// Applies when the "api_key" header is set
 	if api.APIKeyAuth == nil {
@@ -68,6 +69,11 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	if api.GetTransactionsTransfersHandler == nil {
 		api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(func(params operations.GetTransactionsTransfersParams, principal interface{}) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetTransactionsTransfers has not yet been implemented")
+		})
+	}
+	if api.PostTransactionsDepositHandler == nil {
+		api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(func(params operations.PostTransactionsDepositParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PostTransactionsDeposit has not yet been implemented")
 		})
 	}
 	if api.PostTransactionsWithdrawHandler == nil {

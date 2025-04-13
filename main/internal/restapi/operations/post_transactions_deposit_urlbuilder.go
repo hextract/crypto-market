@@ -9,25 +9,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-
-	"github.com/go-openapi/strfmt"
 )
 
-// GetTransactionsPurchaseURL generates an URL for the get transactions purchase operation
-type GetTransactionsPurchaseURL struct {
-	DateFrom *strfmt.DateTime
-	DateTo   *strfmt.DateTime
-	Status   *string
-
+// PostTransactionsDepositURL generates an URL for the post transactions deposit operation
+type PostTransactionsDepositURL struct {
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetTransactionsPurchaseURL) WithBasePath(bp string) *GetTransactionsPurchaseURL {
+func (o *PostTransactionsDepositURL) WithBasePath(bp string) *PostTransactionsDepositURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -35,52 +27,24 @@ func (o *GetTransactionsPurchaseURL) WithBasePath(bp string) *GetTransactionsPur
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *GetTransactionsPurchaseURL) SetBasePath(bp string) {
+func (o *PostTransactionsDepositURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *GetTransactionsPurchaseURL) Build() (*url.URL, error) {
+func (o *PostTransactionsDepositURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/transactions/purchase"
+	var _path = "/transactions/deposit"
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
-
-	qs := make(url.Values)
-
-	var dateFromQ string
-	if o.DateFrom != nil {
-		dateFromQ = o.DateFrom.String()
-	}
-	if dateFromQ != "" {
-		qs.Set("date_from", dateFromQ)
-	}
-
-	var dateToQ string
-	if o.DateTo != nil {
-		dateToQ = o.DateTo.String()
-	}
-	if dateToQ != "" {
-		qs.Set("date_to", dateToQ)
-	}
-
-	var statusQ string
-	if o.Status != nil {
-		statusQ = *o.Status
-	}
-	if statusQ != "" {
-		qs.Set("status", statusQ)
-	}
-
-	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *GetTransactionsPurchaseURL) Must(u *url.URL, err error) *url.URL {
+func (o *PostTransactionsDepositURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -91,17 +55,17 @@ func (o *GetTransactionsPurchaseURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *GetTransactionsPurchaseURL) String() string {
+func (o *PostTransactionsDepositURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *GetTransactionsPurchaseURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PostTransactionsDepositURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on GetTransactionsPurchaseURL")
+		return nil, errors.New("scheme is required for a full url on PostTransactionsDepositURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on GetTransactionsPurchaseURL")
+		return nil, errors.New("host is required for a full url on PostTransactionsDepositURL")
 	}
 
 	base, err := o.Build()
@@ -115,6 +79,6 @@ func (o *GetTransactionsPurchaseURL) BuildFull(scheme, host string) (*url.URL, e
 }
 
 // StringFull returns the string representation of a complete url
-func (o *GetTransactionsPurchaseURL) StringFull(scheme, host string) string {
+func (o *PostTransactionsDepositURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

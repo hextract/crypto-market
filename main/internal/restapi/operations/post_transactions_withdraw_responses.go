@@ -17,7 +17,7 @@ import (
 const PostTransactionsWithdrawOKCode int = 200
 
 /*
-PostTransactionsWithdrawOK Success operation
+PostTransactionsWithdrawOK Successful operation
 
 swagger:response postTransactionsWithdrawOK
 */
@@ -50,6 +50,51 @@ func (o *PostTransactionsWithdrawOK) SetPayload(payload *PostTransactionsWithdra
 func (o *PostTransactionsWithdrawOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// PostTransactionsWithdrawBadRequestCode is the HTTP code returned for type PostTransactionsWithdrawBadRequest
+const PostTransactionsWithdrawBadRequestCode int = 400
+
+/*
+PostTransactionsWithdrawBadRequest Incorrect data or insufficient balance
+
+swagger:response postTransactionsWithdrawBadRequest
+*/
+type PostTransactionsWithdrawBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewPostTransactionsWithdrawBadRequest creates PostTransactionsWithdrawBadRequest with default headers values
+func NewPostTransactionsWithdrawBadRequest() *PostTransactionsWithdrawBadRequest {
+
+	return &PostTransactionsWithdrawBadRequest{}
+}
+
+// WithPayload adds the payload to the post transactions withdraw bad request response
+func (o *PostTransactionsWithdrawBadRequest) WithPayload(payload *models.Error) *PostTransactionsWithdrawBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post transactions withdraw bad request response
+func (o *PostTransactionsWithdrawBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostTransactionsWithdrawBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
@@ -95,51 +140,6 @@ func (o *PostTransactionsWithdrawUnauthorized) SetPayload(payload *models.Error)
 func (o *PostTransactionsWithdrawUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(401)
-	if o.Payload != nil {
-		payload := o.Payload
-		if err := producer.Produce(rw, payload); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	}
-}
-
-// PostTransactionsWithdrawConflictCode is the HTTP code returned for type PostTransactionsWithdrawConflict
-const PostTransactionsWithdrawConflictCode int = 409
-
-/*
-PostTransactionsWithdrawConflict Incorrect data
-
-swagger:response postTransactionsWithdrawConflict
-*/
-type PostTransactionsWithdrawConflict struct {
-
-	/*
-	  In: Body
-	*/
-	Payload *models.Error `json:"body,omitempty"`
-}
-
-// NewPostTransactionsWithdrawConflict creates PostTransactionsWithdrawConflict with default headers values
-func NewPostTransactionsWithdrawConflict() *PostTransactionsWithdrawConflict {
-
-	return &PostTransactionsWithdrawConflict{}
-}
-
-// WithPayload adds the payload to the post transactions withdraw conflict response
-func (o *PostTransactionsWithdrawConflict) WithPayload(payload *models.Error) *PostTransactionsWithdrawConflict {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the post transactions withdraw conflict response
-func (o *PostTransactionsWithdrawConflict) SetPayload(payload *models.Error) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *PostTransactionsWithdrawConflict) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(409)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
