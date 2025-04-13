@@ -321,7 +321,7 @@ func (o *GetTransactionsTransfersParams) bindOperation(rawData []string, hasKey 
 // validateOperation carries on validations for parameter Operation
 func (o *GetTransactionsTransfersParams) validateOperation(formats strfmt.Registry) error {
 
-	if err := validate.EnumCase("operation", "query", *o.Operation, []interface{}{"deposit", "withdrawal"}, true); err != nil {
+	if err := validate.EnumCase("operation", "query", *o.Operation, []interface{}{"deposit", "withdraw"}, true); err != nil {
 		return err
 	}
 

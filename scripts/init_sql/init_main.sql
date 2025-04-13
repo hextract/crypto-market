@@ -88,20 +88,34 @@ $$
     END
 $$;
 
+CREATE TYPE bid_status AS ENUM ('pending', 'processing', 'finished', 'cancelled');
 
--- NOT EDITED
-
-create table if not exists bids
+CREATE TABLE bids
 (
-    user_id       text      not null,
-    currency_id   int       not null references currencies (currency_id),
-    status        text  default 'created',
-    create_date   timestamp not null,
-    complete_date timestamp,
-    min_price     float     not null,
-    max_price     float     not null,
-    amount_to_buy float     not null,
-    bought_amount float default 0.0,
-    buy_speed     float,
-    avg_price     float
+    id            TEXT PRIMARY KEY,
+    user_id       TEXT                     NOT NULL,
+    from_id       INT                      NOT NULL REFERENCES currencies (currency_id) ON DELETE RESTRICT,
+    to_id         INT                      NOT NULL REFERENCES currencies (currency_id) ON DELETE RESTRICT,
+    status        bid_status               NOT NULL DEFAULT 'pending',
+    create_date   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    complete_date TIMESTAMP WITH TIME ZONE,
+    min_price     NUMERIC(20, 8)           NOT NULL CHECK (min_price > 0),
+    max_price     NUMERIC(20, 8)           NOT NULL CHECK (max_price > 0),
+    amount_to_buy NUMERIC(20, 8)           NOT NULL CHECK (amount_to_buy > 0),
+    bought_amount NUMERIC(20, 8)           NOT NULL DEFAULT 0 CHECK (bought_amount >= 0),
+    buy_speed     NUMERIC(20, 8) CHECK (buy_speed >= 0),
+    avg_price     NUMERIC(20, 8) CHECK (avg_price >= 0),
+    CONSTRAINT check_price_range CHECK (max_price >= min_price),
+    CONSTRAINT check_from_to_different CHECK (from_id != to_id)
 );
+
+COMMENT ON TABLE bids IS 'Stores market purchase bids';
+COMMENT ON COLUMN bids.id IS 'Unique bid ID (e.g., bid_123)';
+COMMENT ON COLUMN bids.from_id IS 'Currency used for payment';
+COMMENT ON COLUMN bids.to_id IS 'Currency to be purchased';
+COMMENT ON COLUMN bids.amount_to_buy IS 'Desired amount to buy in to_currency';
+COMMENT ON COLUMN bids.bought_amount IS 'Amount already bought in to_currency';
+COMMENT ON COLUMN bids.avg_price IS 'Average price per unit in from_currency';
+
+CREATE INDEX idx_bids_user_id ON bids (user_id);
+CREATE INDEX idx_bids_status ON bids (status);

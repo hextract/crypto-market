@@ -552,7 +552,7 @@ func init() {
           {
             "enum": [
               "deposit",
-              "withdrawal"
+              "withdraw"
             ],
             "type": "string",
             "description": "Filter by operation type",
@@ -1316,7 +1316,7 @@ func init() {
           {
             "enum": [
               "deposit",
-              "withdrawal"
+              "withdraw"
             ],
             "type": "string",
             "description": "Filter by operation type",

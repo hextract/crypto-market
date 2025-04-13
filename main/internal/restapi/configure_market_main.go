@@ -72,16 +72,9 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
 		})
 	}
-	if api.GetTransactionsPurchaseHandler == nil {
-		api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(func(params operations.GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetTransactionsPurchase has not yet been implemented")
-		})
-	}
-	if api.GetTransactionsTransfersHandler == nil {
-		api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(func(params operations.GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetTransactionsTransfers has not yet been implemented")
-		})
-	}
+	api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(handler.GetTransactionsPurchaseHandler)
+	api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(handler.GetTransactionsTransfersHandler)
+
 	if api.PostTransactionsDepositHandler == nil {
 		api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(func(params operations.PostTransactionsDepositParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.PostTransactionsDeposit has not yet been implemented")
