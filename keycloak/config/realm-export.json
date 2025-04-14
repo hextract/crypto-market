@@ -7,10 +7,10 @@
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
-  "accessTokenLifespan": 300,
-  "accessTokenLifespanForImplicitFlow": 900,
-  "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000,
+  "accessTokenLifespan": 432000,
+  "accessTokenLifespanForImplicitFlow": 86400,
+  "ssoSessionIdleTimeout": 432000,
+  "ssoSessionMaxLifespan": 432000,
   "ssoSessionIdleTimeoutRememberMe": 0,
   "ssoSessionMaxLifespanRememberMe": 0,
   "offlineSessionIdleTimeout": 2592000,
@@ -1648,14 +1648,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
             "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
-            "oidc-usermodel-property-mapper",
             "saml-role-list-mapper",
-            "oidc-address-mapper"
+            "saml-user-property-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-sha256-pairwise-sub-mapper"
           ]
         }
       },
@@ -1675,13 +1675,13 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-role-list-mapper",
             "saml-user-property-mapper",
             "saml-user-attribute-mapper",
+            "oidc-usermodel-property-mapper",
             "oidc-sha256-pairwise-sub-mapper",
             "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-usermodel-property-mapper",
+            "saml-role-list-mapper",
             "oidc-address-mapper"
           ]
         }
@@ -2559,7 +2559,10 @@
     "clientOfflineSessionMaxLifespan": "0",
     "oauth2DevicePollingInterval": "5",
     "clientSessionIdleTimeout": "0",
+    "actionTokenGeneratedByUserLifespan.verify-email": "",
+    "actionTokenGeneratedByUserLifespan.idp-verify-account-via-email": "",
     "clientOfflineSessionIdleTimeout": "0",
+    "actionTokenGeneratedByUserLifespan.execute-actions": "",
     "cibaInterval": "5",
     "realmReusableOtpCode": "false",
     "cibaExpiresIn": "120",
@@ -2568,7 +2571,9 @@
     "clientSessionMaxLifespan": "0",
     "frontendUrl": "",
     "organizationsEnabled": "false",
-    "acr.loa.map": "{}"
+    "acr.loa.map": "{}",
+    "shortVerificationUri": "",
+    "actionTokenGeneratedByUserLifespan.reset-credentials": ""
   },
   "keycloakVersion": "26.0.6",
   "userManagedAccessAllowed": true,
