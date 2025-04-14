@@ -296,7 +296,8 @@ paths:
   /transactions/deposit:
     post:
       summary: "Deposit request"
-      description: "Creates a request to deposit cryptocurrency to the user's account"
+      description: "Creates a request to deposit cryptocurrency to the user's account and generates a deposit address"
+      operationId: "post_transactions_deposit"
       consumes:
         - "application/json"
       produces:
@@ -308,38 +309,25 @@ paths:
           name: body
           required: true
           schema:
-            type: object
-            required:
-              - currency
-              - amount
-            properties:
-              currency:
-                type: string
-                enum: [ USDT, BTC ]
-                example: USDT
-              amount:
-                type: number
-                format: float
-                minimum: 0
-                multipleOf: 0.00000001
-                example: 100.50
+            $ref: "#/definitions/deposit_request"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/deposit_response"
-        401:
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/Error"
         400:
           description: "Incorrect data"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: "Unauthorized"
           schema:
             $ref: "#/definitions/Error"
   /transactions/withdraw:
     post:
       summary: "Withdrawal request"
       description: "Creates a request to withdraw cryptocurrency from the user's account"
+      operationId: "post_transactions_withdraw"
       consumes:
         - "application/json"
       produces:
@@ -351,36 +339,18 @@ paths:
           name: body
           required: true
           schema:
-            type: object
-            required:
-              - currency
-              - amount
-              - address
-            properties:
-              currency:
-                type: string
-                enum: [ USDT, BTC ]
-                example: USDT
-              amount:
-                type: number
-                format: float
-                minimum: 0
-                multipleOf: 0.00000001
-                example: 100.50
-              address:
-                type: string
-                example: "0x1234567890abcdef1234567890abcdef12345678"
+            $ref: "#/definitions/withdraw_request"
       responses:
         200:
           description: "Successful operation"
           schema:
             $ref: "#/definitions/withdraw_response"
-        401:
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/Error"
         400:
           description: "Incorrect data or insufficient balance"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: "Unauthorized"
           schema:
             $ref: "#/definitions/Error"
   /metrics:
@@ -571,6 +541,42 @@ definitions:
       address:
         type: string
         example: "0x1234567890abcdef1234567890abcdef12345678"
+  deposit_request:
+    type: object
+    required:
+      - currency
+      - amount
+    properties:
+      currency:
+        type: string
+        enum: [ "USDT", "BTC" ]
+        example: USDT
+      amount:
+        type: number
+        format: float
+        minimum: 0
+        multipleOf: 0.00000001
+        example: 100.50
+  withdraw_request:
+    type: object
+    required:
+      - currency
+      - amount
+      - address
+    properties:
+      currency:
+        type: string
+        enum: [ "USDT", "BTC" ]
+        example: USDT
+      amount:
+        type: number
+        format: float
+        minimum: 0
+        multipleOf: 0.00000001
+        example: 100.50
+      address:
+        type: string
+        example: "0x1234567890abcdef1234567890abcdef12345678"
   deposit_response:
     type: object
     required:
@@ -580,14 +586,14 @@ definitions:
     properties:
       id:
         type: string
-        example: tx_dep_123456
+        example: "tx_dep_some-uuid"
       status:
         type: string
-        enum: [ finished, processing, pending ]
-        example: pending
+        enum: [ "pending", "finished", "cancelled" ]
+        example: "pending"
       address:
         type: string
-        example: "0x1234567890abcdef1234567890abcdef12345678"
+        example: "0xabcdef1234567890abcdef1234567890abcdef12"
   withdraw_response:
     type: object
     required:
@@ -596,17 +602,8 @@ definitions:
     properties:
       id:
         type: string
-        example: tx_with_123456
+        example: "tx_with_some-uuid"
       status:
         type: string
-        enum: [ finished, processing, pending ]
-        example: pending
-      tx_hash:
-        type: string
-        example: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-      commission:
-        type: number
-        format: float
-        minimum: 0
-        multipleOf: 0.00000001
-        example: 0.1
+        enum: [ "pending", "finished", "cancelled" ]
+        example: "pending"

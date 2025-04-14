@@ -57,12 +57,6 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
 		}),
-		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
-		}),
-		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
-		}),
 		CancelBidHandler: CancelBidHandlerFunc(func(params CancelBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation CancelBid has not yet been implemented")
 		}),
@@ -71,6 +65,12 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		}),
 		GetBidByIDHandler: GetBidByIDHandlerFunc(func(params GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBidByID has not yet been implemented")
+		}),
+		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
+		}),
+		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
 
 		// Applies when the "api_key" header is set
@@ -141,16 +141,16 @@ type MarketMainAPI struct {
 	GetTransactionsPurchaseHandler GetTransactionsPurchaseHandler
 	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
 	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
-	// PostTransactionsDepositHandler sets the operation handler for the post transactions deposit operation
-	PostTransactionsDepositHandler PostTransactionsDepositHandler
-	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
-	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
 	CancelBidHandler CancelBidHandler
 	// CreateBidHandler sets the operation handler for the create bid operation
 	CreateBidHandler CreateBidHandler
 	// GetBidByIDHandler sets the operation handler for the get bid by id operation
 	GetBidByIDHandler GetBidByIDHandler
+	// PostTransactionsDepositHandler sets the operation handler for the post transactions deposit operation
+	PostTransactionsDepositHandler PostTransactionsDepositHandler
+	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
+	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -250,12 +250,6 @@ func (o *MarketMainAPI) Validate() error {
 	if o.GetTransactionsTransfersHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
 	}
-	if o.PostTransactionsDepositHandler == nil {
-		unregistered = append(unregistered, "PostTransactionsDepositHandler")
-	}
-	if o.PostTransactionsWithdrawHandler == nil {
-		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
-	}
 	if o.CancelBidHandler == nil {
 		unregistered = append(unregistered, "CancelBidHandler")
 	}
@@ -264,6 +258,12 @@ func (o *MarketMainAPI) Validate() error {
 	}
 	if o.GetBidByIDHandler == nil {
 		unregistered = append(unregistered, "GetBidByIDHandler")
+	}
+	if o.PostTransactionsDepositHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsDepositHandler")
+	}
+	if o.PostTransactionsWithdrawHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -388,14 +388,6 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/transactions/transfers"] = NewGetTransactionsTransfers(o.context, o.GetTransactionsTransfersHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/transactions/deposit"] = NewPostTransactionsDeposit(o.context, o.PostTransactionsDepositHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
@@ -408,6 +400,14 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/market/{bid_id}"] = NewGetBidByID(o.context, o.GetBidByIDHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transactions/deposit"] = NewPostTransactionsDeposit(o.context, o.PostTransactionsDepositHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

@@ -13,6 +13,8 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // NewPostTransactionsWithdrawParams creates a new PostTransactionsWithdrawParams object
@@ -26,7 +28,7 @@ func NewPostTransactionsWithdrawParams() PostTransactionsWithdrawParams {
 // PostTransactionsWithdrawParams contains all the bound params for the post transactions withdraw operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters PostTransactionsWithdraw
+// swagger:parameters post_transactions_withdraw
 type PostTransactionsWithdrawParams struct {
 
 	// HTTP Request Object
@@ -36,7 +38,7 @@ type PostTransactionsWithdrawParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body PostTransactionsWithdrawBody
+	Body *models.WithdrawRequest
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -50,7 +52,7 @@ func (o *PostTransactionsWithdrawParams) BindRequest(r *http.Request, route *mid
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body PostTransactionsWithdrawBody
+		var body models.WithdrawRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body", ""))
@@ -69,7 +71,7 @@ func (o *PostTransactionsWithdrawParams) BindRequest(r *http.Request, route *mid
 			}
 
 			if len(res) == 0 {
-				o.Body = body
+				o.Body = &body
 			}
 		}
 	} else {

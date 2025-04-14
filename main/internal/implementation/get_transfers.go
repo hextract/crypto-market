@@ -66,10 +66,8 @@ func (ds *DatabaseService) GetTransfers(
 		argIndex++
 	}
 
-	// Добавляем ORDER BY перед LIMIT и OFFSET
 	query += " ORDER BY t.created_at DESC"
 
-	// Добавляем LIMIT и OFFSET, если указаны
 	if limit != nil {
 		query += " LIMIT $" + string(rune('0'+argIndex))
 		args = append(args, *limit)
@@ -81,7 +79,6 @@ func (ds *DatabaseService) GetTransfers(
 		argIndex++
 	}
 
-	// Точка с запятой в конце
 	query += ";"
 
 	rows, err := ds.pool.Query(context.Background(), query, args...)

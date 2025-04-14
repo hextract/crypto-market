@@ -13,6 +13,8 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // NewPostTransactionsDepositParams creates a new PostTransactionsDepositParams object
@@ -26,7 +28,7 @@ func NewPostTransactionsDepositParams() PostTransactionsDepositParams {
 // PostTransactionsDepositParams contains all the bound params for the post transactions deposit operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters PostTransactionsDeposit
+// swagger:parameters post_transactions_deposit
 type PostTransactionsDepositParams struct {
 
 	// HTTP Request Object
@@ -36,7 +38,7 @@ type PostTransactionsDepositParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body PostTransactionsDepositBody
+	Body *models.DepositRequest
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -50,7 +52,7 @@ func (o *PostTransactionsDepositParams) BindRequest(r *http.Request, route *midd
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body PostTransactionsDepositBody
+		var body models.DepositRequest
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body", ""))
@@ -69,7 +71,7 @@ func (o *PostTransactionsDepositParams) BindRequest(r *http.Request, route *midd
 			}
 
 			if len(res) == 0 {
-				o.Body = body
+				o.Body = &body
 			}
 		}
 	} else {

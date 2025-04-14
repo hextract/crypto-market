@@ -45,10 +45,8 @@ func (ds *DatabaseService) GetPurchases(
 		argIndex++
 	}
 
-	// Добавляем ORDER BY перед LIMIT и OFFSET, но без точки с запятой
 	query += " ORDER BY b.create_date DESC"
 
-	// Добавляем LIMIT и OFFSET, если указаны
 	if limit != nil {
 		query += " LIMIT $" + string(rune('0'+argIndex))
 		args = append(args, *limit)
@@ -60,7 +58,6 @@ func (ds *DatabaseService) GetPurchases(
 		argIndex++
 	}
 
-	// Точка с запятой в самом конце
 	query += ";"
 
 	rows, err := ds.pool.Query(context.Background(), query, args...)

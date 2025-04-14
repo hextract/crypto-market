@@ -21,19 +21,19 @@ import (
 type DepositResponse struct {
 
 	// address
-	// Example: 0x1234567890abcdef1234567890abcdef12345678
+	// Example: 0xabcdef1234567890abcdef1234567890abcdef12
 	// Required: true
 	Address *string `json:"address"`
 
 	// id
-	// Example: tx_dep_123456
+	// Example: tx_dep_some-uuid
 	// Required: true
 	ID *string `json:"id"`
 
 	// status
 	// Example: pending
 	// Required: true
-	// Enum: ["finished","processing","pending"]
+	// Enum: ["pending","finished","cancelled"]
 	Status *string `json:"status"`
 }
 
@@ -81,7 +81,7 @@ var depositResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","pending"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["pending","finished","cancelled"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -91,14 +91,14 @@ func init() {
 
 const (
 
+	// DepositResponseStatusPending captures enum value "pending"
+	DepositResponseStatusPending string = "pending"
+
 	// DepositResponseStatusFinished captures enum value "finished"
 	DepositResponseStatusFinished string = "finished"
 
-	// DepositResponseStatusProcessing captures enum value "processing"
-	DepositResponseStatusProcessing string = "processing"
-
-	// DepositResponseStatusPending captures enum value "pending"
-	DepositResponseStatusPending string = "pending"
+	// DepositResponseStatusCancelled captures enum value "cancelled"
+	DepositResponseStatusCancelled string = "cancelled"
 )
 
 // prop value enum

@@ -306,7 +306,7 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Creates a request to deposit cryptocurrency to the user's account",
+        "description": "Creates a request to deposit cryptocurrency to the user's account and generates a deposit address",
         "consumes": [
           "application/json"
         ],
@@ -314,33 +314,14 @@ func init() {
           "application/json"
         ],
         "summary": "Deposit request",
+        "operationId": "post_transactions_deposit",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "currency",
-                "amount"
-              ],
-              "properties": {
-                "amount": {
-                  "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8,
-                  "example": 100.5
-                },
-                "currency": {
-                  "type": "string",
-                  "enum": [
-                    "USDT",
-                    "BTC"
-                  ],
-                  "example": "USDT"
-                }
-              }
+              "$ref": "#/definitions/deposit_request"
             }
           }
         ],
@@ -579,38 +560,14 @@ func init() {
           "application/json"
         ],
         "summary": "Withdrawal request",
+        "operationId": "post_transactions_withdraw",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "currency",
-                "amount",
-                "address"
-              ],
-              "properties": {
-                "address": {
-                  "type": "string",
-                  "example": "0x1234567890abcdef1234567890abcdef12345678"
-                },
-                "amount": {
-                  "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8,
-                  "example": 100.5
-                },
-                "currency": {
-                  "type": "string",
-                  "enum": [
-                    "USDT",
-                    "BTC"
-                  ],
-                  "example": "USDT"
-                }
-              }
+              "$ref": "#/definitions/withdraw_request"
             }
           }
         ],
@@ -739,6 +696,29 @@ func init() {
         }
       }
     },
+    "deposit_request": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        }
+      }
+    },
     "deposit_response": {
       "type": "object",
       "required": [
@@ -749,18 +729,18 @@ func init() {
       "properties": {
         "address": {
           "type": "string",
-          "example": "0x1234567890abcdef1234567890abcdef12345678"
+          "example": "0xabcdef1234567890abcdef1234567890abcdef12"
         },
         "id": {
           "type": "string",
-          "example": "tx_dep_123456"
+          "example": "tx_dep_some-uuid"
         },
         "status": {
           "type": "string",
           "enum": [
+            "pending",
             "finished",
-            "processing",
-            "pending"
+            "cancelled"
           ],
           "example": "pending"
         }
@@ -891,6 +871,34 @@ func init() {
         }
       }
     },
+    "withdraw_request": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount",
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        }
+      }
+    },
     "withdraw_response": {
       "type": "object",
       "required": [
@@ -898,28 +906,18 @@ func init() {
         "status"
       ],
       "properties": {
-        "commission": {
-          "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8,
-          "example": 0.1
-        },
         "id": {
           "type": "string",
-          "example": "tx_with_123456"
+          "example": "tx_with_some-uuid"
         },
         "status": {
           "type": "string",
           "enum": [
+            "pending",
             "finished",
-            "processing",
-            "pending"
+            "cancelled"
           ],
           "example": "pending"
-        },
-        "tx_hash": {
-          "type": "string",
-          "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
         }
       }
     }
@@ -1210,7 +1208,7 @@ func init() {
             "api_key": []
           }
         ],
-        "description": "Creates a request to deposit cryptocurrency to the user's account",
+        "description": "Creates a request to deposit cryptocurrency to the user's account and generates a deposit address",
         "consumes": [
           "application/json"
         ],
@@ -1218,34 +1216,14 @@ func init() {
           "application/json"
         ],
         "summary": "Deposit request",
+        "operationId": "post_transactions_deposit",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "currency",
-                "amount"
-              ],
-              "properties": {
-                "amount": {
-                  "type": "number",
-                  "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8,
-                  "example": 100.5
-                },
-                "currency": {
-                  "type": "string",
-                  "enum": [
-                    "USDT",
-                    "BTC"
-                  ],
-                  "example": "USDT"
-                }
-              }
+              "$ref": "#/definitions/deposit_request"
             }
           }
         ],
@@ -1488,39 +1466,14 @@ func init() {
           "application/json"
         ],
         "summary": "Withdrawal request",
+        "operationId": "post_transactions_withdraw",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "currency",
-                "amount",
-                "address"
-              ],
-              "properties": {
-                "address": {
-                  "type": "string",
-                  "example": "0x1234567890abcdef1234567890abcdef12345678"
-                },
-                "amount": {
-                  "type": "number",
-                  "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8,
-                  "example": 100.5
-                },
-                "currency": {
-                  "type": "string",
-                  "enum": [
-                    "USDT",
-                    "BTC"
-                  ],
-                  "example": "USDT"
-                }
-              }
+              "$ref": "#/definitions/withdraw_request"
             }
           }
         ],
@@ -1679,6 +1632,30 @@ func init() {
         }
       }
     },
+    "deposit_request": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        }
+      }
+    },
     "deposit_response": {
       "type": "object",
       "required": [
@@ -1689,18 +1666,18 @@ func init() {
       "properties": {
         "address": {
           "type": "string",
-          "example": "0x1234567890abcdef1234567890abcdef12345678"
+          "example": "0xabcdef1234567890abcdef1234567890abcdef12"
         },
         "id": {
           "type": "string",
-          "example": "tx_dep_123456"
+          "example": "tx_dep_some-uuid"
         },
         "status": {
           "type": "string",
           "enum": [
+            "pending",
             "finished",
-            "processing",
-            "pending"
+            "cancelled"
           ],
           "example": "pending"
         }
@@ -1835,6 +1812,35 @@ func init() {
         }
       }
     },
+    "withdraw_request": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount",
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string",
+          "example": "0x1234567890abcdef1234567890abcdef12345678"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "multipleOf": 1e-8,
+          "example": 100.5
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USDT",
+            "BTC"
+          ],
+          "example": "USDT"
+        }
+      }
+    },
     "withdraw_response": {
       "type": "object",
       "required": [
@@ -1842,29 +1848,18 @@ func init() {
         "status"
       ],
       "properties": {
-        "commission": {
-          "type": "number",
-          "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8,
-          "example": 0.1
-        },
         "id": {
           "type": "string",
-          "example": "tx_with_123456"
+          "example": "tx_with_some-uuid"
         },
         "status": {
           "type": "string",
           "enum": [
+            "pending",
             "finished",
-            "processing",
-            "pending"
+            "cancelled"
           ],
           "example": "pending"
-        },
-        "tx_hash": {
-          "type": "string",
-          "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
         }
       }
     }

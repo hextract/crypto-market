@@ -119,3 +119,16 @@ COMMENT ON COLUMN bids.avg_price IS 'Average price per unit in from_currency';
 
 CREATE INDEX idx_bids_user_id ON bids (user_id);
 CREATE INDEX idx_bids_status ON bids (status);
+
+
+CREATE TABLE wallets
+(
+    id            TEXT PRIMARY KEY,
+    user_id       UUID        NOT NULL,
+    currency_id   UUID        NOT NULL,
+    address       TEXT        NOT NULL,
+    encrypted_key TEXT        NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL,
+    FOREIGN KEY (currency_id) REFERENCES currencies (currency_id),
+    UNIQUE (user_id, currency_id, address)
+);

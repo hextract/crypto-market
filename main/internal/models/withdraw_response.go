@@ -20,35 +20,21 @@ import (
 // swagger:model withdraw_response
 type WithdrawResponse struct {
 
-	// commission
-	// Example: 0.1
-	// Minimum: 0
-	// Multiple Of: 1e-08
-	Commission *float32 `json:"commission,omitempty"`
-
 	// id
-	// Example: tx_with_123456
+	// Example: tx_with_some-uuid
 	// Required: true
 	ID *string `json:"id"`
 
 	// status
 	// Example: pending
 	// Required: true
-	// Enum: ["finished","processing","pending"]
+	// Enum: ["pending","finished","cancelled"]
 	Status *string `json:"status"`
-
-	// tx hash
-	// Example: 0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
-	TxHash string `json:"tx_hash,omitempty"`
 }
 
 // Validate validates this withdraw response
 func (m *WithdrawResponse) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateCommission(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
@@ -61,22 +47,6 @@ func (m *WithdrawResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *WithdrawResponse) validateCommission(formats strfmt.Registry) error {
-	if swag.IsZero(m.Commission) { // not required
-		return nil
-	}
-
-	if err := validate.Minimum("commission", "body", float64(*m.Commission), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("commission", "body", float64(*m.Commission), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -93,7 +63,7 @@ var withdrawResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["finished","processing","pending"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["pending","finished","cancelled"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -103,14 +73,14 @@ func init() {
 
 const (
 
+	// WithdrawResponseStatusPending captures enum value "pending"
+	WithdrawResponseStatusPending string = "pending"
+
 	// WithdrawResponseStatusFinished captures enum value "finished"
 	WithdrawResponseStatusFinished string = "finished"
 
-	// WithdrawResponseStatusProcessing captures enum value "processing"
-	WithdrawResponseStatusProcessing string = "processing"
-
-	// WithdrawResponseStatusPending captures enum value "pending"
-	WithdrawResponseStatusPending string = "pending"
+	// WithdrawResponseStatusCancelled captures enum value "cancelled"
+	WithdrawResponseStatusCancelled string = "cancelled"
 )
 
 // prop value enum

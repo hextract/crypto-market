@@ -6,15 +6,9 @@ package operations
 // Editing this file might prove futile when you re-run the generate command
 
 import (
-	"context"
-	"encoding/json"
 	"net/http"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 
 	"github.com/h4x4d/crypto-market/main/internal/models"
 )
@@ -42,7 +36,7 @@ func NewPostTransactionsDeposit(ctx *middleware.Context, handler PostTransaction
 
 # Deposit request
 
-Creates a request to deposit cryptocurrency to the user's account
+Creates a request to deposit cryptocurrency to the user's account and generates a deposit address
 */
 type PostTransactionsDeposit struct {
 	Context *middleware.Context
@@ -76,124 +70,4 @@ func (o *PostTransactionsDeposit) ServeHTTP(rw http.ResponseWriter, r *http.Requ
 	res := o.Handler.Handle(Params, principal) // actually handle the request
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
-}
-
-// PostTransactionsDepositBody post transactions deposit body
-//
-// swagger:model PostTransactionsDepositBody
-type PostTransactionsDepositBody struct {
-
-	// amount
-	// Example: 100.5
-	// Required: true
-	// Minimum: 0
-	// Multiple Of: 1e-08
-	Amount *float32 `json:"amount"`
-
-	// currency
-	// Example: USDT
-	// Required: true
-	// Enum: ["USDT","BTC"]
-	Currency *string `json:"currency"`
-}
-
-// Validate validates this post transactions deposit body
-func (o *PostTransactionsDepositBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateAmount(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateCurrency(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *PostTransactionsDepositBody) validateAmount(formats strfmt.Registry) error {
-
-	if err := validate.Required("body"+"."+"amount", "body", o.Amount); err != nil {
-		return err
-	}
-
-	if err := validate.Minimum("body"+"."+"amount", "body", float64(*o.Amount), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("body"+"."+"amount", "body", float64(*o.Amount), 1e-08); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var postTransactionsDepositBodyTypeCurrencyPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["USDT","BTC"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		postTransactionsDepositBodyTypeCurrencyPropEnum = append(postTransactionsDepositBodyTypeCurrencyPropEnum, v)
-	}
-}
-
-const (
-
-	// PostTransactionsDepositBodyCurrencyUSDT captures enum value "USDT"
-	PostTransactionsDepositBodyCurrencyUSDT string = "USDT"
-
-	// PostTransactionsDepositBodyCurrencyBTC captures enum value "BTC"
-	PostTransactionsDepositBodyCurrencyBTC string = "BTC"
-)
-
-// prop value enum
-func (o *PostTransactionsDepositBody) validateCurrencyEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, postTransactionsDepositBodyTypeCurrencyPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *PostTransactionsDepositBody) validateCurrency(formats strfmt.Registry) error {
-
-	if err := validate.Required("body"+"."+"currency", "body", o.Currency); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := o.validateCurrencyEnum("body"+"."+"currency", "body", *o.Currency); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this post transactions deposit body based on context it is used
-func (o *PostTransactionsDepositBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *PostTransactionsDepositBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *PostTransactionsDepositBody) UnmarshalBinary(b []byte) error {
-	var res PostTransactionsDepositBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
 }
