@@ -1,4 +1,3 @@
-// implementation/database_service.go
 package implementation
 
 import (
@@ -7,7 +6,12 @@ import (
 	"time"
 )
 
-func (ds *DatabaseService) GetPurchases(user *models.User, status *string, dateFrom, dateTo *time.Time) ([]*models.Purchase, error) {
+func (ds *DatabaseService) GetPurchases(
+	user *models.User,
+	status *string,
+	dateFrom, dateTo *time.Time,
+	limit, offset *int64,
+) ([]*models.Purchase, error) {
 	query := `
         SELECT 
             b.id,
@@ -16,7 +20,7 @@ func (ds *DatabaseService) GetPurchases(user *models.User, status *string, dateF
             COALESCE(b.bought_amount * b.avg_price, 0) AS amount_from,
             b.bought_amount AS amount_to,
             b.status,
-            b.create_date AS date
+            EXTRACT(EPOCH FROM b.create_date)::bigint AS date
         FROM bids b
         JOIN currencies cf ON b.from_id = cf.currency_id
         JOIN currencies ct ON b.to_id = ct.currency_id
@@ -41,7 +45,23 @@ func (ds *DatabaseService) GetPurchases(user *models.User, status *string, dateF
 		argIndex++
 	}
 
-	query += " ORDER BY b.create_date DESC;"
+	// Добавляем ORDER BY перед LIMIT и OFFSET, но без точки с запятой
+	query += " ORDER BY b.create_date DESC"
+
+	// Добавляем LIMIT и OFFSET, если указаны
+	if limit != nil {
+		query += " LIMIT $" + string(rune('0'+argIndex))
+		args = append(args, *limit)
+		argIndex++
+	}
+	if offset != nil {
+		query += " OFFSET $" + string(rune('0'+argIndex))
+		args = append(args, *offset)
+		argIndex++
+	}
+
+	// Точка с запятой в самом конце
+	query += ";"
 
 	rows, err := ds.pool.Query(context.Background(), query, args...)
 	if err != nil {

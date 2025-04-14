@@ -29,3 +29,8 @@ up:
 .PHONY: ps
 ps:
 	$(DOCKER_COMPOSE) ps -a
+
+
+.PHONY: cert
+cert:
+	./scripts/generate_certificates.sh

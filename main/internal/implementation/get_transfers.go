@@ -11,6 +11,7 @@ func (ds *DatabaseService) GetTransfers(
 	minAmount, maxAmount *float32,
 	status, currency, operation *string,
 	dateFrom, dateTo *time.Time,
+	limit, offset *int64,
 ) ([]*models.Transfer, error) {
 	query := `
         SELECT 
@@ -20,7 +21,7 @@ func (ds *DatabaseService) GetTransfers(
             t.commission,
             t.type AS operation,
             t.status,
-            t.created_at AS date,
+            EXTRACT(EPOCH FROM t.created_at)::bigint AS date,
             t.address
         FROM transactions t
         JOIN currencies c ON t.currency_id = c.currency_id
@@ -65,7 +66,23 @@ func (ds *DatabaseService) GetTransfers(
 		argIndex++
 	}
 
-	query += " ORDER BY t.created_at DESC;"
+	// Добавляем ORDER BY перед LIMIT и OFFSET
+	query += " ORDER BY t.created_at DESC"
+
+	// Добавляем LIMIT и OFFSET, если указаны
+	if limit != nil {
+		query += " LIMIT $" + string(rune('0'+argIndex))
+		args = append(args, *limit)
+		argIndex++
+	}
+	if offset != nil {
+		query += " OFFSET $" + string(rune('0'+argIndex))
+		args = append(args, *offset)
+		argIndex++
+	}
+
+	// Точка с запятой в конце
+	query += ";"
 
 	rows, err := ds.pool.Query(context.Background(), query, args...)
 	if err != nil {
@@ -73,7 +90,7 @@ func (ds *DatabaseService) GetTransfers(
 	}
 	defer rows.Close()
 
-	result := []*models.Transfer{}
+	var result []*models.Transfer
 	for rows.Next() {
 		transfer := &models.Transfer{}
 		err := rows.Scan(

@@ -20,7 +20,7 @@ func (handler *Handler) GetBalanceHandler(_ operations.GetAccountBalanceParams, 
 
 	for _, balance := range balances {
 		values = append(values, &operations.GetAccountBalanceOKBodyItems0{
-			Currency: balance.Currency,
+			Currency: &balance.Currency,
 			Amount:   &balance.Amount,
 		})
 	}

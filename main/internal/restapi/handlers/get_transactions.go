@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/strfmt"
 	"github.com/h4x4d/crypto-market/main/internal/models"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/operations"
 	"github.com/h4x4d/crypto-market/main/internal/utils"
@@ -33,33 +32,28 @@ func (handler *Handler) GetTransactionsTransfersHandler(params operations.GetTra
 
 	var dateFrom, dateTo *time.Time
 	if params.DateFrom != nil {
-		dateFrom = (*time.Time)(params.DateFrom)
+		df := time.Unix(*params.DateFrom, 0)
+		dateFrom = &df
 	}
 	if params.DateTo != nil {
-		dateTo = (*time.Time)(params.DateTo)
+		df := time.Unix(*params.DateTo, 0)
+		dateTo = &df
 	}
 
-	transfers, err := handler.Database.GetTransfers(user, minAmount, maxAmount, status, currency, operation, dateFrom, dateTo)
+	var limit, offset *int64
+	if params.Limit != nil {
+		limit = params.Limit
+	}
+	if params.Offset != nil {
+		offset = params.Offset
+	}
+
+	transfers, err := handler.Database.GetTransfers(user, minAmount, maxAmount, status, currency, operation, dateFrom, dateTo, limit, offset)
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
 
-	var values []*operations.GetTransactionsTransfersOKBodyItems0
-	for _, transfer := range transfers {
-		date := strfmt.DateTime(transfer.Date)
-		values = append(values, &operations.GetTransactionsTransfersOKBodyItems0{
-			ID:         &transfer.ID,
-			Currency:   &transfer.Currency,
-			Amount:     &transfer.Amount,
-			Commission: &transfer.Commission,
-			Operation:  &transfer.Operation,
-			Status:     &transfer.Status,
-			Date:       &date,
-			Address:    transfer.Address,
-		})
-	}
-
 	result := new(operations.GetTransactionsTransfersOK)
-	result.SetPayload(values)
+	result.SetPayload(transfers)
 	return result
 }
