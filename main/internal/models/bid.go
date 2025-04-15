@@ -23,22 +23,18 @@ type Bid struct {
 	// amount to buy
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	AmountToBuy *float32 `json:"amount_to_buy"`
 
 	// avg price
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	AvgPrice *float32 `json:"avg_price,omitempty"`
 
 	// bought amount
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	BoughtAmount *float32 `json:"bought_amount,omitempty"`
 
 	// buy speed
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	BuySpeed *float32 `json:"buy_speed,omitempty"`
 
 	// complete date
@@ -63,13 +59,11 @@ type Bid struct {
 	// max price
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	MaxPrice *float32 `json:"max_price"`
 
 	// min price
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	MinPrice *float32 `json:"min_price"`
 
 	// status
@@ -151,10 +145,6 @@ func (m *Bid) validateAmountToBuy(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("amount_to_buy", "body", float64(*m.AmountToBuy), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -164,10 +154,6 @@ func (m *Bid) validateAvgPrice(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("avg_price", "body", float64(*m.AvgPrice), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("avg_price", "body", float64(*m.AvgPrice), 1e-08); err != nil {
 		return err
 	}
 
@@ -183,10 +169,6 @@ func (m *Bid) validateBoughtAmount(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("bought_amount", "body", float64(*m.BoughtAmount), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -196,10 +178,6 @@ func (m *Bid) validateBuySpeed(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("buy_speed", "body", float64(*m.BuySpeed), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("buy_speed", "body", float64(*m.BuySpeed), 1e-08); err != nil {
 		return err
 	}
 
@@ -293,10 +271,6 @@ func (m *Bid) validateMaxPrice(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("max_price", "body", float64(*m.MaxPrice), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -307,10 +281,6 @@ func (m *Bid) validateMinPrice(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("min_price", "body", float64(*m.MinPrice), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("min_price", "body", float64(*m.MinPrice), 1e-08); err != nil {
 		return err
 	}
 

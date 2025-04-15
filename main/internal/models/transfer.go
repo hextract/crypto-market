@@ -28,13 +28,11 @@ type Transfer struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	Amount *float32 `json:"amount"`
 
 	// commission
 	// Example: 0.1
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	Commission *float32 `json:"commission,omitempty"`
 
 	// currency
@@ -114,10 +112,6 @@ func (m *Transfer) validateAmount(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("amount", "body", float64(*m.Amount), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -127,10 +121,6 @@ func (m *Transfer) validateCommission(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("commission", "body", float64(*m.Commission), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("commission", "body", float64(*m.Commission), 1e-08); err != nil {
 		return err
 	}
 

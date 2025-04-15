@@ -97,22 +97,18 @@ paths:
                 type: number
                 format: float
                 minimum: 0
-                multipleOf: 0.00000001
               max_price:
                 type: number
                 format: float
                 minimum: 0
-                multipleOf: 0.00000001
               amount_to_buy:
                 type: number
                 format: float
                 minimum: 0
-                multipleOf: 0.00000001
               buy_speed:
                 type: number
                 format: float
                 minimum: 0
-                multipleOf: 0.00000001
       responses:
         200:
           description: "Successful operation"
@@ -159,7 +155,6 @@ paths:
                   type: number
                   format: float
                   minimum: 0
-                  multipleOf: 0.00000001
                   example: 100.50
         401:
           description: "Unauthorized"
@@ -420,32 +415,26 @@ definitions:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       max_price:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       amount_to_buy:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       bought_amount:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       buy_speed:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       avg_price:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
       status:
         type: string
         enum: [ pending, processing, finished, cancelled ]
@@ -481,13 +470,11 @@ definitions:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 100.50
       amount_to:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 0.005
       status:
         type: string
@@ -518,13 +505,11 @@ definitions:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 100.50
       commission:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 0.1
       operation:
         type: string
@@ -555,7 +540,6 @@ definitions:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 100.50
   withdraw_request:
     type: object
@@ -572,7 +556,6 @@ definitions:
         type: number
         format: float
         minimum: 0
-        multipleOf: 0.00000001
         example: 100.50
       address:
         type: string

@@ -29,7 +29,6 @@ type WithdrawRequest struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	Amount *float32 `json:"amount"`
 
 	// currency
@@ -77,10 +76,6 @@ func (m *WithdrawRequest) validateAmount(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("amount", "body", float64(*m.Amount), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("amount", "body", float64(*m.Amount), 1e-08); err != nil {
 		return err
 	}
 

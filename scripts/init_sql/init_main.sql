@@ -124,11 +124,23 @@ CREATE INDEX idx_bids_status ON bids (status);
 CREATE TABLE wallets
 (
     id            TEXT PRIMARY KEY,
-    user_id       UUID        NOT NULL,
-    currency_id   UUID        NOT NULL,
+    user_id       TEXT        NOT NULL,
+    currency_id   INTEGER     NOT NULL,
     address       TEXT        NOT NULL,
     encrypted_key TEXT        NOT NULL,
     created_at    TIMESTAMPTZ NOT NULL,
     FOREIGN KEY (currency_id) REFERENCES currencies (currency_id),
     UNIQUE (user_id, currency_id, address)
+);
+
+CREATE INDEX idx_wallets_user_currency ON wallets (user_id, currency_id);
+CREATE INDEX idx_wallets_address ON wallets (address);
+
+CREATE TABLE hot_wallets
+(
+    currency_id   INTEGER PRIMARY KEY,
+    address       TEXT        NOT NULL,
+    encrypted_key TEXT        NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL,
+    FOREIGN KEY (currency_id) REFERENCES currencies (currency_id)
 );

@@ -24,14 +24,12 @@ type Purchase struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	AmountFrom *float32 `json:"amount_from"`
 
 	// amount to
 	// Example: 0.005
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	AmountTo *float32 `json:"amount_to"`
 
 	// currency from
@@ -111,10 +109,6 @@ func (m *Purchase) validateAmountFrom(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("amount_from", "body", float64(*m.AmountFrom), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -125,10 +119,6 @@ func (m *Purchase) validateAmountTo(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("amount_to", "body", float64(*m.AmountTo), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("amount_to", "body", float64(*m.AmountTo), 1e-08); err != nil {
 		return err
 	}
 

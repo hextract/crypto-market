@@ -84,12 +84,10 @@ type CreateBidBody struct {
 	// amount to buy
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	AmountToBuy *float32 `json:"amount_to_buy"`
 
 	// buy speed
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	BuySpeed *float32 `json:"buy_speed,omitempty"`
 
 	// from currency
@@ -100,13 +98,11 @@ type CreateBidBody struct {
 	// max price
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	MaxPrice *float32 `json:"max_price"`
 
 	// min price
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	MinPrice *float32 `json:"min_price"`
 
 	// to currency
@@ -159,10 +155,6 @@ func (o *CreateBidBody) validateAmountToBuy(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("body"+"."+"amount_to_buy", "body", float64(*o.AmountToBuy), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -172,10 +164,6 @@ func (o *CreateBidBody) validateBuySpeed(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("body"+"."+"buy_speed", "body", float64(*o.BuySpeed), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("body"+"."+"buy_speed", "body", float64(*o.BuySpeed), 1e-08); err != nil {
 		return err
 	}
 
@@ -235,10 +223,6 @@ func (o *CreateBidBody) validateMaxPrice(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MultipleOf("body"+"."+"max_price", "body", float64(*o.MaxPrice), 1e-08); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -249,10 +233,6 @@ func (o *CreateBidBody) validateMinPrice(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Minimum("body"+"."+"min_price", "body", float64(*o.MinPrice), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("body"+"."+"min_price", "body", float64(*o.MinPrice), 1e-08); err != nil {
 		return err
 	}
 

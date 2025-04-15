@@ -56,7 +56,6 @@ func init() {
                   "amount": {
                     "type": "number",
                     "format": "float",
-                    "multipleOf": 1e-8,
                     "example": 100.5
                   },
                   "currency": {
@@ -112,13 +111,11 @@ func init() {
               "properties": {
                 "amount_to_buy": {
                   "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8
+                  "format": "float"
                 },
                 "buy_speed": {
                   "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8
+                  "format": "float"
                 },
                 "from_currency": {
                   "type": "string",
@@ -129,13 +126,11 @@ func init() {
                 },
                 "max_price": {
                   "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8
+                  "format": "float"
                 },
                 "min_price": {
                   "type": "number",
-                  "format": "float",
-                  "multipleOf": 1e-8
+                  "format": "float"
                 },
                 "to_currency": {
                   "type": "string",
@@ -631,23 +626,19 @@ func init() {
       "properties": {
         "amount_to_buy": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "avg_price": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "bought_amount": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "buy_speed": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "complete_date": {
           "type": "string",
@@ -670,13 +661,11 @@ func init() {
         },
         "max_price": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "min_price": {
           "type": "number",
-          "format": "float",
-          "multipleOf": 1e-8
+          "format": "float"
         },
         "status": {
           "type": "string",
@@ -706,7 +695,6 @@ func init() {
         "amount": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {
@@ -761,13 +749,11 @@ func init() {
         "amount_from": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "amount_to": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 0.005
         },
         "currency_from": {
@@ -825,13 +811,11 @@ func init() {
         "amount": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "commission": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 0.1
         },
         "currency": {
@@ -886,7 +870,6 @@ func init() {
         "amount": {
           "type": "number",
           "format": "float",
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {
@@ -1011,14 +994,12 @@ func init() {
                 "amount_to_buy": {
                   "type": "number",
                   "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8
+                  "minimum": 0
                 },
                 "buy_speed": {
                   "type": "number",
                   "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8
+                  "minimum": 0
                 },
                 "from_currency": {
                   "type": "string",
@@ -1030,14 +1011,12 @@ func init() {
                 "max_price": {
                   "type": "number",
                   "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8
+                  "minimum": 0
                 },
                 "min_price": {
                   "type": "number",
                   "format": "float",
-                  "minimum": 0,
-                  "multipleOf": 1e-8
+                  "minimum": 0
                 },
                 "to_currency": {
                   "type": "string",
@@ -1533,7 +1512,6 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {
@@ -1562,26 +1540,22 @@ func init() {
         "amount_to_buy": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "avg_price": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "bought_amount": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "buy_speed": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "complete_date": {
           "type": "string",
@@ -1605,14 +1579,12 @@ func init() {
         "max_price": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "min_price": {
           "type": "number",
           "format": "float",
-          "minimum": 0,
-          "multipleOf": 1e-8
+          "minimum": 0
         },
         "status": {
           "type": "string",
@@ -1643,7 +1615,6 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {
@@ -1699,14 +1670,12 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "amount_to": {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 0.005
         },
         "currency_from": {
@@ -1765,14 +1734,12 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "commission": {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 0.1
         },
         "currency": {
@@ -1828,7 +1795,6 @@ func init() {
           "type": "number",
           "format": "float",
           "minimum": 0,
-          "multipleOf": 1e-8,
           "example": 100.5
         },
         "currency": {

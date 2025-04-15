@@ -87,7 +87,6 @@ type GetAccountBalanceOKBodyItems0 struct {
 	// Example: 100.5
 	// Required: true
 	// Minimum: 0
-	// Multiple Of: 1e-08
 	Amount *float32 `json:"amount"`
 
 	// currency
@@ -122,10 +121,6 @@ func (o *GetAccountBalanceOKBodyItems0) validateAmount(formats strfmt.Registry) 
 	}
 
 	if err := validate.Minimum("amount", "body", float64(*o.Amount), 0, false); err != nil {
-		return err
-	}
-
-	if err := validate.MultipleOf("amount", "body", float64(*o.Amount), 1e-08); err != nil {
 		return err
 	}
 

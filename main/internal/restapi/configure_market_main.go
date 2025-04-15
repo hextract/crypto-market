@@ -3,8 +3,10 @@
 package restapi
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/h4x4d/crypto-market/main/internal/implementation"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/handlers"
 	"github.com/h4x4d/crypto-market/pkg/client"
 	"log"
@@ -60,9 +62,26 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"), "db", os.Getenv("POSTGRES_PORT"), os.Getenv("MAIN_DB_NAME"))
-	handler, makeErr := handlers.NewHandler(connStr)
+
+	blockchainClient, blockchainErr := implementation.NewBlockchainClient(
+		os.Getenv("ETHEREUM_RPC_URL"),
+		os.Getenv("BITCOIN_RPC_HOST"),
+		os.Getenv("BITCOIN_RPC_USER"),
+		os.Getenv("BITCOIN_RPC_PASS"),
+	)
+
+	if blockchainErr != nil {
+		log.Fatal(blockchainErr)
+	}
+
+	handler, makeErr := handlers.NewHandler(connStr, blockchainClient)
 	for makeErr != nil {
-		handler, makeErr = handlers.NewHandler(connStr)
+		handler, makeErr = handlers.NewHandler(connStr, blockchainClient)
+	}
+
+	hotErr := handler.Database.CreateHotWallet(context.Background(), "USDT")
+	if hotErr != nil {
+		log.Println(hotErr)
 	}
 
 	if api.MetricsKeyAuth == nil {
@@ -81,16 +100,9 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(handler.GetTransactionsPurchaseHandler)
 	api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(handler.GetTransactionsTransfersHandler)
 
-	if api.PostTransactionsDepositHandler == nil {
-		api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(func(params operations.PostTransactionsDepositParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PostTransactionsDeposit has not yet been implemented")
-		})
-	}
-	if api.PostTransactionsWithdrawHandler == nil {
-		api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(func(params operations.PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PostTransactionsWithdraw has not yet been implemented")
-		})
-	}
+	api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(handler.PostTransactionsDepositHandler)
+	api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(handler.PostTransactionsWithdrawHandler)
+
 	if api.CancelBidHandler == nil {
 		api.CancelBidHandler = operations.CancelBidHandlerFunc(func(params operations.CancelBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.CancelBid has not yet been implemented")
