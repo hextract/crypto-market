@@ -26,7 +26,7 @@ type CancelBidOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Result `json:"body,omitempty"`
+	Payload *CancelBidOKBody `json:"body,omitempty"`
 }
 
 // NewCancelBidOK creates CancelBidOK with default headers values
@@ -36,13 +36,13 @@ func NewCancelBidOK() *CancelBidOK {
 }
 
 // WithPayload adds the payload to the cancel bid o k response
-func (o *CancelBidOK) WithPayload(payload *models.Result) *CancelBidOK {
+func (o *CancelBidOK) WithPayload(payload *CancelBidOKBody) *CancelBidOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the cancel bid o k response
-func (o *CancelBidOK) SetPayload(payload *models.Result) {
+func (o *CancelBidOK) SetPayload(payload *CancelBidOKBody) {
 	o.Payload = payload
 }
 

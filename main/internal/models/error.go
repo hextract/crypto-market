@@ -19,6 +19,10 @@ import (
 // swagger:model Error
 type Error struct {
 
+	// error code
+	// Example: INVALID_INPUT
+	ErrorCode string `json:"error_code,omitempty"`
+
 	// error message
 	// Example: Invalid input data
 	// Required: true

@@ -17,11 +17,22 @@ import (
 )
 
 // NewGetTransactionsTransfersParams creates a new GetTransactionsTransfersParams object
-//
-// There are no default values defined in the spec.
+// with the default values initialized.
 func NewGetTransactionsTransfersParams() GetTransactionsTransfersParams {
 
-	return GetTransactionsTransfersParams{}
+	var (
+		// initialize parameters with default values
+
+		limitDefault = int64(100)
+
+		offsetDefault = int64(0)
+	)
+
+	return GetTransactionsTransfersParams{
+		Limit: &limitDefault,
+
+		Offset: &offsetDefault,
+	}
 }
 
 // GetTransactionsTransfersParams contains all the bound params for the get transactions transfers operation
@@ -37,14 +48,20 @@ type GetTransactionsTransfersParams struct {
 	  In: query
 	*/
 	Currency *string
-	/*Filter transactions from this date (ISO 8601)
+	/*Filter transactions from this Unix timestamp
 	  In: query
 	*/
-	DateFrom *strfmt.DateTime
-	/*Filter transactions up to this date (ISO 8601)
+	DateFrom *int64
+	/*Filter transactions up to this Unix timestamp
 	  In: query
 	*/
-	DateTo *strfmt.DateTime
+	DateTo *int64
+	/*Maximum number of results
+	  Minimum: 1
+	  In: query
+	  Default: 100
+	*/
+	Limit *int64
 	/*Maximum transaction amount
 	  Minimum: 0
 	  In: query
@@ -55,6 +72,12 @@ type GetTransactionsTransfersParams struct {
 	  In: query
 	*/
 	MinAmount *float32
+	/*Number of results to skip
+	  Minimum: 0
+	  In: query
+	  Default: 0
+	*/
+	Offset *int64
 	/*Filter by operation type
 	  In: query
 	*/
@@ -91,6 +114,11 @@ func (o *GetTransactionsTransfersParams) BindRequest(r *http.Request, route *mid
 		res = append(res, err)
 	}
 
+	qLimit, qhkLimit, _ := qs.GetOK("limit")
+	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qMaxAmount, qhkMaxAmount, _ := qs.GetOK("max_amount")
 	if err := o.bindMaxAmount(qMaxAmount, qhkMaxAmount, route.Formats); err != nil {
 		res = append(res, err)
@@ -98,6 +126,11 @@ func (o *GetTransactionsTransfersParams) BindRequest(r *http.Request, route *mid
 
 	qMinAmount, qhkMinAmount, _ := qs.GetOK("min_amount")
 	if err := o.bindMinAmount(qMinAmount, qhkMinAmount, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qOffset, qhkOffset, _ := qs.GetOK("offset")
+	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -162,26 +195,12 @@ func (o *GetTransactionsTransfersParams) bindDateFrom(rawData []string, hasKey b
 		return nil
 	}
 
-	// Format: date-time
-	value, err := formats.Parse("date-time", raw)
+	value, err := swag.ConvertInt64(raw)
 	if err != nil {
-		return errors.InvalidType("date_from", "query", "strfmt.DateTime", raw)
+		return errors.InvalidType("date_from", "query", "int64", raw)
 	}
-	o.DateFrom = (value.(*strfmt.DateTime))
+	o.DateFrom = &value
 
-	if err := o.validateDateFrom(formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateDateFrom carries on validations for parameter DateFrom
-func (o *GetTransactionsTransfersParams) validateDateFrom(formats strfmt.Registry) error {
-
-	if err := validate.FormatOf("date_from", "query", "date-time", o.DateFrom.String(), formats); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -199,26 +218,50 @@ func (o *GetTransactionsTransfersParams) bindDateTo(rawData []string, hasKey boo
 		return nil
 	}
 
-	// Format: date-time
-	value, err := formats.Parse("date-time", raw)
+	value, err := swag.ConvertInt64(raw)
 	if err != nil {
-		return errors.InvalidType("date_to", "query", "strfmt.DateTime", raw)
+		return errors.InvalidType("date_to", "query", "int64", raw)
 	}
-	o.DateTo = (value.(*strfmt.DateTime))
+	o.DateTo = &value
 
-	if err := o.validateDateTo(formats); err != nil {
+	return nil
+}
+
+// bindLimit binds and validates parameter Limit from query.
+func (o *GetTransactionsTransfersParams) bindLimit(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetTransactionsTransfersParams()
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("limit", "query", "int64", raw)
+	}
+	o.Limit = &value
+
+	if err := o.validateLimit(formats); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// validateDateTo carries on validations for parameter DateTo
-func (o *GetTransactionsTransfersParams) validateDateTo(formats strfmt.Registry) error {
+// validateLimit carries on validations for parameter Limit
+func (o *GetTransactionsTransfersParams) validateLimit(formats strfmt.Registry) error {
 
-	if err := validate.FormatOf("date_to", "query", "date-time", o.DateTo.String(), formats); err != nil {
+	if err := validate.MinimumInt("limit", "query", *o.Limit, 1, false); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -296,6 +339,44 @@ func (o *GetTransactionsTransfersParams) validateMinAmount(formats strfmt.Regist
 	return nil
 }
 
+// bindOffset binds and validates parameter Offset from query.
+func (o *GetTransactionsTransfersParams) bindOffset(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetTransactionsTransfersParams()
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("offset", "query", "int64", raw)
+	}
+	o.Offset = &value
+
+	if err := o.validateOffset(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateOffset carries on validations for parameter Offset
+func (o *GetTransactionsTransfersParams) validateOffset(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("offset", "query", *o.Offset, 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // bindOperation binds and validates parameter Operation from query.
 func (o *GetTransactionsTransfersParams) bindOperation(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
@@ -321,7 +402,7 @@ func (o *GetTransactionsTransfersParams) bindOperation(rawData []string, hasKey 
 // validateOperation carries on validations for parameter Operation
 func (o *GetTransactionsTransfersParams) validateOperation(formats strfmt.Registry) error {
 
-	if err := validate.EnumCase("operation", "query", *o.Operation, []interface{}{"deposit", "withdrawal"}, true); err != nil {
+	if err := validate.EnumCase("operation", "query", *o.Operation, []interface{}{"deposit", "withdraw"}, true); err != nil {
 		return err
 	}
 

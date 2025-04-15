@@ -26,7 +26,7 @@ type GetTransactionsTransfersOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*GetTransactionsTransfersOKBodyItems0 `json:"body,omitempty"`
+	Payload []*models.Transfer `json:"body,omitempty"`
 }
 
 // NewGetTransactionsTransfersOK creates GetTransactionsTransfersOK with default headers values
@@ -36,13 +36,13 @@ func NewGetTransactionsTransfersOK() *GetTransactionsTransfersOK {
 }
 
 // WithPayload adds the payload to the get transactions transfers o k response
-func (o *GetTransactionsTransfersOK) WithPayload(payload []*GetTransactionsTransfersOKBodyItems0) *GetTransactionsTransfersOK {
+func (o *GetTransactionsTransfersOK) WithPayload(payload []*models.Transfer) *GetTransactionsTransfersOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get transactions transfers o k response
-func (o *GetTransactionsTransfersOK) SetPayload(payload []*GetTransactionsTransfersOKBodyItems0) {
+func (o *GetTransactionsTransfersOK) SetPayload(payload []*models.Transfer) {
 	o.Payload = payload
 }
 
@@ -53,7 +53,7 @@ func (o *GetTransactionsTransfersOK) WriteResponse(rw http.ResponseWriter, produ
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*GetTransactionsTransfersOKBodyItems0, 0, 50)
+		payload = make([]*models.Transfer, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

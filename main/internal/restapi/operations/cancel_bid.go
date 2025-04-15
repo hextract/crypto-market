@@ -6,9 +6,15 @@ package operations
 // Editing this file might prove futile when you re-run the generate command
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 
 	"github.com/h4x4d/crypto-market/main/internal/models"
 )
@@ -68,4 +74,93 @@ func (o *CancelBid) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	res := o.Handler.Handle(Params, principal) // actually handle the request
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
+}
+
+// CancelBidOKBody cancel bid o k body
+//
+// swagger:model CancelBidOKBody
+type CancelBidOKBody struct {
+
+	// id
+	ID string `json:"id,omitempty"`
+
+	// status
+	// Enum: ["cancelled"]
+	Status string `json:"status,omitempty"`
+}
+
+// Validate validates this cancel bid o k body
+func (o *CancelBidOKBody) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := o.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var cancelBidOKBodyTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["cancelled"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		cancelBidOKBodyTypeStatusPropEnum = append(cancelBidOKBodyTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// CancelBidOKBodyStatusCancelled captures enum value "cancelled"
+	CancelBidOKBodyStatusCancelled string = "cancelled"
+)
+
+// prop value enum
+func (o *CancelBidOKBody) validateStatusEnum(path, location string, value string) error {
+	if err := validate.EnumCase(path, location, value, cancelBidOKBodyTypeStatusPropEnum, true); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *CancelBidOKBody) validateStatus(formats strfmt.Registry) error {
+	if swag.IsZero(o.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := o.validateStatusEnum("cancelBidOK"+"."+"status", "body", o.Status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validates this cancel bid o k body based on context it is used
+func (o *CancelBidOKBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (o *CancelBidOKBody) MarshalBinary() ([]byte, error) {
+	if o == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(o)
+}
+
+// UnmarshalBinary interface implementation
+func (o *CancelBidOKBody) UnmarshalBinary(b []byte) error {
+	var res CancelBidOKBody
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*o = res
+	return nil
 }

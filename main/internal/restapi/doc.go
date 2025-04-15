@@ -5,6 +5,7 @@
 //	Continuous market API for cryptocurrency trading and account management
 //	Schemes:
 //	  http
+//	  https
 //	Host: localhost
 //	BasePath: /
 //	Version: 0.1.0

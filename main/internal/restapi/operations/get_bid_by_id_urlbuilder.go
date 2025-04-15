@@ -10,13 +10,11 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
-
-	"github.com/go-openapi/swag"
 )
 
 // GetBidByIDURL generates an URL for the get bid by id operation
 type GetBidByIDURL struct {
-	BidID int64
+	BidID string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -44,7 +42,7 @@ func (o *GetBidByIDURL) Build() (*url.URL, error) {
 
 	var _path = "/market/{bid_id}"
 
-	bidID := swag.FormatInt64(o.BidID)
+	bidID := o.BidID
 	if bidID != "" {
 		_path = strings.Replace(_path, "{bid_id}", bidID, -1)
 	} else {

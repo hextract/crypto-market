@@ -26,7 +26,7 @@ type PostTransactionsDepositOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *PostTransactionsDepositOKBody `json:"body,omitempty"`
+	Payload *models.DepositResponse `json:"body,omitempty"`
 }
 
 // NewPostTransactionsDepositOK creates PostTransactionsDepositOK with default headers values
@@ -36,13 +36,13 @@ func NewPostTransactionsDepositOK() *PostTransactionsDepositOK {
 }
 
 // WithPayload adds the payload to the post transactions deposit o k response
-func (o *PostTransactionsDepositOK) WithPayload(payload *PostTransactionsDepositOKBody) *PostTransactionsDepositOK {
+func (o *PostTransactionsDepositOK) WithPayload(payload *models.DepositResponse) *PostTransactionsDepositOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the post transactions deposit o k response
-func (o *PostTransactionsDepositOK) SetPayload(payload *PostTransactionsDepositOKBody) {
+func (o *PostTransactionsDepositOK) SetPayload(payload *models.DepositResponse) {
 	o.Payload = payload
 }
 

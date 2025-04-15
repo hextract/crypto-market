@@ -10,17 +10,18 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // GetTransactionsTransfersURL generates an URL for the get transactions transfers operation
 type GetTransactionsTransfersURL struct {
 	Currency  *string
-	DateFrom  *strfmt.DateTime
-	DateTo    *strfmt.DateTime
+	DateFrom  *int64
+	DateTo    *int64
+	Limit     *int64
 	MaxAmount *float32
 	MinAmount *float32
+	Offset    *int64
 	Operation *string
 	Status    *string
 
@@ -65,7 +66,7 @@ func (o *GetTransactionsTransfersURL) Build() (*url.URL, error) {
 
 	var dateFromQ string
 	if o.DateFrom != nil {
-		dateFromQ = o.DateFrom.String()
+		dateFromQ = swag.FormatInt64(*o.DateFrom)
 	}
 	if dateFromQ != "" {
 		qs.Set("date_from", dateFromQ)
@@ -73,10 +74,18 @@ func (o *GetTransactionsTransfersURL) Build() (*url.URL, error) {
 
 	var dateToQ string
 	if o.DateTo != nil {
-		dateToQ = o.DateTo.String()
+		dateToQ = swag.FormatInt64(*o.DateTo)
 	}
 	if dateToQ != "" {
 		qs.Set("date_to", dateToQ)
+	}
+
+	var limitQ string
+	if o.Limit != nil {
+		limitQ = swag.FormatInt64(*o.Limit)
+	}
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
 	}
 
 	var maxAmountQ string
@@ -93,6 +102,14 @@ func (o *GetTransactionsTransfersURL) Build() (*url.URL, error) {
 	}
 	if minAmountQ != "" {
 		qs.Set("min_amount", minAmountQ)
+	}
+
+	var offsetQ string
+	if o.Offset != nil {
+		offsetQ = swag.FormatInt64(*o.Offset)
+	}
+	if offsetQ != "" {
+		qs.Set("offset", offsetQ)
 	}
 
 	var operationQ string

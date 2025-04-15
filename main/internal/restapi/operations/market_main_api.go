@@ -48,7 +48,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
 		}),
-		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams) middleware.Responder {
+		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
 		}),
 		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
@@ -56,12 +56,6 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		}),
 		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
-		}),
-		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
-		}),
-		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
 		CancelBidHandler: CancelBidHandlerFunc(func(params CancelBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation CancelBid has not yet been implemented")
@@ -72,13 +66,20 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetBidByIDHandler: GetBidByIDHandlerFunc(func(params GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBidByID has not yet been implemented")
 		}),
-		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GetBids has not yet been implemented")
+		PostTransactionsDepositHandler: PostTransactionsDepositHandlerFunc(func(params PostTransactionsDepositParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsDeposit has not yet been implemented")
+		}),
+		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
 
 		// Applies when the "api_key" header is set
 		APIKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
+		},
+		// Applies when the "metrics_key" header is set
+		MetricsKeyAuth: func(token string) (*models.User, error) {
+			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
 		},
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
@@ -125,6 +126,10 @@ type MarketMainAPI struct {
 	// it performs authentication based on an api key api_key provided in the header
 	APIKeyAuth func(string) (*models.User, error)
 
+	// MetricsKeyAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key metrics_key provided in the header
+	MetricsKeyAuth func(string) (*models.User, error)
+
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
 
@@ -136,18 +141,16 @@ type MarketMainAPI struct {
 	GetTransactionsPurchaseHandler GetTransactionsPurchaseHandler
 	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
 	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
-	// PostTransactionsDepositHandler sets the operation handler for the post transactions deposit operation
-	PostTransactionsDepositHandler PostTransactionsDepositHandler
-	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
-	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
 	CancelBidHandler CancelBidHandler
 	// CreateBidHandler sets the operation handler for the create bid operation
 	CreateBidHandler CreateBidHandler
 	// GetBidByIDHandler sets the operation handler for the get bid by id operation
 	GetBidByIDHandler GetBidByIDHandler
-	// GetBidsHandler sets the operation handler for the get bids operation
-	GetBidsHandler GetBidsHandler
+	// PostTransactionsDepositHandler sets the operation handler for the post transactions deposit operation
+	PostTransactionsDepositHandler PostTransactionsDepositHandler
+	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
+	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -231,6 +234,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.APIKeyAuth == nil {
 		unregistered = append(unregistered, "APIKeyAuth")
 	}
+	if o.MetricsKeyAuth == nil {
+		unregistered = append(unregistered, "MetricsKeyAuth")
+	}
 
 	if o.GetAccountBalanceHandler == nil {
 		unregistered = append(unregistered, "GetAccountBalanceHandler")
@@ -244,12 +250,6 @@ func (o *MarketMainAPI) Validate() error {
 	if o.GetTransactionsTransfersHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
 	}
-	if o.PostTransactionsDepositHandler == nil {
-		unregistered = append(unregistered, "PostTransactionsDepositHandler")
-	}
-	if o.PostTransactionsWithdrawHandler == nil {
-		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
-	}
 	if o.CancelBidHandler == nil {
 		unregistered = append(unregistered, "CancelBidHandler")
 	}
@@ -259,8 +259,11 @@ func (o *MarketMainAPI) Validate() error {
 	if o.GetBidByIDHandler == nil {
 		unregistered = append(unregistered, "GetBidByIDHandler")
 	}
-	if o.GetBidsHandler == nil {
-		unregistered = append(unregistered, "GetBidsHandler")
+	if o.PostTransactionsDepositHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsDepositHandler")
+	}
+	if o.PostTransactionsWithdrawHandler == nil {
+		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -284,6 +287,12 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 			scheme := schemes[name]
 			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
 				return o.APIKeyAuth(token)
+			})
+
+		case "metrics_key":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
+				return o.MetricsKeyAuth(token)
 			})
 
 		}
@@ -379,14 +388,6 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/transactions/transfers"] = NewGetTransactionsTransfers(o.context, o.GetTransactionsTransfersHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/transactions/deposit"] = NewPostTransactionsDeposit(o.context, o.PostTransactionsDepositHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
@@ -399,10 +400,14 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/market/{bid_id}"] = NewGetBidByID(o.context, o.GetBidByIDHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/bid"] = NewGetBids(o.context, o.GetBidsHandler)
+	o.handlers["POST"]["/transactions/deposit"] = NewPostTransactionsDeposit(o.context, o.PostTransactionsDepositHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

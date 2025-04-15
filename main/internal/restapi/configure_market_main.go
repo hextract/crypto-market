@@ -3,8 +3,10 @@
 package restapi
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/h4x4d/crypto-market/main/internal/implementation"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/handlers"
 	"github.com/h4x4d/crypto-market/pkg/client"
 	"log"
@@ -59,39 +61,48 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	}
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"), "db", os.Getenv("POSTGRES_PORT"), os.Getenv("HOTEL_DB_NAME"))
-	handler, makeErr := handlers.NewHandler(connStr)
+		os.Getenv("POSTGRES_PASSWORD"), "db", os.Getenv("POSTGRES_PORT"), os.Getenv("MAIN_DB_NAME"))
+
+	blockchainClient, blockchainErr := implementation.NewBlockchainClient(
+		os.Getenv("ETHEREUM_RPC_URL"),
+		os.Getenv("BITCOIN_RPC_HOST"),
+		os.Getenv("BITCOIN_RPC_USER"),
+		os.Getenv("BITCOIN_RPC_PASS"),
+	)
+
+	if blockchainErr != nil {
+		log.Fatal(blockchainErr)
+	}
+
+	handler, makeErr := handlers.NewHandler(connStr, blockchainClient)
 	for makeErr != nil {
-		handler, makeErr = handlers.NewHandler(connStr)
+		handler, makeErr = handlers.NewHandler(connStr, blockchainClient)
+	}
+
+	hotErr := handler.Database.CreateHotWallet(context.Background(), "USDT")
+	if hotErr != nil {
+		log.Println(hotErr)
+	}
+
+	if api.MetricsKeyAuth == nil {
+		api.MetricsKeyAuth = func(token string) (*models.User, error) {
+			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
+		}
 	}
 
 	api.GetAccountBalanceHandler = operations.GetAccountBalanceHandlerFunc(handler.GetBalanceHandler)
 
 	if api.GetMetricsHandler == nil {
-		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams) middleware.Responder {
+		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
 		})
 	}
-	if api.GetTransactionsPurchaseHandler == nil {
-		api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(func(params operations.GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetTransactionsPurchase has not yet been implemented")
-		})
-	}
-	if api.GetTransactionsTransfersHandler == nil {
-		api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(func(params operations.GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetTransactionsTransfers has not yet been implemented")
-		})
-	}
-	if api.PostTransactionsDepositHandler == nil {
-		api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(func(params operations.PostTransactionsDepositParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PostTransactionsDeposit has not yet been implemented")
-		})
-	}
-	if api.PostTransactionsWithdrawHandler == nil {
-		api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(func(params operations.PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PostTransactionsWithdraw has not yet been implemented")
-		})
-	}
+	api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(handler.GetTransactionsPurchaseHandler)
+	api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(handler.GetTransactionsTransfersHandler)
+
+	api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(handler.PostTransactionsDepositHandler)
+	api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(handler.PostTransactionsWithdrawHandler)
+
 	if api.CancelBidHandler == nil {
 		api.CancelBidHandler = operations.CancelBidHandlerFunc(func(params operations.CancelBidParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.CancelBid has not yet been implemented")
@@ -105,11 +116,6 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	if api.GetBidByIDHandler == nil {
 		api.GetBidByIDHandler = operations.GetBidByIDHandlerFunc(func(params operations.GetBidByIDParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetBidByID has not yet been implemented")
-		})
-	}
-	if api.GetBidsHandler == nil {
-		api.GetBidsHandler = operations.GetBidsHandlerFunc(func(params operations.GetBidsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetBids has not yet been implemented")
 		})
 	}
 

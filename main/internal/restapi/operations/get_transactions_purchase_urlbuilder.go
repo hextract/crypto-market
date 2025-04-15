@@ -10,13 +10,15 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 
-	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // GetTransactionsPurchaseURL generates an URL for the get transactions purchase operation
 type GetTransactionsPurchaseURL struct {
-	DateFrom *strfmt.DateTime
-	DateTo   *strfmt.DateTime
+	DateFrom *int64
+	DateTo   *int64
+	Limit    *int64
+	Offset   *int64
 	Status   *string
 
 	_basePath string
@@ -52,7 +54,7 @@ func (o *GetTransactionsPurchaseURL) Build() (*url.URL, error) {
 
 	var dateFromQ string
 	if o.DateFrom != nil {
-		dateFromQ = o.DateFrom.String()
+		dateFromQ = swag.FormatInt64(*o.DateFrom)
 	}
 	if dateFromQ != "" {
 		qs.Set("date_from", dateFromQ)
@@ -60,10 +62,26 @@ func (o *GetTransactionsPurchaseURL) Build() (*url.URL, error) {
 
 	var dateToQ string
 	if o.DateTo != nil {
-		dateToQ = o.DateTo.String()
+		dateToQ = swag.FormatInt64(*o.DateTo)
 	}
 	if dateToQ != "" {
 		qs.Set("date_to", dateToQ)
+	}
+
+	var limitQ string
+	if o.Limit != nil {
+		limitQ = swag.FormatInt64(*o.Limit)
+	}
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
+	}
+
+	var offsetQ string
+	if o.Offset != nil {
+		offsetQ = swag.FormatInt64(*o.Offset)
+	}
+	if offsetQ != "" {
+		qs.Set("offset", offsetQ)
 	}
 
 	var statusQ string

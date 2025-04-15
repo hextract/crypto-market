@@ -6,8 +6,8 @@ type Handler struct {
 	Database *implementation.DatabaseService
 }
 
-func NewHandler(connStr string) (*Handler, error) {
-	db, err := implementation.NewDatabaseService(connStr)
+func NewHandler(connStr string, blockchainClient *implementation.BlockchainClient) (*Handler, error) {
+	db, err := implementation.NewDatabaseService(connStr, blockchainClient)
 	if err != nil {
 		return nil, err
 	}
