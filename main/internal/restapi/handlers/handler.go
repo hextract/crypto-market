@@ -4,6 +4,7 @@ import "github.com/h4x4d/crypto-market/main/internal/implementation"
 
 type Handler struct {
 	Database *implementation.DatabaseService
+	MatchingEngine implementation.MatchingEngineService
 }
 
 func NewHandler(connStr string, blockchainClient *implementation.BlockchainClient) (*Handler, error) {
@@ -12,5 +13,7 @@ func NewHandler(connStr string, blockchainClient *implementation.BlockchainClien
 		return nil, err
 	}
 
-	return &Handler{db}, nil
+	return &Handler{Database: db, 
+		MatchingEngine: implementation.NewMatcingEngineStub(), 
+		}, nil
 }

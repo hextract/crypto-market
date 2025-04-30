@@ -3,9 +3,27 @@ package implementation
 import (
 	"context"
 	"fmt"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 )
+
+type MatchingEngineService interface {
+	PlaceOrder(bid models.Bid) error
+}
+
+type MatchingEngineStub struct {
+
+}
+
+func NewMatcingEngineStub() *MatchingEngineStub {
+	return &MatchingEngineStub{}
+}
+
+func (me *MatchingEngineStub) PlaceOrder(models.Bid) error {
+	return nil
+}
 
 type CryptoService interface {
 	Encrypt(data []byte) (string, error)
