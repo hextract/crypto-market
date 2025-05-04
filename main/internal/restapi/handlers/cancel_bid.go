@@ -10,14 +10,9 @@ import (
 )
 
 func (h *Handler) CancelBidHandler(params operations.CancelBidParams, user *models.User) (responder middleware.Responder) {
-	err := h.MatchingEngine.CancelOrder(params.BidID)
-	if err != nil {
-		return utils.HandleError("couldn't cancel order", http.StatusInternalServerError)
-	}
-
 	defer utils.CatchPanic(&responder)
 
-	err = h.Database.CancelBid(params.BidID)
+	err := h.Database.CancelBid(params.BidID)
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
@@ -27,6 +22,11 @@ func (h *Handler) CancelBidHandler(params operations.CancelBidParams, user *mode
 		ID:     params.BidID,
 		Status: "cancelled",
 	})
+
+	err = h.MatchingEngine.CancelOrder(params.BidID)
+	if err != nil {
+		return utils.HandleError("couldn't cancel order", http.StatusInternalServerError)
+	}
 
 	return result
 }
