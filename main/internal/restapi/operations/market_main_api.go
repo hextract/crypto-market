@@ -72,10 +72,17 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
+		UpdateOrderStatusHandler: UpdateOrderStatusHandlerFunc(func(params UpdateOrderStatusParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateOrderStatus has not yet been implemented")
+		}),
 
 		// Applies when the "api_key" header is set
 		APIKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
+		},
+		// Applies when the "market_maker" header is set
+		MarketMakerKeyAuth: func(token string) (interface{}, error) {
+			return nil, errors.NotImplemented("api key auth (market_maker_key) market_maker from header param [market_maker] has not yet been implemented")
 		},
 		// Applies when the "metrics_key" header is set
 		MetricsKeyAuth: func(token string) (*models.User, error) {
@@ -126,6 +133,10 @@ type MarketMainAPI struct {
 	// it performs authentication based on an api key api_key provided in the header
 	APIKeyAuth func(string) (*models.User, error)
 
+	// MarketMakerKeyAuth registers a function that takes a token and returns a principal
+	// it performs authentication based on an api key market_maker provided in the header
+	MarketMakerKeyAuth func(string) (interface{}, error)
+
 	// MetricsKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key metrics_key provided in the header
 	MetricsKeyAuth func(string) (*models.User, error)
@@ -151,6 +162,8 @@ type MarketMainAPI struct {
 	PostTransactionsDepositHandler PostTransactionsDepositHandler
 	// PostTransactionsWithdrawHandler sets the operation handler for the post transactions withdraw operation
 	PostTransactionsWithdrawHandler PostTransactionsWithdrawHandler
+	// UpdateOrderStatusHandler sets the operation handler for the update order status operation
+	UpdateOrderStatusHandler UpdateOrderStatusHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -234,6 +247,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.APIKeyAuth == nil {
 		unregistered = append(unregistered, "APIKeyAuth")
 	}
+	if o.MarketMakerKeyAuth == nil {
+		unregistered = append(unregistered, "MarketMakerAuth")
+	}
 	if o.MetricsKeyAuth == nil {
 		unregistered = append(unregistered, "MetricsKeyAuth")
 	}
@@ -265,6 +281,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.PostTransactionsWithdrawHandler == nil {
 		unregistered = append(unregistered, "PostTransactionsWithdrawHandler")
 	}
+	if o.UpdateOrderStatusHandler == nil {
+		unregistered = append(unregistered, "UpdateOrderStatusHandler")
+	}
 
 	if len(unregistered) > 0 {
 		return fmt.Errorf("missing registration: %s", strings.Join(unregistered, ", "))
@@ -288,6 +307,11 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
 				return o.APIKeyAuth(token)
 			})
+
+
+		case "market_maker_key":
+			scheme := schemes[name]
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.MarketMakerKeyAuth)
 
 		case "metrics_key":
 			scheme := schemes[name]
@@ -408,6 +432,10 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/market-maker/{order_id}/status"] = NewUpdateOrderStatus(o.context, o.UpdateOrderStatusHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
