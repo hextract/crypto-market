@@ -42,12 +42,15 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 	})
 
 	err = h.MatchingEngine.PlaceOrder(models.Bid{
-		ID: &bidID,
-	}) 
-
+		ID:          &bidID,
+		AmountToBuy: params.Body.AmountToBuy,
+		MinPrice:    params.Body.MinPrice,
+		MaxPrice:    params.Body.MaxPrice,
+		BuySpeed:    &buySpeed,
+	})
 	if err != nil {
 		return utils.HandleError("couldn't place order", http.StatusInternalServerError)
 	}
-	
+
 	return result
 }
