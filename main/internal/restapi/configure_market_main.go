@@ -103,21 +103,11 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(handler.PostTransactionsDepositHandler)
 	api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(handler.PostTransactionsWithdrawHandler)
 
-	if api.CancelBidHandler == nil {
-		api.CancelBidHandler = operations.CancelBidHandlerFunc(func(params operations.CancelBidParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CancelBid has not yet been implemented")
-		})
-	}
-	if api.CreateBidHandler == nil {
-		api.CreateBidHandler = operations.CreateBidHandlerFunc(func(params operations.CreateBidParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateBid has not yet been implemented")
-		})
-	}
-	if api.GetBidByIDHandler == nil {
-		api.GetBidByIDHandler = operations.GetBidByIDHandlerFunc(func(params operations.GetBidByIDParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetBidByID has not yet been implemented")
-		})
-	}
+
+	api.CancelBidHandler = operations.CancelBidHandlerFunc(handler.CancelBidHandler)
+	api.CreateBidHandler = operations.CreateBidHandlerFunc(handler.CreateBidHandler)
+
+	api.GetBidByIDHandler = operations.GetBidByIDHandlerFunc(handler.GetBidByID)
 
 	api.PreServerShutdown = func() {}
 

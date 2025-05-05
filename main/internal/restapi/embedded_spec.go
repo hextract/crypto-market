@@ -171,6 +171,86 @@ func init() {
         }
       }
     },
+    "/market-maker/{order_id}/status": {
+      "patch": {
+        "security": [
+          {
+            "market_maker_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Update order status",
+        "operationId": "update_order_status",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "status"
+              ],
+              "properties": {
+                "bought_amount": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "finished",
+                    "cancelled"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "string",
+            "description": "ID of bid to update",
+            "name": "order_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "bid_123"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/market/{bid_id}": {
       "get": {
         "security": [
@@ -911,6 +991,11 @@ func init() {
       "name": "api_key",
       "in": "header"
     },
+    "market_maker_key": {
+      "type": "apiKey",
+      "name": "market_maker",
+      "in": "header"
+    },
     "metrics_key": {
       "type": "apiKey",
       "name": "metrics_key",
@@ -1027,6 +1112,88 @@ func init() {
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "bid_123"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "No access",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/market-maker/{order_id}/status": {
+      "patch": {
+        "security": [
+          {
+            "market_maker_key": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Update order status",
+        "operationId": "update_order_status",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "status"
+              ],
+              "properties": {
+                "bought_amount": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float",
+                  "minimum": 0
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "finished",
+                    "cancelled"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "string",
+            "description": "ID of bid to update",
+            "name": "order_id",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {
@@ -1834,6 +2001,11 @@ func init() {
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
+      "in": "header"
+    },
+    "market_maker_key": {
+      "type": "apiKey",
+      "name": "market_maker",
       "in": "header"
     },
     "metrics_key": {
