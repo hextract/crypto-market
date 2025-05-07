@@ -72,7 +72,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
-		UpdateOrderStatusHandler: UpdateOrderStatusHandlerFunc(func(params UpdateOrderStatusParams, principal interface{}) middleware.Responder {
+		UpdateOrderStatusHandler: UpdateOrderStatusHandlerFunc(func(params UpdateOrderStatusParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateOrderStatus has not yet been implemented")
 		}),
 
@@ -81,7 +81,7 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
 		},
 		// Applies when the "market_maker" header is set
-		MarketMakerKeyAuth: func(token string) (interface{}, error) {
+		MarketMakerKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (market_maker_key) market_maker from header param [market_maker] has not yet been implemented")
 		},
 		// Applies when the "metrics_key" header is set
@@ -135,7 +135,7 @@ type MarketMainAPI struct {
 
 	// MarketMakerKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key market_maker provided in the header
-	MarketMakerKeyAuth func(string) (interface{}, error)
+	MarketMakerKeyAuth func(string) (*models.User, error)
 
 	// MetricsKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key metrics_key provided in the header
@@ -308,10 +308,11 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 				return o.APIKeyAuth(token)
 			})
 
-
 		case "market_maker_key":
 			scheme := schemes[name]
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, o.MarketMakerKeyAuth)
+			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
+				return o.MarketMakerKeyAuth(token)
+			})
 
 		case "metrics_key":
 			scheme := schemes[name]
