@@ -49,6 +49,7 @@ func configureAPI(api *operations.MarketAuthAPI) http.Handler {
 	api.PostAuthRegisterHandler = operations.PostAuthRegisterHandlerFunc(handler.RegisterHandler)
 	api.PostAuthChangePasswordHandler = operations.PostAuthChangePasswordHandlerFunc(handler.ChangePasswordHandler)
 	api.GetMetricsHandler = operations.GetMetricsHandlerFunc(handlers.MetricsHandler)
+	api.PostAuthValidateTokenHandler = operations.PostAuthValidateTokenHandlerFunc(handler.ValidateTokenHandler)
 
 	if api.GetMetricsHandler == nil {
 		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams) middleware.Responder {
