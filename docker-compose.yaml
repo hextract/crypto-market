@@ -41,18 +41,6 @@ services:
         condition: service_healthy
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
-  stack_connector:
-    container_name: stack_connector-svc
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: stack_connector/Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "${STACK_CONNECTOR_REST_PORT}:${STACK_CONNECTOR_REST_PORT}"
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
