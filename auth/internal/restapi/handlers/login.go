@@ -24,10 +24,10 @@ func (h *Handler) LoginHandler(api operations.PostAuthLoginParams) middleware.Re
 			slog.Group("user-properties",
 				slog.String("login", api.Body.Login),
 			),
-			slog.Int("status_code", operations.PostAuthRegisterConflictCode),
+			slog.Int("status_code", operations.PostAuthLoginUnauthorizedCode),
 			slog.String("error", err.Error()),
 		)
-		return new(operations.PostAuthRegisterConflict).WithPayload(&models.Error{
+		return new(operations.PostAuthLoginUnauthorized).WithPayload(&models.Error{
 			ErrorMessage:    err.Error(),
 			ErrorStatusCode: conflict,
 		})
