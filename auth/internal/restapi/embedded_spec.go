@@ -184,6 +184,51 @@ func init() {
         }
       }
     },
+    "/auth/validate-token": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Validate token",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "is-valid": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/metrics": {
       "get": {
         "produces": [
@@ -371,6 +416,51 @@ func init() {
             }
           },
           "409": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/auth/validate-token": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Validate token",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "is-valid": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
             "description": "Incorrect data",
             "schema": {
               "$ref": "#/definitions/Error"
