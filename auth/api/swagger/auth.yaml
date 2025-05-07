@@ -108,6 +108,35 @@ paths:
           schema:
             $ref: "#/definitions/Error"
           description: "Incorrect old password"
+  /auth/validate-token:
+    post:
+      summary: "Validate token"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+      responses:
+        200:
+          description: "Success operation"
+          schema:
+            type: "object"
+            properties:
+              is-valid:
+                type: boolean
+        400:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Incorrect data"
+
   /metrics:
     get:
       summary: "Prometheus metrics"
