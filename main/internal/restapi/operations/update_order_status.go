@@ -15,19 +15,21 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // UpdateOrderStatusHandlerFunc turns a function with the right signature into a update order status handler
-type UpdateOrderStatusHandlerFunc func(UpdateOrderStatusParams, interface{}) middleware.Responder
+type UpdateOrderStatusHandlerFunc func(UpdateOrderStatusParams, *models.User) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn UpdateOrderStatusHandlerFunc) Handle(params UpdateOrderStatusParams, principal interface{}) middleware.Responder {
+func (fn UpdateOrderStatusHandlerFunc) Handle(params UpdateOrderStatusParams, principal *models.User) middleware.Responder {
 	return fn(params, principal)
 }
 
 // UpdateOrderStatusHandler interface for that can handle valid update order status params
 type UpdateOrderStatusHandler interface {
-	Handle(UpdateOrderStatusParams, interface{}) middleware.Responder
+	Handle(UpdateOrderStatusParams, *models.User) middleware.Responder
 }
 
 // NewUpdateOrderStatus creates a new http.Handler for the update order status operation
@@ -59,9 +61,9 @@ func (o *UpdateOrderStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	if aCtx != nil {
 		*r = *aCtx
 	}
-	var principal interface{}
+	var principal *models.User
 	if uprinc != nil {
-		principal = uprinc.(interface{}) // this is really a interface{}, I promise
+		principal = uprinc.(*models.User) // this is really a models.User, I promise
 	}
 
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
@@ -89,7 +91,7 @@ type UpdateOrderStatusBody struct {
 
 	// status
 	// Required: true
-	// Enum: [finished cancelled]
+	// Enum: ["finished","cancelled"]
 	Status *string `json:"status"`
 }
 

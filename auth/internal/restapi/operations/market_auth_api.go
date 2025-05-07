@@ -54,6 +54,9 @@ func NewMarketAuthAPI(spec *loads.Document) *MarketAuthAPI {
 		PostAuthRegisterHandler: PostAuthRegisterHandlerFunc(func(params PostAuthRegisterParams) middleware.Responder {
 			return middleware.NotImplemented("operation PostAuthRegister has not yet been implemented")
 		}),
+		PostAuthValidateTokenHandler: PostAuthValidateTokenHandlerFunc(func(params PostAuthValidateTokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation PostAuthValidateToken has not yet been implemented")
+		}),
 	}
 }
 
@@ -98,6 +101,8 @@ type MarketAuthAPI struct {
 	PostAuthLoginHandler PostAuthLoginHandler
 	// PostAuthRegisterHandler sets the operation handler for the post auth register operation
 	PostAuthRegisterHandler PostAuthRegisterHandler
+	// PostAuthValidateTokenHandler sets the operation handler for the post auth validate token operation
+	PostAuthValidateTokenHandler PostAuthValidateTokenHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -186,6 +191,9 @@ func (o *MarketAuthAPI) Validate() error {
 	}
 	if o.PostAuthRegisterHandler == nil {
 		unregistered = append(unregistered, "PostAuthRegisterHandler")
+	}
+	if o.PostAuthValidateTokenHandler == nil {
+		unregistered = append(unregistered, "PostAuthValidateTokenHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -291,6 +299,10 @@ func (o *MarketAuthAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/auth/register"] = NewPostAuthRegister(o.context, o.PostAuthRegisterHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/auth/validate-token"] = NewPostAuthValidateToken(o.context, o.PostAuthValidateTokenHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

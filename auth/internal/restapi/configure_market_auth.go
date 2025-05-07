@@ -16,7 +16,7 @@ import (
 	"github.com/h4x4d/crypto-market/auth/internal/restapi/operations"
 )
 
-//go:generate swagger generate server --target ../../internal --name MarketAuth --spec ../../api/swagger/auth.yaml --principal interface{}
+//go:generate swagger generate server --target ../../internal --name MarketAuth --spec ../../api/swagger/auth.yaml --principal interface{} --exclude-main
 
 func configureFlags(api *operations.MarketAuthAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
@@ -68,6 +68,11 @@ func configureAPI(api *operations.MarketAuthAPI) http.Handler {
 	if api.PostAuthRegisterHandler == nil {
 		api.PostAuthRegisterHandler = operations.PostAuthRegisterHandlerFunc(func(params operations.PostAuthRegisterParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.PostAuthRegister has not yet been implemented")
+		})
+	}
+	if api.PostAuthValidateTokenHandler == nil {
+		api.PostAuthValidateTokenHandler = operations.PostAuthValidateTokenHandlerFunc(func(params operations.PostAuthValidateTokenParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PostAuthValidateToken has not yet been implemented")
 		})
 	}
 
