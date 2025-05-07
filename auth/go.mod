@@ -14,6 +14,7 @@ require (
 	github.com/h4x4d/crypto-market/pkg v0.0.0-00010101000000-000000000000
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/prometheus/client_golang v1.21.1
+	github.com/rs/cors v1.11.1
 	go.opentelemetry.io/otel/trace v1.35.0
 	golang.org/x/net v0.37.0
 )

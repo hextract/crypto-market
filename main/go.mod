@@ -17,6 +17,7 @@ require (
 	github.com/h4x4d/crypto-market/pkg v0.0.0-00010101000000-000000000000
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/jessevdk/go-flags v1.6.1
+	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.37.0
 )

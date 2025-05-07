@@ -5,6 +5,7 @@ package restapi
 import (
 	"crypto/tls"
 	"github.com/h4x4d/crypto-market/auth/internal/restapi/handlers"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 
@@ -98,5 +99,14 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics.
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
-	return handler
+	// Настройки CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            false,
+	})
+
+	return c.Handler(handler)
 }

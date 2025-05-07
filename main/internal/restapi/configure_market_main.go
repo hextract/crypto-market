@@ -9,6 +9,7 @@ import (
 	"github.com/h4x4d/crypto-market/main/internal/implementation"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/handlers"
 	"github.com/h4x4d/crypto-market/pkg/client"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -103,7 +104,6 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(handler.PostTransactionsDepositHandler)
 	api.PostTransactionsWithdrawHandler = operations.PostTransactionsWithdrawHandlerFunc(handler.PostTransactionsWithdrawHandler)
 
-
 	api.CancelBidHandler = operations.CancelBidHandlerFunc(handler.CancelBidHandler)
 	api.CreateBidHandler = operations.CreateBidHandlerFunc(handler.CreateBidHandler)
 
@@ -137,5 +137,14 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // The middleware configuration happens before anything, this middleware also applies to serving the swagger.json document.
 // So this is a good place to plug in a panic handling middleware, logging and metrics.
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
-	return handler
+	// Настройки CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            false,
+	})
+
+	return c.Handler(handler)
 }
