@@ -168,6 +168,10 @@
     color: #2196F3;
 }
 
+.status-cancelled {
+    color: #F44336;
+}
+
 .status-failed {
     color: #F44336;
 }
