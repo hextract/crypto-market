@@ -435,13 +435,15 @@ const Main = () => {
           <span className="balance-currency">BTC: {balances.BTC.toFixed(6)}</span>
           <div className="balance-button">
             <button
-              className="balance-btn withdraw-btn"
+              disabled={true}
+              className="balance-btn withdraw-btn disabled"
               onClick={() => handleWithdrawClick('BTC')}
             >
               withdraw
             </button>
             <button
-              className="balance-btn deposit-btn"
+              disabled={true}
+              className="balance-btn deposit-btn disabled"
               onClick={handleDepositClick}
             >
               deposit
