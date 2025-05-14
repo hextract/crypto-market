@@ -1,0 +1,406 @@
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    min-width: 100vw;
+    background: radial-gradient(circle at left top, #50129E -200%, black 100%),
+    linear-gradient(135deg, #50129E -150%, black);
+    background-blend-mode: color-dodge;
+    color: white;
+}
+
+.profile-content {
+    width: 80%;
+    margin-top: 20px;
+}
+
+.profile-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #a74aff;
+}
+
+.profile-tabs button {
+    padding: 10px 20px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+}
+
+.profile-tabs button.active {
+    color: #a74aff;
+}
+
+.profile-tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #a74aff;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.filters select {
+    background: #150B23;
+    border: 1px solid #a74aff;
+    border-radius: 5px;
+    color: white;
+    padding: 8px 12px;
+    min-width: 120px;
+}
+
+.clear-filters-btn {
+    background: transparent;
+    border: 1px solid #a74aff;
+    border-radius: 5px;
+    color: #a74aff;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-left: auto;
+}
+
+.clear-filters-btn:hover {
+    background: rgba(167, 74, 255, 0.1);
+}
+
+.history-table {
+    width: 100%;
+    border: 1px solid #a74aff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: rgba(21, 11, 35, 0.8);
+    padding: 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #a74aff;
+}
+
+.table-header div {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 15px;
+    border-bottom: 1px solid rgba(167, 74, 255, 0.3);
+    align-items: center;
+}
+
+.table-row > div {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.expanded-row {
+    padding: 15px;
+    background: rgba(21, 11, 35, 0.5);
+    border-top: 1px dashed #a74aff;
+}
+
+.wallet-info, .trade-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 15px;
+}
+
+.type-deposit {
+    color: #4CAF50;
+}
+
+.type-withdraw {
+    color: #F44336;
+}
+
+.status-completed {
+    color: #4CAF50;
+}
+
+.status-pending {
+    color: #FFC107;
+}
+
+.status-partial {
+    color: #2196F3;
+}
+
+.status-failed {
+    color: #F44336;
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.details-btn, .cancel-btn {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    width: 80px;
+    transition: all 0.3s;
+}
+
+.details-btn {
+    background: #a74aff;
+    color: white;
+}
+
+.details-btn:hover {
+    opacity: 0.9;
+}
+
+.cancel-btn {
+    background: #F44336;
+    color: white;
+}
+
+.cancel-btn:hover {
+    opacity: 0.9;
+}
+
+.confirm-dialog {
+    position: absolute;
+    background: #150B23;
+    border: 1px solid #a74aff;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 10;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.confirm-dialog p {
+    margin-bottom: 10px;
+}
+
+.confirm-dialog div {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.confirm-btn, .cancel-confirm-btn {
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+}
+
+.confirm-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.cancel-confirm-btn {
+    background: #F44336;
+    color: white;
+}
+
+.no-data {
+    padding: 20px;
+    text-align: center;
+    color: gray;
+    grid-column: 1 / -1;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .profile-content {
+        width: 95%;
+    }
+
+    .filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .clear-filters-btn {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .table-header, .table-row {
+        grid-template-columns: repeat(3, 1fr);
+        font-size: 14px;
+    }
+
+    .table-header div:nth-child(n+4),
+    .table-row div:nth-child(n+4) {
+        display: none;
+    }
+
+    .expanded-row {
+        grid-column: 1 / -1;
+    }
+
+    .actions {
+        flex-direction: row;
+        gap: 5px;
+    }
+
+    .details-btn, .cancel-btn {
+        width: auto;
+        padding: 3px 8px;
+    }
+
+    .confirm-dialog {
+        width: 150px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+/* Стили для модального окна */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: #150B23;
+    border: 1px solid #a74aff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: white;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.modal-content {
+    text-align: center;
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-confirm-btn, .modal-cancel-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.modal-confirm-btn {
+    background: #F44336;
+    color: white;
+    border: none;
+}
+
+.modal-confirm-btn:hover {
+    background: #d32f2f;
+}
+
+.modal-cancel-btn {
+    background: transparent;
+    color: #a74aff;
+    border: 1px solid #a74aff;
+}
+
+.modal-cancel-btn:hover {
+    background: rgba(167, 74, 255, 0.1);
+}
+
+/* Адаптация модального окна для мобильных */
+@media (max-width: 480px) {
+    .modal {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-confirm-btn, .modal-cancel-btn {
+        width: 100%;
+    }
+}

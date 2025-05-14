@@ -1,0 +1,611 @@
+/* Основной контейнер */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: radial-gradient(circle at left top, #50129E -200%, black 100%),
+  linear-gradient(135deg, #50129E -150%, black);
+  background-blend-mode: color-dodge;
+  color: white;
+  text-align: center;
+}
+
+/* Навигация */
+.navbar-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  padding: 10px 20px;
+  background: #150B23;
+  border: #8541F5 1px solid;
+  border-radius: 20px;
+  max-height: 64px;
+  margin: 20px 0 20px;
+}
+
+/* Логотип */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Навигационные ссылки */
+.nav-links a {
+  margin: 0 10px;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-links .active-main {
+  text-decoration: underline;
+}
+
+/* Контент */
+.content {
+  display: flex;
+  width: 80%;
+  gap: 23px;
+}
+
+/* Блок графика */
+.chart-section {
+  flex: 2;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  height: 501px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  color: gray;
+}
+
+/* Торговая панель */
+.trade-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+/* Информация о рынке */
+.market-info {
+  background: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  margin-bottom: 23px;
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 117px;
+  width: 418px;
+}
+
+.market-info .main-info {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 23px;
+}
+
+.market-info .add-info {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.trading-pair {
+  font-size: 36px;
+}
+
+.price {
+  font-size: 36px;
+}
+
+.high-price,
+.price-change {
+  margin: 0;
+  font-size: 20px;
+  color: gray;
+}
+
+
+/* Блок с инпутами */
+.market-data {
+  background: rgba(20, 10, 40, 0.8); /* Темно-фиолетовый фон с прозрачностью */
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 361px;
+  width: 418px;
+}
+
+/* Кнопки наверху */
+.market-data .button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 15px;
+}
+
+.market-data .button-group button {
+  flex: 1;
+  background-color: inherit;
+  padding: 10px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+}
+
+.market-data .button-group .active {
+  border: none;
+  background: linear-gradient(135deg, #8a2be2, #6a0dad);
+}
+
+/* Последняя кнопка Proceed */
+.market-data .proceed-btn {
+  background: linear-gradient(135deg, #a74aff, #6a0dad);
+  border: none;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  height: 55px;
+  width: 388px;
+  max-width: 90%;
+}
+
+.market-data .proceed-btn.active:hover {
+  opacity: 0.9;
+}
+
+/* Баланс */
+.balance-section {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 20px;
+}
+
+.balance-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.balance-button {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.balance-btn {
+  padding: 8px;
+  background-color: inherit;
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  width: 120px;
+  height: 42px;
+}
+
+.balance-currency {
+  font-size: 36px;
+}
+
+.balance-btn.deposit-btn {
+  border: none;
+  background: linear-gradient(135deg, #a74aff, #6a0dad);
+}
+
+.main-form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.input {
+  background: rgba(10, 5, 30, 0.9);
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  width: 90%;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+}
+
+.input-container-main {
+  position: relative;
+  width: 100%;
+}
+
+/* --------Стили для ошибок-------- */
+
+.error {
+  border-color: #ff4d4f !important;
+}
+
+.tooltip {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  transform: translateY(-100%);
+  background-color: #ff4d4f;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.tooltip.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 100px;
+  border-width: 5px 5px 0;
+  border-style: solid;
+  border-color: #ff4d4f transparent transparent;
+}
+
+.proceed-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-group button.active {
+  background-color: #7a3aff;
+  color: white;
+}
+/*-----------------------------------*/
+
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: radial-gradient(circle at left top, #50129E -200%, black 100%),
+  linear-gradient(135deg, #50129E -150%, black);
+  color: white;
+  font-size: 24px;
+}
+.logout-btn {
+  background: transparent;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover {
+  background: #ff4d4f;
+  color: white;
+}
+/* 🌟 Медиа-запрос для мобильных устройств */
+@media (max-width: 768px) {
+  .navbar-main {
+    width: 90%;
+    flex-direction: column;
+    padding: 15px 0 15px;
+    text-align: center;
+  }
+
+  .nav-links {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+  }
+
+  .content {
+      flex-direction: column;
+      width: 90%;
+  }
+
+  .chart-section,
+  .trade-panel {
+      align-items: center;
+      width: 100%;
+  }
+
+  .balance-section {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+  }
+
+  .balance-card {
+      width: 90%;
+      margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 464px) {
+  .market-info {
+    width: 100%;
+    height: 100%;
+  }
+  .market-info .add-info {
+    margin: 10px 15px
+  }
+
+  .trading-pair {
+    font-size: 24px;
+  }
+
+  .price {
+    font-size: 24px;
+  }
+
+  .high-price,
+  .price-change {
+    margin: 0;
+    font-size: 14px;
+    color: gray;
+  }
+
+  .market-data {
+    width: 100%;
+    height: 100%;
+  }
+
+  .balance-currency {
+    font-size: 24px;
+  }
+  .balance-btn {
+    width: 80px;
+  }
+
+  .tooltip {
+    font-size: 12px;
+  }
+}
+
+/* Стили для модальных окон */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #150B23;
+  border: 1px solid #a74aff;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-input-container {
+  position: relative;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  background: rgba(10, 5, 30, 0.9);
+  border: 1px solid #a74aff;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.modal-input.error {
+  border-color: #ff4d4f;
+}
+
+.modal-tooltip {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.modal-submit-btn {
+  background: linear-gradient(135deg, #a74aff, #6a0dad);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.modal-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.wallet-address {
+  background: rgba(10, 5, 30, 0.9);
+  border: 1px solid #a74aff;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 15px 0;
+  word-break: break-all;
+  font-family: monospace;
+  color: #a74aff;
+}
+
+.wallet-note {
+  font-size: 14px;
+  color: #aaa;
+  margin-top: 15px;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .modal-header h3 {
+    font-size: 20px;
+  }
+
+  .modal-input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .modal-submit-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .wallet-address {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .wallet-note {
+    font-size: 12px;
+  }
+}
+/* Стили для кнопки копирования и контейнера адреса */
+.wallet-address-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.wallet-address {
+  background: rgba(10, 5, 30, 0.9);
+  border: 1px solid #a74aff;
+  border-radius: 8px;
+  padding: 15px;
+  word-break: break-all;
+  font-family: monospace;
+  color: #a74aff;
+  flex-grow: 1;
+}
+
+.copy-btn {
+  background: rgba(10, 5, 30, 0.9);
+  border: 1px solid #a74aff;
+  border-radius: 8px;
+  color: white;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #a74aff;
+  color: white;
+}
+
+/* Анимация для статуса "Copied!" */
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.copy-btn:active {
+  transform: scale(0.95);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+  .wallet-address-container {
+    flex-direction: column;
+  }
+
+  .wallet-address, .copy-btn {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+  }
+}

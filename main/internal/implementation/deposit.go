@@ -252,7 +252,7 @@ func (ds *DatabaseService) monitorDeposit(ctx context.Context, logEntry *logrus.
 		}
 
 		// Monitor for Transfer events
-		for i := 0; i < 360; i++ { // Monitor for 1 hour
+		for i := 0; i < 36; i++ { // Monitor for 1 hour
 			latestBlock, err := ds.blockchainClient.EthClient.BlockNumber(ctx)
 			if err != nil {
 				logEntry.WithError(err).Error("Failed to get latest block")
@@ -370,7 +370,7 @@ func (ds *DatabaseService) monitorDeposit(ctx context.Context, logEntry *logrus.
 						updateStatus("cancelled", transferTxHash, "hot wallet transfer failed", actualAmount)
 						return
 					}
-					time.Sleep(10 * time.Second)
+					time.Sleep(100 * time.Second)
 				}
 				if !confirmed {
 					logEntry.WithField("tx_hash", transferTxHash).Error("Hot wallet transfer timed out")
@@ -400,7 +400,7 @@ func (ds *DatabaseService) monitorDeposit(ctx context.Context, logEntry *logrus.
 				}).Info("Deposit detected and transferred to hot wallet")
 				return
 			}
-			time.Sleep(10 * time.Second)
+			time.Sleep(100 * time.Second)
 		}
 		logEntry.Info("Deposit monitoring timed out")
 		updateStatus("cancelled", "", "deposit not detected", 0)
