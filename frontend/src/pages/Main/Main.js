@@ -205,10 +205,9 @@ const Main = () => {
     setShowWithdrawModal(true);
   };
 
-  const handleDepositClick = async () => {
+  const handleDepositClick = async (currency) => {
     try {
-      // Получаем адрес для депозита
-      const response = await createDeposit('USDT', 0.00000001); // amount 0 - просто чтобы получить адрес
+      const response = await createDeposit(currency);
       setDepositAddress(response.address);
       setShowDepositModal(true);
     } catch (error) {
@@ -424,7 +423,7 @@ const Main = () => {
             </button>
             <button
               className="balance-btn deposit-btn"
-              onClick={handleDepositClick}
+              onClick={() => handleDepositClick('USDT') }
             >
               deposit
             </button>
@@ -444,7 +443,7 @@ const Main = () => {
             <button
               disabled={true}
               className="balance-btn deposit-btn disabled"
-              onClick={handleDepositClick}
+              onClick={() => handleDepositClick('BTC') }
             >
               deposit
             </button>

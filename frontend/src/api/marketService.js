@@ -26,11 +26,10 @@ export const getBalance = async () => {
   }
 };
 
-export const createDeposit = async (currency, amount) => {
+export const createDeposit = async (currency) => {
   try {
     const response = await api.post('/transactions/deposit', {
-      currency,
-      amount
+      currency
     });
     return response.data;
   } catch (error) {
