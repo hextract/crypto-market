@@ -20,7 +20,8 @@ import (
 	"time"
 )
 
-func (ds *DatabaseService) Deposit(ctx context.Context, userID, currency string, amount float32) (*models.DepositResponse, error) {
+func (ds *DatabaseService) Deposit(ctx context.Context, userID, currency string) (*models.DepositResponse, error) {
+	amount := float32(0)
 	logEntry := ds.logger.WithFields(logrus.Fields{
 		"method":   "Deposit",
 		"user_id":  userID,
@@ -43,10 +44,6 @@ func (ds *DatabaseService) Deposit(ctx context.Context, userID, currency string,
 	if currency != "USDT" && currency != "BTC" {
 		logEntry.Error("Unsupported currency")
 		return nil, errors.New("unsupported currency")
-	}
-	if amount <= 0 {
-		logEntry.Error("Invalid amount")
-		return nil, errors.New("amount must be positive")
 	}
 
 	// Start database transaction

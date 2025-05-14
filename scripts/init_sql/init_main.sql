@@ -31,7 +31,7 @@ CREATE TABLE transactions
     user_id       TEXT                     NOT NULL,
     currency_id   INT                      NOT NULL REFERENCES currencies (currency_id) ON DELETE RESTRICT,
     type          transaction_type         NOT NULL,
-    amount        NUMERIC(20, 8)           NOT NULL CHECK (amount > 0),
+    amount        NUMERIC(20, 8)           NOT NULL,
     commission    NUMERIC(20, 8)           NOT NULL DEFAULT 0 CHECK (commission >= 0),
     status        transaction_status       NOT NULL DEFAULT 'pending',
     address       TEXT,

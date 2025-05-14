@@ -768,15 +768,9 @@ func init() {
     "deposit_request": {
       "type": "object",
       "required": [
-        "currency",
-        "amount"
+        "currency"
       ],
       "properties": {
-        "amount": {
-          "type": "number",
-          "format": "float",
-          "example": 100.5
-        },
         "currency": {
           "type": "string",
           "enum": [
@@ -1774,16 +1768,9 @@ func init() {
     "deposit_request": {
       "type": "object",
       "required": [
-        "currency",
-        "amount"
+        "currency"
       ],
       "properties": {
-        "amount": {
-          "type": "number",
-          "format": "float",
-          "minimum": 0,
-          "example": 100.5
-        },
         "currency": {
           "type": "string",
           "enum": [

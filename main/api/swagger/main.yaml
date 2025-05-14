@@ -586,17 +586,11 @@ definitions:
     type: object
     required:
       - currency
-      - amount
     properties:
       currency:
         type: string
         enum: [ "USDT", "BTC" ]
         example: USDT
-      amount:
-        type: number
-        format: float
-        minimum: 0
-        example: 100.50
   withdraw_request:
     type: object
     required:

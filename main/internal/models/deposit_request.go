@@ -20,12 +20,6 @@ import (
 // swagger:model deposit_request
 type DepositRequest struct {
 
-	// amount
-	// Example: 100.5
-	// Required: true
-	// Minimum: 0
-	Amount *float32 `json:"amount"`
-
 	// currency
 	// Example: USDT
 	// Required: true
@@ -37,10 +31,6 @@ type DepositRequest struct {
 func (m *DepositRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAmount(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateCurrency(formats); err != nil {
 		res = append(res, err)
 	}
@@ -48,19 +38,6 @@ func (m *DepositRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *DepositRequest) validateAmount(formats strfmt.Registry) error {
-
-	if err := validate.Required("amount", "body", m.Amount); err != nil {
-		return err
-	}
-
-	if err := validate.Minimum("amount", "body", float64(*m.Amount), 0, false); err != nil {
-		return err
-	}
-
 	return nil
 }
 

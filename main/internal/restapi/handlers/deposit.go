@@ -11,9 +11,7 @@ func (handler *Handler) PostTransactionsDepositHandler(params operations.PostTra
 	defer utils.CatchPanic(&responder)
 
 	currency := params.Body.Currency
-	amount := params.Body.Amount
-
-	transaction, err := handler.Database.Deposit(params.HTTPRequest.Context(), user.UserID, *currency, *amount)
+	transaction, err := handler.Database.Deposit(params.HTTPRequest.Context(), user.UserID, *currency)
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
