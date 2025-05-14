@@ -272,18 +272,24 @@
         width: 100%;
     }
 
-    .table-header, .table-row {
-        grid-template-columns: repeat(3, 1fr);
+    .history-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    .table-header, .table-body {
+        min-width: 700px;
+    }
+
+    .table-header {
+        grid-template-columns: repeat(7, 1fr);
         font-size: 14px;
     }
 
-    .table-header div:nth-child(n+4),
-    .table-row div:nth-child(n+4) {
-        display: none;
-    }
-
-    .expanded-row {
-        grid-column: 1 / -1;
+    .table-row {
+        grid-template-columns: repeat(7, 1fr);
+        font-size: 14px;
     }
 
     .actions {
@@ -294,12 +300,11 @@
     .details-btn, .cancel-btn {
         width: auto;
         padding: 3px 8px;
+        font-size: 12px;
     }
 
-    .confirm-dialog {
-        width: 150px;
-        left: 50%;
-        transform: translateX(-50%);
+    .expanded-row {
+        grid-column: 1 / -1;
     }
 }
 
