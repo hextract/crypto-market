@@ -404,3 +404,18 @@
         width: 100%;
     }
 }
+
+.loading {
+    padding: 20px;
+    text-align: center;
+    color: #a74aff;
+    font-size: 18px;
+    grid-column: 1 / -1;
+}
+
+.no-data {
+    padding: 20px;
+    text-align: center;
+    color: gray;
+    grid-column: 1 / -1;
+}

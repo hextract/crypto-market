@@ -85,3 +85,35 @@ const getAuthToken = () => {
   const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
   return tokenCookie ? tokenCookie.split('=')[1] : null;
 };
+
+export const getTransactionsHistory = async (filters = {}) => {
+  try {
+    const response = await api.get('/transactions/transfers', {
+      params: filters
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getTradesHistory = async (filters = {}) => {
+  try {
+    const response = await api.get('/transactions/purchase', {
+      params: filters
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const cancelTrade = async (tradeId) => {
+  try {
+    console.log(`/market/${tradeId}`);
+    const response = await api.delete(`/market/${tradeId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

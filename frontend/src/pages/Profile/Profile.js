@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../api/authService';
+import {
+  getTransactionsHistory,
+  getTradesHistory,
+  cancelTrade
+} from '../../api/marketService';
 import './Profile.css';
 import logo from '../../assets/logo-purple.svg';
 
@@ -19,53 +24,124 @@ const Profile = () => {
     id: null,
     type: null
   });
+  const [errorModal, setErrorModal] = useState({
+    show: false,
+    message: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [trades, setTrades] = useState([]);
 
-  // Заглушки для данных
-  const transactions = [
-    {
-      id: 1,
-      date: new Date('2023-05-15T14:30:00'),
-      type: 'deposit',
-      currency: 'USDT',
-      amount: 1000,
-      fee: 10,
-      status: 'completed',
-      wallet: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
-    },
-    {
-      id: 2,
-      date: new Date('2023-05-14T10:15:00'),
-      type: 'withdraw',
-      currency: 'BTC',
-      amount: 0.1,
-      fee: 0.001,
-      status: 'pending',
-      wallet: '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5'
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      if (activeTab === 'transactions') {
+        const params = buildTransactionFilters();
+        const data = await getTransactionsHistory(params);
+        setTransactions(data.map(mapTransaction));
+      } else {
+        const params = buildTradeFilters();
+        const data = await getTradesHistory(params);
+        setTrades(data.map(mapTrade));
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      showError('Failed to load history. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  }, [activeTab, filters]);
 
-  const trades = [
-    {
-      id: 1,
-      date: new Date('2023-05-15T09:45:00'),
-      sellCurrency: 'USDT',
-      buyCurrency: 'BTC',
-      amount: 500,
-      fee: 5,
-      status: 'partial',
-      completedAmount: 300
-    },
-    {
-      id: 2,
-      date: new Date('2023-05-14T16:20:00'),
-      sellCurrency: 'BTC',
-      buyCurrency: 'USDT',
-      amount: 0.05,
-      fee: 0.0005,
-      status: 'pending',
-      completedAmount: 0
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const buildTransactionFilters = () => {
+    const params = {};
+    if (filters.time !== 'all') {
+      const now = Math.floor(Date.now() / 1000);
+      switch (filters.time) {
+        case 'hour': params.date_from = now - 3600; break;
+        case 'day': params.date_from = now - 86400; break;
+        case 'week': params.date_from = now - 604800; break;
+        case 'month': params.date_from = now - 2592000; break;
+        case 'year': params.date_from = now - 31536000; break;
+      }
     }
-  ];
+    if (filters.type !== 'all') {
+      params.operation = filters.type;
+    }
+    if (filters.status !== 'all') {
+      params.status = filters.status;
+    }
+    return params;
+  };
+
+  const buildTradeFilters = () => {
+    const params = {};
+    if (filters.time !== 'all') {
+      const now = Math.floor(Date.now() / 1000);
+      switch (filters.time) {
+        case 'hour': params.date_from = now - 3600; break;
+        case 'day': params.date_from = now - 86400; break;
+        case 'week': params.date_from = now - 604800; break;
+        case 'month': params.date_from = now - 2592000; break;
+        case 'year': params.date_from = now - 31536000; break;
+      }
+    }
+    if (filters.status !== 'all') {
+      params.status = filters.status;
+    }
+    return params;
+  };
+
+  const mapTransaction = (item) => ({
+    id: item.id,
+    date: new Date(item.date * 1000),
+    type: item.operation,
+    currency: item.currency,
+    amount: item.amount,
+    fee: item.commission || 0,
+    status: item.status,
+    wallet: item.address,
+    rawStatus: item.status
+  });
+
+  const mapTrade = (item) => ({
+    id: item.id,
+    date: new Date(item.date * 1000),
+    sellCurrency: item.currency_from,
+    buyCurrency: item.currency_to,
+    amount: item.amount_to,
+    fee: item.commission || 0,
+    status: mapTradeStatus(item.status),
+    completedAmount: item.amount_to || 0,
+    rawStatus: item.status
+  });
+
+  const mapTradeStatus = (status) => {
+    switch (status) {
+      case 'finished': return 'completed';
+      case 'processing': return 'partial';
+      case 'pending': return 'pending';
+      case 'cancelled': return 'failed';
+      default: return status;
+    }
+  };
+
+  const showError = (message) => {
+    setErrorModal({
+      show: true,
+      message
+    });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal({
+      show: false,
+      message: ''
+    });
+  };
 
   const handleLogout = () => {
     logout();
@@ -118,9 +194,9 @@ const Profile = () => {
 
     if (activeTab === 'transactions' && filters.type !== 'all' && item.type !== filters.type) return false;
 
-    return !(filters.status !== 'all' && item.status !== filters.status);
+    if (filters.status !== 'all' && item.rawStatus !== filters.status) return false;
 
-
+    return true;
   });
 
   const formatDate = (date) => {
@@ -135,10 +211,17 @@ const Profile = () => {
     });
   };
 
-  const confirmCancel = () => {
-    console.log(`Canceling ${cancelModal.type} with id: ${cancelModal.id}`);
-    // Здесь будет логика отмены заявки
-    setCancelModal({ show: false, id: null, type: null });
+  const confirmCancel = async () => {
+    try {
+      await cancelTrade(cancelModal.id);
+      // Обновляем данные после отмены
+      await loadData();
+      setCancelModal({ show: false, id: null, type: null });
+    } catch (error) {
+      console.error('Failed to cancel trade:', error);
+      showError('Failed to cancel trade. Please try again.');
+      setCancelModal({ show: false, id: null, type: null });
+    }
   };
 
   const closeModal = () => {
@@ -212,10 +295,10 @@ const Profile = () => {
               onChange={(e) => handleFilterChange('status', e.target.value)}
             >
               <option value="all">All statuses</option>
-              <option value="completed">Completed</option>
+              <option value="finished">Completed</option>
               <option value="pending">Pending</option>
-              <option value="partial">Partial</option>
-              <option value="failed">Failed</option>
+              <option value="processing">Processing</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
 
@@ -228,117 +311,121 @@ const Profile = () => {
         </div>
 
         <div className="history-table">
-          <div className="table-header">
-            {activeTab === 'transactions' ? (
-              <>
-                <div onClick={() => handleSort('date')}>
-                  Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div onClick={() => handleSort('type')}>
-                  Type {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div onClick={() => handleSort('currency')}>
-                  Currency {sortConfig.key === 'currency' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div onClick={() => handleSort('amount')}>
-                  Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div>Fee</div>
-                <div onClick={() => handleSort('status')}>
-                  Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div>Actions</div>
-              </>
-            ) : (
-              <>
-                <div onClick={() => handleSort('date')}>
-                  Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div>Pair</div>
-                <div onClick={() => handleSort('amount')}>
-                  Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div>Fee</div>
-                <div onClick={() => handleSort('status')}>
-                  Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-                </div>
-                <div>Completed</div>
-                <div>Actions</div>
-              </>
-            )}
-          </div>
+          {isLoading ? (
+            <div className="loading">Loading...</div>
+          ) : filteredData.length > 0 ? (
+            <>
+              <div className="table-header">
+                {activeTab === 'transactions' ? (
+                  <>
+                    <div onClick={() => handleSort('date')}>
+                      Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div onClick={() => handleSort('type')}>
+                      Type {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div onClick={() => handleSort('currency')}>
+                      Currency {sortConfig.key === 'currency' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div onClick={() => handleSort('amount')}>
+                      Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div>Fee</div>
+                    <div onClick={() => handleSort('status')}>
+                      Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div>Actions</div>
+                  </>
+                ) : (
+                  <>
+                    <div onClick={() => handleSort('date')}>
+                      Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div>Pair</div>
+                    <div onClick={() => handleSort('amount')}>
+                      Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div>Fee</div>
+                    <div onClick={() => handleSort('status')}>
+                      Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                    </div>
+                    <div>Completed</div>
+                    <div>Actions</div>
+                  </>
+                )}
+              </div>
 
-          <div className="table-body">
-            {filteredData.length > 0 ? (
-              filteredData.map((item) => (
-                <React.Fragment key={item.id}>
-                  <div className="table-row">
-                    {activeTab === 'transactions' ? (
-                      <>
-                        <div>{formatDate(item.date)}</div>
-                        <div className={`type-${item.type}`}>{item.type}</div>
-                        <div>{item.currency}</div>
-                        <div>{item.amount}</div>
-                        <div>{item.fee}</div>
-                        <div className={`status-${item.status}`}>{item.status}</div>
-                        <div className="actions">
-                          <button
-                            onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                            className="details-btn"
-                          >
-                            {expandedId === item.id ? 'Hide' : 'Details'}
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div>{formatDate(item.date)}</div>
-                        <div>{item.sellCurrency}/{item.buyCurrency}</div>
-                        <div>{item.amount}</div>
-                        <div>{item.fee}</div>
-                        <div className={`status-${item.status}`}>{item.status}</div>
-                        <div>{item.completedAmount}/{item.amount}</div>
-                        <div className="actions">
-                          <button
-                            onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                            className="details-btn"
-                          >
-                            {expandedId === item.id ? 'Hide' : 'Details'}
-                          </button>
-                          {(item.status === 'pending' || item.status === 'partial') && (
-                            <button
-                              onClick={() => handleCancelClick(item.id)}
-                              className="cancel-btn"
-                            >
-                              Cancel
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {expandedId === item.id && (
-                    <div className="expanded-row">
+              <div className="table-body">
+                {filteredData.map((item) => (
+                  <React.Fragment key={item.id}>
+                    <div className="table-row">
                       {activeTab === 'transactions' ? (
-                        <div className="wallet-info">
-                          <strong>Wallet:</strong> {item.wallet}
-                        </div>
+                        <>
+                          <div>{formatDate(item.date)}</div>
+                          <div className={`type-${item.type}`}>{item.type}</div>
+                          <div>{item.currency}</div>
+                          <div>{item.amount}</div>
+                          <div>{item.fee}</div>
+                          <div className={`status-${item.status}`}>{item.status}</div>
+                          <div className="actions">
+                            <button
+                              onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                              className="details-btn"
+                            >
+                              {expandedId === item.id ? 'Hide' : 'Details'}
+                            </button>
+                          </div>
+                        </>
                       ) : (
-                        <div className="trade-details">
-                          <div><strong>Sell:</strong> {item.sellCurrency}</div>
-                          <div><strong>Buy:</strong> {item.buyCurrency}</div>
-                          <div><strong>Progress:</strong> {(item.completedAmount / item.amount * 100).toFixed(2)}%</div>
-                        </div>
+                        <>
+                          <div>{formatDate(item.date)}</div>
+                          <div>{item.sellCurrency}/{item.buyCurrency}</div>
+                          <div>{item.amount}</div>
+                          <div>{item.fee}</div>
+                          <div className={`status-${item.status}`}>{item.status}</div>
+                          <div>{item.completedAmount}/{item.amount}</div>
+                          <div className="actions">
+                            <button
+                              onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                              className="details-btn"
+                            >
+                              {expandedId === item.id ? 'Hide' : 'Details'}
+                            </button>
+                            {(item.rawStatus === 'pending' || item.rawStatus === 'processing') && (
+                              <button
+                                onClick={() => handleCancelClick(item.id)}
+                                className="cancel-btn"
+                              >
+                                Cancel
+                              </button>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
-                  )}
-                </React.Fragment>
-              ))
-            ) : (
-              <div className="no-data">No records found</div>
-            )}
-          </div>
+
+                    {expandedId === item.id && (
+                      <div className="expanded-row">
+                        {activeTab === 'transactions' ? (
+                          <div className="wallet-info">
+                            <strong>Wallet:</strong> {item.wallet}
+                          </div>
+                        ) : (
+                          <div className="trade-details">
+                            <div><strong>Sell:</strong> {item.sellCurrency}</div>
+                            <div><strong>Buy:</strong> {item.buyCurrency}</div>
+                            <div><strong>Progress:</strong> {item.amount > 0 ? (item.completedAmount / item.amount * 100).toFixed(2) : 0}%</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="no-data">No records found</div>
+          )}
         </div>
       </div>
 
@@ -364,6 +451,29 @@ const Profile = () => {
                   className="modal-cancel-btn"
                 >
                   No, keep it
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно ошибки */}
+      {errorModal.show && (
+        <div className="modal-overlay" onClick={closeErrorModal}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Error</h3>
+              <button className="modal-close" onClick={closeErrorModal}>×</button>
+            </div>
+            <div className="modal-content">
+              <p>{errorModal.message}</p>
+              <div className="modal-buttons">
+                <button
+                  onClick={closeErrorModal}
+                  className="modal-confirm-btn"
+                >
+                  OK
                 </button>
               </div>
             </div>
