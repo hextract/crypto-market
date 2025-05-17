@@ -33,15 +33,21 @@ func (ds *DatabaseService) GetBidByID(ID string) (*models.Bid, error) {
 	defer rows.Close()
 
 	bid := &models.Bid{}
+	var userID string
 	err = rows.Scan(
 		&bid.ID,
+		&userID,
 		&bid.FromCurrency,
 		&bid.ToCurrency,
+		&bid.Status,
+		&bid.CreateDate,
+		&bid.CompleteDate,
 		&bid.MinPrice,
 		&bid.MaxPrice,
 		&bid.AmountToBuy,
-		&bid.Status,
-		&bid.CreateDate,
+		&bid.BoughtAmount,
+		&bid.BuySpeed,
+		&bid.AvgPrice,
 	)
 	if err != nil {
 		return nil, err

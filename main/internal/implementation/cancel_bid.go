@@ -3,7 +3,7 @@ package implementation
 import "context"
 
 func (ds *DatabaseService) CancelBid(ID string) error {
-	query := `DELETE FROM bids WHERE bids.id == $1;`
+	query := `DELETE FROM bids WHERE bids.id = $1;`
 
 	args := []any{ID}
 
