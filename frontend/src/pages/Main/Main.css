@@ -55,7 +55,7 @@
 /* Блок графика */
 .chart-section {
   flex: 2;
-  background: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(to bottom right, #1e1e2f, #2e1e4f);
   border: 1px solid #a74aff;
   border-radius: 10px;
   height: 501px;

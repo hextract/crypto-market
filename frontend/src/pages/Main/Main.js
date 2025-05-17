@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import MarketChart from '../../components/MarketChart';
 import { useNavigate } from 'react-router-dom';
 import { isAuthenticated, logout } from '../../api/authService';
 import {
@@ -309,7 +310,7 @@ const Main = () => {
 
       <div className="content">
         <div className="chart-section">
-          <p className="chart-placeholder">тут график</p>
+          <MarketChart data={marketData.history || []} clearingPrice={marketData.price} />
         </div>
 
         <div className="trade-panel">
