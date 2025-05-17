@@ -18,6 +18,23 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 		return utils.HandleError("max_price must be greater than or equal to min_price", http.StatusInternalServerError)
 	}
 
+	needBalance := *params.Body.MaxPrice * *params.Body.AmountToBuy
+
+	balances, err := h.Database.GetAccountBalance(user)
+
+	quoteBal := float32(0)
+
+	for _, cur := range balances {
+		if cur.Currency == *params.Body.FromCurrency {
+			quoteBal = cur.Amount
+			break
+		}
+	}
+
+	if quoteBal < needBalance {
+		return utils.HandleError("not enough balance!", http.StatusInternalServerError)
+	}
+
 	buySpeed := float32(0)
 	if params.Body.BuySpeed != nil {
 		buySpeed = *params.Body.BuySpeed
@@ -49,6 +66,9 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 		BuySpeed:    &buySpeed,
 	})
 	if err != nil {
+		err := h.Database.CancelBid(bidID)
+		if err != nil {
+		}
 		return utils.HandleError("couldn't place order", http.StatusInternalServerError)
 	}
 
