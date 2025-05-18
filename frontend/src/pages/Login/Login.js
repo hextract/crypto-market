@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { loginUser, setAuthToken } from "../../api/authService";
 import "../Register/Register.css";
 import logo from "../../assets/logo-purple.svg";
+import eyeOpen from '../../assets/eye-open.png';
+import eyeClosed from '../../assets/eye-closed.png';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -18,6 +20,7 @@ const LoginPage = () => {
 
     const [submitAttempted, setSubmitAttempted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const validateEmail = (email) => {
@@ -92,6 +95,11 @@ const LoginPage = () => {
         }
     }, [submitAttempted, validateForm]);
 
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+
     return (
       <div className="container">
           <nav className="navbar">
@@ -126,10 +134,10 @@ const LoginPage = () => {
                   )}
               </div>
 
-              <div className="input-container">
+              <div className="input-container password-container">
                   <input
                     formNoValidate={true}
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     minLength="8"
                     placeholder="password"
@@ -137,6 +145,18 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                   />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={toggleShowPassword}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                      <img
+                        src={showPassword ? eyeOpen : eyeClosed}
+                        alt={showPassword ? "Hide password" : "Show password"}
+                        className="eye-icon"
+                      />
+                  </button>
                   {errors.password && submitAttempted && (
                     <div className="tooltip show">{errors.password}</div>
                   )}

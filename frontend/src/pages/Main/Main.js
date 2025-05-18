@@ -76,7 +76,7 @@ const Main = () => {
       const balanceResponse = await getBalance();
       const newBalances = { USDT: 0, BTC: 0 };
       balanceResponse.forEach(item => {
-        newBalances[item.currency] = item.amount + 100;
+        newBalances[item.currency] = item.amount;
       });
       setBalances(newBalances);
 

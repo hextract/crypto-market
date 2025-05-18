@@ -42,6 +42,7 @@ const Profile = () => {
       } else {
         const params = buildTradeFilters();
         const data = await getTradesHistory(params);
+        console.log(data);
         setTrades(data.map(mapTrade));
       }
     } catch (error) {
@@ -109,13 +110,14 @@ const Profile = () => {
 
   const mapTrade = (item) => ({
     id: item.id,
-    date: new Date(item.date * 1000),
-    sellCurrency: item.currency_from,
-    buyCurrency: item.currency_to,
-    amount: item.amount_to,
+    date: new Date(item.create_date),
+    cancelledDate: item.complete_date ? new Date(item.complete_date) : null,
+    sellCurrency: item.from_currency,
+    buyCurrency: item.to_currency,
+    amount: item.amount_to_buy,
     fee: item.commission || 0,
     status: mapTradeStatus(item.status),
-    completedAmount: item.amount_to || 0,
+    completedAmount: item.bought_amount || 0,
     rawStatus: item.status
   });
 
@@ -194,9 +196,9 @@ const Profile = () => {
 
     if (activeTab === 'transactions' && filters.type !== 'all' && item.type !== filters.type) return false;
 
-    if (filters.status !== 'all' && item.rawStatus !== filters.status) return false;
+    return !(filters.status !== 'all' && item.rawStatus !== filters.status);
 
-    return true;
+
   });
 
   const formatDate = (date) => {
@@ -415,6 +417,9 @@ const Profile = () => {
                             <div><strong>Sell:</strong> {item.sellCurrency}</div>
                             <div><strong>Buy:</strong> {item.buyCurrency}</div>
                             <div><strong>Progress:</strong> {item.amount > 0 ? (item.completedAmount / item.amount * 100).toFixed(2) : 0}%</div>
+                            {item.cancelledDate && item.cancelledDate.getFullYear() > 1 && (
+                              <div><strong>Completed Date:</strong> {formatDate(item.cancelledDate)}</div>
+                            )}
                           </div>
                         )}
                       </div>

@@ -98,7 +98,7 @@ export const getTransactionsHistory = async (filters = {}) => {
 
 export const getTradesHistory = async (filters = {}) => {
   try {
-    const response = await api.get('/transactions/purchase', {
+    const response = await api.get('/bids', {
       params: filters
     });
     return response.data;
