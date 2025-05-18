@@ -171,6 +171,88 @@ func init() {
         }
       }
     },
+    "/bids": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Returns the user's market maker requests",
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get bids \u0026 ask history",
+        "parameters": [
+          {
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled",
+              "pending"
+            ],
+            "type": "string",
+            "description": "Filter by purchase status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases from this Unix timestamp",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases up to this Unix timestamp",
+            "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid"
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/market-maker/{order_id}/status": {
       "patch": {
         "security": [
@@ -405,88 +487,6 @@ func init() {
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/deposit_response"
-            }
-          },
-          "400": {
-            "description": "Incorrect data",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/transactions/purchase": {
-      "get": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "description": "Returns the user's purchase history with optional filters",
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get purchase history",
-        "parameters": [
-          {
-            "enum": [
-              "finished",
-              "processing",
-              "cancelled",
-              "pending"
-            ],
-            "type": "string",
-            "description": "Filter by purchase status",
-            "name": "status",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Filter purchases from this Unix timestamp",
-            "name": "date_from",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Filter purchases up to this Unix timestamp",
-            "name": "date_to",
-            "in": "query"
-          },
-          {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int64",
-            "default": 100,
-            "description": "Maximum number of results",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int64",
-            "default": 0,
-            "description": "Number of results to skip",
-            "name": "offset",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/purchase"
-              }
             }
           },
           "400": {
@@ -1136,6 +1136,89 @@ func init() {
         }
       }
     },
+    "/bids": {
+      "get": {
+        "security": [
+          {
+            "api_key": []
+          }
+        ],
+        "description": "Returns the user's market maker requests",
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get bids \u0026 ask history",
+        "parameters": [
+          {
+            "enum": [
+              "finished",
+              "processing",
+              "cancelled",
+              "pending"
+            ],
+            "type": "string",
+            "description": "Filter by purchase status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases from this Unix timestamp",
+            "name": "date_from",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "Filter purchases up to this Unix timestamp",
+            "name": "date_to",
+            "in": "query"
+          },
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "description": "Maximum number of results",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
+            "default": 0,
+            "description": "Number of results to skip",
+            "name": "offset",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid"
+              }
+            }
+          },
+          "400": {
+            "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/market-maker/{order_id}/status": {
       "patch": {
         "security": [
@@ -1372,89 +1455,6 @@ func init() {
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/deposit_response"
-            }
-          },
-          "400": {
-            "description": "Incorrect data",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/transactions/purchase": {
-      "get": {
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "description": "Returns the user's purchase history with optional filters",
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get purchase history",
-        "parameters": [
-          {
-            "enum": [
-              "finished",
-              "processing",
-              "cancelled",
-              "pending"
-            ],
-            "type": "string",
-            "description": "Filter by purchase status",
-            "name": "status",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Filter purchases from this Unix timestamp",
-            "name": "date_from",
-            "in": "query"
-          },
-          {
-            "type": "integer",
-            "format": "int64",
-            "description": "Filter purchases up to this Unix timestamp",
-            "name": "date_to",
-            "in": "query"
-          },
-          {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int64",
-            "default": 100,
-            "description": "Maximum number of results",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int64",
-            "default": 0,
-            "description": "Number of results to skip",
-            "name": "offset",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/purchase"
-              }
             }
           },
           "400": {

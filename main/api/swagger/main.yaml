@@ -160,10 +160,10 @@ paths:
           description: "Unauthorized"
           schema:
             $ref: "#/definitions/Error"
-  /transactions/purchase:
+  /bids:
     get:
-      summary: "Get purchase history"
-      description: "Returns the user's purchase history with optional filters"
+      summary: "Get bids & ask history"
+      description: "Returns the user's market maker requests"
       produces:
         - "application/json"
       security:
@@ -204,7 +204,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/purchase"
+              $ref: "#/definitions/bid"
         401:
           description: "Unauthorized"
           schema:

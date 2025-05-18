@@ -9,25 +9,64 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // NewGetBidsParams creates a new GetBidsParams object
-//
-// There are no default values defined in the spec.
+// with the default values initialized.
 func NewGetBidsParams() GetBidsParams {
 
-	return GetBidsParams{}
+	var (
+		// initialize parameters with default values
+
+		limitDefault  = int64(100)
+		offsetDefault = int64(0)
+	)
+
+	return GetBidsParams{
+		Limit: &limitDefault,
+
+		Offset: &offsetDefault,
+	}
 }
 
 // GetBidsParams contains all the bound params for the get bids operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters get_bids
+// swagger:parameters GetBids
 type GetBidsParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
+
+	/*Filter purchases from this Unix timestamp
+	  In: query
+	*/
+	DateFrom *int64
+	/*Filter purchases up to this Unix timestamp
+	  In: query
+	*/
+	DateTo *int64
+	/*Maximum number of results
+	  Minimum: 1
+	  In: query
+	  Default: 100
+	*/
+	Limit *int64
+	/*Number of results to skip
+	  Minimum: 0
+	  In: query
+	  Default: 0
+	*/
+	Offset *int64
+	/*Filter by purchase status
+	  In: query
+	*/
+	Status *string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -39,8 +78,188 @@ func (o *GetBidsParams) BindRequest(r *http.Request, route *middleware.MatchedRo
 
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
+	qDateFrom, qhkDateFrom, _ := qs.GetOK("date_from")
+	if err := o.bindDateFrom(qDateFrom, qhkDateFrom, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qDateTo, qhkDateTo, _ := qs.GetOK("date_to")
+	if err := o.bindDateTo(qDateTo, qhkDateTo, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qLimit, qhkLimit, _ := qs.GetOK("limit")
+	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qOffset, qhkOffset, _ := qs.GetOK("offset")
+	if err := o.bindOffset(qOffset, qhkOffset, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qStatus, qhkStatus, _ := qs.GetOK("status")
+	if err := o.bindStatus(qStatus, qhkStatus, route.Formats); err != nil {
+		res = append(res, err)
+	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindDateFrom binds and validates parameter DateFrom from query.
+func (o *GetBidsParams) bindDateFrom(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("date_from", "query", "int64", raw)
+	}
+	o.DateFrom = &value
+
+	return nil
+}
+
+// bindDateTo binds and validates parameter DateTo from query.
+func (o *GetBidsParams) bindDateTo(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("date_to", "query", "int64", raw)
+	}
+	o.DateTo = &value
+
+	return nil
+}
+
+// bindLimit binds and validates parameter Limit from query.
+func (o *GetBidsParams) bindLimit(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetBidsParams()
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("limit", "query", "int64", raw)
+	}
+	o.Limit = &value
+
+	if err := o.validateLimit(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateLimit carries on validations for parameter Limit
+func (o *GetBidsParams) validateLimit(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("limit", "query", *o.Limit, 1, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindOffset binds and validates parameter Offset from query.
+func (o *GetBidsParams) bindOffset(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewGetBidsParams()
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("offset", "query", "int64", raw)
+	}
+	o.Offset = &value
+
+	if err := o.validateOffset(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateOffset carries on validations for parameter Offset
+func (o *GetBidsParams) validateOffset(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("offset", "query", *o.Offset, 0, false); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// bindStatus binds and validates parameter Status from query.
+func (o *GetBidsParams) bindStatus(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Status = &raw
+
+	if err := o.validateStatus(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateStatus carries on validations for parameter Status
+func (o *GetBidsParams) validateStatus(formats strfmt.Registry) error {
+
+	if err := validate.EnumCase("status", "query", *o.Status, []interface{}{"finished", "processing", "cancelled", "pending"}, true); err != nil {
+		return err
+	}
+
 	return nil
 }
