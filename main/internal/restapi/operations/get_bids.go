@@ -32,9 +32,11 @@ func NewGetBids(ctx *middleware.Context, handler GetBidsHandler) *GetBids {
 }
 
 /*
-	GetBids swagger:route GET /bid getBids
+	GetBids swagger:route GET /bids getBids
 
-Get my bids
+Get bids & ask history
+
+Returns the user's market maker requests
 */
 type GetBids struct {
 	Context *middleware.Context

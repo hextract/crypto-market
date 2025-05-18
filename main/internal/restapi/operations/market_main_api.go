@@ -48,11 +48,11 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
 		}),
+		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal *models.User) middleware.Responder {
+			return middleware.NotImplemented("operation GetBids has not yet been implemented")
+		}),
 		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
-		}),
-		GetTransactionsPurchaseHandler: GetTransactionsPurchaseHandlerFunc(func(params GetTransactionsPurchaseParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GetTransactionsPurchase has not yet been implemented")
 		}),
 		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
@@ -146,10 +146,10 @@ type MarketMainAPI struct {
 
 	// GetAccountBalanceHandler sets the operation handler for the get account balance operation
 	GetAccountBalanceHandler GetAccountBalanceHandler
+	// GetBidsHandler sets the operation handler for the get bids operation
+	GetBidsHandler GetBidsHandler
 	// GetMetricsHandler sets the operation handler for the get metrics operation
 	GetMetricsHandler GetMetricsHandler
-	// GetTransactionsPurchaseHandler sets the operation handler for the get transactions purchase operation
-	GetTransactionsPurchaseHandler GetTransactionsPurchaseHandler
 	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
 	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
@@ -257,11 +257,11 @@ func (o *MarketMainAPI) Validate() error {
 	if o.GetAccountBalanceHandler == nil {
 		unregistered = append(unregistered, "GetAccountBalanceHandler")
 	}
+	if o.GetBidsHandler == nil {
+		unregistered = append(unregistered, "GetBidsHandler")
+	}
 	if o.GetMetricsHandler == nil {
 		unregistered = append(unregistered, "GetMetricsHandler")
-	}
-	if o.GetTransactionsPurchaseHandler == nil {
-		unregistered = append(unregistered, "GetTransactionsPurchaseHandler")
 	}
 	if o.GetTransactionsTransfersHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
@@ -404,11 +404,11 @@ func (o *MarketMainAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/metrics"] = NewGetMetrics(o.context, o.GetMetricsHandler)
+	o.handlers["GET"]["/bids"] = NewGetBids(o.context, o.GetBidsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/transactions/purchase"] = NewGetTransactionsPurchase(o.context, o.GetTransactionsPurchaseHandler)
+	o.handlers["GET"]["/metrics"] = NewGetMetrics(o.context, o.GetMetricsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

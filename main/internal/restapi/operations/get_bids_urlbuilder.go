@@ -9,11 +9,21 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
 // GetBidsURL generates an URL for the get bids operation
 type GetBidsURL struct {
+	DateFrom *int64
+	DateTo   *int64
+	Limit    *int64
+	Offset   *int64
+	Status   *string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -35,10 +45,54 @@ func (o *GetBidsURL) SetBasePath(bp string) {
 func (o *GetBidsURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/bid"
+	var _path = "/bids"
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var dateFromQ string
+	if o.DateFrom != nil {
+		dateFromQ = swag.FormatInt64(*o.DateFrom)
+	}
+	if dateFromQ != "" {
+		qs.Set("date_from", dateFromQ)
+	}
+
+	var dateToQ string
+	if o.DateTo != nil {
+		dateToQ = swag.FormatInt64(*o.DateTo)
+	}
+	if dateToQ != "" {
+		qs.Set("date_to", dateToQ)
+	}
+
+	var limitQ string
+	if o.Limit != nil {
+		limitQ = swag.FormatInt64(*o.Limit)
+	}
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
+	}
+
+	var offsetQ string
+	if o.Offset != nil {
+		offsetQ = swag.FormatInt64(*o.Offset)
+	}
+	if offsetQ != "" {
+		qs.Set("offset", offsetQ)
+	}
+
+	var statusQ string
+	if o.Status != nil {
+		statusQ = *o.Status
+	}
+	if statusQ != "" {
+		qs.Set("status", statusQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

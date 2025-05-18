@@ -6,21 +6,26 @@ import (
 	"time"
 )
 
-func (ds *DatabaseService) GetPurchases(
+func (ds *DatabaseService) GetBids(
 	user *models.User,
 	status *string,
 	dateFrom, dateTo *time.Time,
 	limit, offset *int64,
-) ([]*models.Purchase, error) {
+) ([]*models.Bid, error) {
 	query := `
         SELECT 
             b.id,
             cf.name AS currency_from,
             ct.name AS currency_to,
-            COALESCE(b.bought_amount * b.avg_price, 0) AS amount_from,
-            b.bought_amount AS amount_to,
             b.status,
-            EXTRACT(EPOCH FROM b.create_date)::bigint AS date
+            b.create_date,
+            b.complete_date,
+            b.min_price,
+            b.max_price,
+            b.amount_to_buy,
+            b.bought_amount,
+            b.buy_speed,
+            b.avg_price
         FROM bids b
         JOIN currencies cf ON b.from_id = cf.currency_id
         JOIN currencies ct ON b.to_id = ct.currency_id
@@ -66,22 +71,27 @@ func (ds *DatabaseService) GetPurchases(
 	}
 	defer rows.Close()
 
-	result := []*models.Purchase{}
+	var result []*models.Bid
 	for rows.Next() {
-		purchase := &models.Purchase{}
+		bid := &models.Bid{}
 		err := rows.Scan(
-			&purchase.ID,
-			&purchase.CurrencyFrom,
-			&purchase.CurrencyTo,
-			&purchase.AmountFrom,
-			&purchase.AmountTo,
-			&purchase.Status,
-			&purchase.Date,
+			&bid.ID,
+			&bid.FromCurrency,
+			&bid.ToCurrency,
+			&bid.Status,
+			&bid.CreateDate,
+			&bid.CompleteDate,
+			&bid.MinPrice,
+			&bid.MaxPrice,
+			&bid.AmountToBuy,
+			&bid.BoughtAmount,
+			&bid.BuySpeed,
+			&bid.AvgPrice,
 		)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, purchase)
+		result = append(result, bid)
 	}
 
 	return result, nil

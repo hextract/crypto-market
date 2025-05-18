@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (handler *Handler) GetTransactionsPurchaseHandler(params operations.GetTransactionsPurchaseParams, user *models.User) (responder middleware.Responder) {
+func (handler *Handler) GetBidsHandler(params operations.GetBidsParams, user *models.User) (responder middleware.Responder) {
 	defer utils.CatchPanic(&responder)
 
 	var status *string
@@ -34,12 +34,12 @@ func (handler *Handler) GetTransactionsPurchaseHandler(params operations.GetTran
 		offset = params.Offset
 	}
 
-	purchases, err := handler.Database.GetPurchases(user, status, dateFrom, dateTo, limit, offset)
+	bids, err := handler.Database.GetBids(user, status, dateFrom, dateTo, limit, offset)
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
 
-	result := new(operations.GetTransactionsPurchaseOK)
-	result.SetPayload(purchases)
+	result := new(operations.GetBidsOK)
+	result.SetPayload(bids)
 	return result
 }

@@ -98,7 +98,7 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
 		})
 	}
-	api.GetTransactionsPurchaseHandler = operations.GetTransactionsPurchaseHandlerFunc(handler.GetTransactionsPurchaseHandler)
+	api.GetBidsHandler = operations.GetBidsHandlerFunc(handler.GetBidsHandler)
 	api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(handler.GetTransactionsTransfersHandler)
 
 	api.PostTransactionsDepositHandler = operations.PostTransactionsDepositHandlerFunc(handler.PostTransactionsDepositHandler)

@@ -61,15 +61,15 @@ func (o *GetBidsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Produ
 	}
 }
 
-// GetBidsForbiddenCode is the HTTP code returned for type GetBidsForbidden
-const GetBidsForbiddenCode int = 403
+// GetBidsBadRequestCode is the HTTP code returned for type GetBidsBadRequest
+const GetBidsBadRequestCode int = 400
 
 /*
-GetBidsForbidden No access
+GetBidsBadRequest Incorrect data
 
-swagger:response getBidsForbidden
+swagger:response getBidsBadRequest
 */
-type GetBidsForbidden struct {
+type GetBidsBadRequest struct {
 
 	/*
 	  In: Body
@@ -77,27 +77,72 @@ type GetBidsForbidden struct {
 	Payload *models.Error `json:"body,omitempty"`
 }
 
-// NewGetBidsForbidden creates GetBidsForbidden with default headers values
-func NewGetBidsForbidden() *GetBidsForbidden {
+// NewGetBidsBadRequest creates GetBidsBadRequest with default headers values
+func NewGetBidsBadRequest() *GetBidsBadRequest {
 
-	return &GetBidsForbidden{}
+	return &GetBidsBadRequest{}
 }
 
-// WithPayload adds the payload to the get bids forbidden response
-func (o *GetBidsForbidden) WithPayload(payload *models.Error) *GetBidsForbidden {
+// WithPayload adds the payload to the get bids bad request response
+func (o *GetBidsBadRequest) WithPayload(payload *models.Error) *GetBidsBadRequest {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get bids forbidden response
-func (o *GetBidsForbidden) SetPayload(payload *models.Error) {
+// SetPayload sets the payload to the get bids bad request response
+func (o *GetBidsBadRequest) SetPayload(payload *models.Error) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *GetBidsForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *GetBidsBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(403)
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// GetBidsUnauthorizedCode is the HTTP code returned for type GetBidsUnauthorized
+const GetBidsUnauthorizedCode int = 401
+
+/*
+GetBidsUnauthorized Unauthorized
+
+swagger:response getBidsUnauthorized
+*/
+type GetBidsUnauthorized struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetBidsUnauthorized creates GetBidsUnauthorized with default headers values
+func NewGetBidsUnauthorized() *GetBidsUnauthorized {
+
+	return &GetBidsUnauthorized{}
+}
+
+// WithPayload adds the payload to the get bids unauthorized response
+func (o *GetBidsUnauthorized) WithPayload(payload *models.Error) *GetBidsUnauthorized {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get bids unauthorized response
+func (o *GetBidsUnauthorized) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetBidsUnauthorized) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(401)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
