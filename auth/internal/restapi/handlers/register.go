@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/h4x4d/crypto-market/auth/internal/impl"
 	"github.com/h4x4d/crypto-market/auth/internal/models"
@@ -15,7 +17,9 @@ func (h *Handler) RegisterHandler(api operations.PostAuthRegisterParams) middlew
 	defer span.End()
 
 	token, err := impl.CreateUser(h.Client, api.Body)
-	if err != nil {
+
+	var apiErr *gocloak.APIError
+	if errors.As(err, &apiErr) {
 		// Logging
 		slog.Error(
 			"failed register new user",
@@ -24,14 +28,27 @@ func (h *Handler) RegisterHandler(api operations.PostAuthRegisterParams) middlew
 				slog.String("login", api.Body.Login),
 				slog.String("email", api.Body.Email),
 			),
-			slog.Int("status_code", operations.PostAuthRegisterConflictCode),
-			slog.String("error", err.Error()),
+			slog.Int("status_code", apiErr.Code),
+			slog.String("error", apiErr.Error()),
 		)
 
-		conflict := int64(operations.PostAuthRegisterConflictCode)
-		return new(operations.PostAuthRegisterConflict).WithPayload(&models.Error{
+		switch apiErr.Code {
+		case 409:
+			conflict := int64(operations.PostAuthRegisterConflictCode)
+			return new(operations.PostAuthRegisterConflict).WithPayload(&models.Error{
+				ErrorMessage:    err.Error(),
+				ErrorStatusCode: conflict,
+			})
+		default:
+			return new(operations.PostAuthRegisterInternalServerError).WithPayload(&models.Error{
+				ErrorMessage:    err.Error(),
+				ErrorStatusCode: int64(operations.PostAuthRegisterInternalServerErrorCode),
+			})
+		}
+	} else if err != nil {
+		return new(operations.PostAuthRegisterInternalServerError).WithPayload(&models.Error{
 			ErrorMessage:    err.Error(),
-			ErrorStatusCode: conflict,
+			ErrorStatusCode: int64(operations.PostAuthRegisterInternalServerErrorCode),
 		})
 	}
 	// Logging

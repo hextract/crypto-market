@@ -38,6 +38,10 @@ paths:
           schema:
             $ref: "#/definitions/Error"
           description: "Incorrect login data"
+        500:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Server error"
 
   /auth/register:
     post:
@@ -71,6 +75,10 @@ paths:
           schema:
             $ref: "#/definitions/Error"
           description: "Incorrect data"
+        500:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Server error"
 
   /auth/change-password:
     post:
@@ -108,6 +116,11 @@ paths:
           schema:
             $ref: "#/definitions/Error"
           description: "Incorrect old password"
+        500:
+          schema:
+            $ref: "#/definitions/Error"
+          description: "Server error"
+
   /auth/validate-token:
     post:
       summary: "Validate token"

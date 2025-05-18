@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/h4x4d/crypto-market/auth/internal/impl"
 	"github.com/h4x4d/crypto-market/auth/internal/models"
@@ -15,8 +17,8 @@ func (h *Handler) LoginHandler(api operations.PostAuthLoginParams) middleware.Re
 	defer span.End()
 
 	token, err := impl.LoginUser(h.Client, api.Body)
-	conflict := int64(operations.PostAuthLoginUnauthorizedCode)
-	if err != nil {
+	var apiErr *gocloak.APIError
+	if errors.As(err, &apiErr) {
 		// Logging
 		slog.Error(
 			"failed login user",
@@ -27,11 +29,26 @@ func (h *Handler) LoginHandler(api operations.PostAuthLoginParams) middleware.Re
 			slog.Int("status_code", operations.PostAuthLoginUnauthorizedCode),
 			slog.String("error", err.Error()),
 		)
-		return new(operations.PostAuthLoginUnauthorized).WithPayload(&models.Error{
+
+		switch apiErr.Code {
+		case 401:
+			return new(operations.PostAuthLoginUnauthorized).WithPayload(&models.Error{
+				ErrorMessage:    err.Error(),
+				ErrorStatusCode: int64(operations.PostAuthLoginUnauthorizedCode),
+			})
+		default:
+			return new(operations.PostAuthLoginInternalServerError).WithPayload(&models.Error{
+				ErrorMessage:    err.Error(),
+				ErrorStatusCode: int64(operations.PostAuthLoginInternalServerErrorCode),
+			})
+		}
+	} else if err != nil {
+		return new(operations.PostAuthLoginInternalServerError).WithPayload(&models.Error{
 			ErrorMessage:    err.Error(),
-			ErrorStatusCode: conflict,
+			ErrorStatusCode: int64(operations.PostAuthLoginInternalServerErrorCode),
 		})
 	}
+
 	// Logging
 	slog.Info(
 		"user login",

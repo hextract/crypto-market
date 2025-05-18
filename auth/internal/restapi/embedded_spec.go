@@ -81,6 +81,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -126,6 +132,12 @@ func init() {
           },
           "401": {
             "description": "Incorrect login data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -177,6 +189,12 @@ func init() {
           },
           "409": {
             "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -321,6 +339,12 @@ func init() {
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          },
+          "500": {
+            "description": "Server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -366,6 +390,12 @@ func init() {
           },
           "401": {
             "description": "Incorrect login data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -417,6 +447,12 @@ func init() {
           },
           "409": {
             "description": "Incorrect data",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Server error",
             "schema": {
               "$ref": "#/definitions/Error"
             }

@@ -147,3 +147,48 @@ func (o *PostAuthChangePasswordUnauthorized) WriteResponse(rw http.ResponseWrite
 		}
 	}
 }
+
+// PostAuthChangePasswordInternalServerErrorCode is the HTTP code returned for type PostAuthChangePasswordInternalServerError
+const PostAuthChangePasswordInternalServerErrorCode int = 500
+
+/*
+PostAuthChangePasswordInternalServerError Server error
+
+swagger:response postAuthChangePasswordInternalServerError
+*/
+type PostAuthChangePasswordInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewPostAuthChangePasswordInternalServerError creates PostAuthChangePasswordInternalServerError with default headers values
+func NewPostAuthChangePasswordInternalServerError() *PostAuthChangePasswordInternalServerError {
+
+	return &PostAuthChangePasswordInternalServerError{}
+}
+
+// WithPayload adds the payload to the post auth change password internal server error response
+func (o *PostAuthChangePasswordInternalServerError) WithPayload(payload *models.Error) *PostAuthChangePasswordInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post auth change password internal server error response
+func (o *PostAuthChangePasswordInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostAuthChangePasswordInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}

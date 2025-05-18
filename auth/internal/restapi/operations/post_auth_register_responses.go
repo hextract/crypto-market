@@ -102,3 +102,48 @@ func (o *PostAuthRegisterConflict) WriteResponse(rw http.ResponseWriter, produce
 		}
 	}
 }
+
+// PostAuthRegisterInternalServerErrorCode is the HTTP code returned for type PostAuthRegisterInternalServerError
+const PostAuthRegisterInternalServerErrorCode int = 500
+
+/*
+PostAuthRegisterInternalServerError Server error
+
+swagger:response postAuthRegisterInternalServerError
+*/
+type PostAuthRegisterInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewPostAuthRegisterInternalServerError creates PostAuthRegisterInternalServerError with default headers values
+func NewPostAuthRegisterInternalServerError() *PostAuthRegisterInternalServerError {
+
+	return &PostAuthRegisterInternalServerError{}
+}
+
+// WithPayload adds the payload to the post auth register internal server error response
+func (o *PostAuthRegisterInternalServerError) WithPayload(payload *models.Error) *PostAuthRegisterInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post auth register internal server error response
+func (o *PostAuthRegisterInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostAuthRegisterInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
