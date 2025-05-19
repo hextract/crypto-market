@@ -12,6 +12,7 @@ import {
   Label,
 } from 'recharts';
 import { getCurvesData } from '../api/matchingEngineService';
+import { useTranslation } from 'react-i18next';
 
 const CustomizedAxisTick = ({ x, y, payload }) => {
   return (
@@ -30,6 +31,8 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
 };
 
 export default function MarketChart() {
+  const { t } = useTranslation();
+
   const [supply, setSupply] = useState([]);
   const [demand, setDemand] = useState([]);
   const [intersection, setIntersection] = useState(null);
@@ -56,7 +59,6 @@ export default function MarketChart() {
         }
 
         const ratio = (targetPrice - left.price) / (right.price - left.price);
-        console.log(left.volume + ratio * (right.volume - left.volume))
         return left.volume + ratio * (right.volume - left.volume);
       };
 
@@ -74,7 +76,7 @@ export default function MarketChart() {
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>
-            Price: {label.toFixed(2)}
+            {t("main.chart.price")}: {label.toFixed(2)}
           </div>
           {supplyValue !== null && (
             <div style={{ color: '#ff4f81', display: 'flex', alignItems: 'center' }}>
@@ -85,7 +87,7 @@ export default function MarketChart() {
                 marginRight: '8px',
                 borderRadius: '50%'
               }}/>
-              Supply: {supplyValue.toFixed(4)}
+              {t("main.chart.supply")}: {supplyValue.toFixed(4)}
             </div>
           )}
           {demandValue !== null && (
@@ -97,7 +99,7 @@ export default function MarketChart() {
                 marginRight: '8px',
                 borderRadius: '50%'
               }}/>
-              Demand: {demandValue.toFixed(4)}
+              {t("main.chart.demand")}: {demandValue.toFixed(4)}
             </div>
           )}
         </div>
@@ -203,7 +205,7 @@ export default function MarketChart() {
             type="number"
           >
             <Label
-              value="Price (USDT)"
+              value={t("main.chart.price") + " (USDT)"}
               position="bottom"
               offset={24}
               style={{
@@ -222,7 +224,7 @@ export default function MarketChart() {
             width={80}
           >
             <Label
-              value="BTC volume/hour"
+              value={"BTC " + t("main.chart.volume_hour")}
               angle={-90}
               position="left"
               offset={0}
@@ -265,7 +267,7 @@ export default function MarketChart() {
             dataKey="volume"
             stroke="#ff4f81"
             strokeWidth={3}
-            name="Supply"
+            name={t("main.chart.supply")}
             dot={false}
             isAnimationActive={false}
           />
@@ -275,7 +277,7 @@ export default function MarketChart() {
             dataKey="volume"
             stroke="#4fc3f7"
             strokeWidth={3}
-            name="Demand"
+            name={t("main.chart.demand")}
             dot={false}
             activeDot={false}
             isAnimationActive={false}
@@ -289,7 +291,7 @@ export default function MarketChart() {
                 stroke="#fff"
                 strokeWidth={2}
                 label={{
-                  value: `Clearing: ${intersection.price.toFixed(2)}`,
+                  value:  `{${t("main.chart.clearing")} : ${intersection.price.toFixed(2)}}`,
                   position: 'right',
                   fill: '#ffffff',
                   fontSize: 12

@@ -5,6 +5,7 @@ import "../Register/Register.css";
 import logo from "../../assets/logo-purple.svg";
 import eyeOpen from '../../assets/eye-open.png';
 import eyeClosed from '../../assets/eye-closed.png';
+import { useTranslation } from 'react-i18next';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,12 +56,12 @@ const LoginPage = () => {
         } catch (err) {
             if (err.response) {
                 if (err.response.status === 401) {
-                    setErrors(prev => ({ ...prev, server: "Incorrect email or password" }));
+                    setErrors(prev => ({ ...prev, server: t('auth.errors.incorrectCredentials') }));
                 } else if (err.response.status >= 500) {
-                    setErrors(prev => ({ ...prev, server: "Server is unavailable, please try later" }));
+                    setErrors(prev => ({ ...prev, server: t('auth.errors.serverUnavailable') }));
                 }
             } else {
-                setErrors(prev => ({ ...prev, server: "Network error, please try later" }));
+                setErrors(prev => ({ ...prev, server: t('auth.errors.networkError') }));
             }
         } finally {
             setIsLoading(false);
@@ -69,6 +71,7 @@ const LoginPage = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
         if ((formData.email && name !== "email") || (formData.password && name !== "password")) {
             setSubmitAttempted(true);
         }
@@ -79,15 +82,15 @@ const LoginPage = () => {
 
     const validateForm = useCallback(() => {
         const newErrors = {
-            email: !formData.email ? 'Email is required' :
-              !validateEmail(formData.email) ? 'Invalid email format' : null,
-            password: !formData.password ? 'Password is required' :
-              formData.password.length < 8 ? 'Min 8 characters required' : null,
+            email: !formData.email ? t('auth.errors.emailRequired') :
+              !validateEmail(formData.email) ? t('auth.errors.invalidEmail') : null,
+            password: !formData.password ? t('auth.errors.passwordRequired') :
+              formData.password.length < 8 ? t('auth.errors.minPassword') : null,
             server: null,
         };
         setErrors(newErrors);
         return !newErrors.email && !newErrors.password;
-    }, [formData]);
+    }, [formData, t]);
 
     useEffect(() => {
         if (submitAttempted) {
@@ -99,22 +102,21 @@ const LoginPage = () => {
         setShowPassword(!showPassword);
     };
 
-
     return (
       <div className="container">
           <nav className="navbar">
               <div className="logo">
                   <img src={logo} alt="Logo" className="logo-purple"/>
-                  <span className="title-navbar">CONT</span>
+                  <span className="title-navbar">{t('navbar.logo')}</span>
               </div>
               <div className="nav-links">
-                  <a className="link" href="/about">about</a>
-                  <a className="link active" href="/login">login</a>
-                  <a className="link" href="/register">register</a>
+                  <a className="link" href="/about">{t('navbar.about')}</a>
+                  <a className="link active" href="/login">{t('navbar.login')}</a>
+                  <a className="link" href="/register">{t('navbar.register')}</a>
               </div>
           </nav>
 
-          <h2 className="title">Sign in</h2>
+          <h2 className="title">{t('auth.signIn')}</h2>
 
           {errors.server && <div className="error-message">{errors.server}</div>}
 
@@ -124,7 +126,7 @@ const LoginPage = () => {
                     formNoValidate={true}
                     type="email"
                     name="email"
-                    placeholder="email"
+                    placeholder={t('auth.email')}
                     className={`input-register ${errors.email ? "error" : ""}`}
                     value={formData.email}
                     onChange={handleChange}
@@ -140,7 +142,7 @@ const LoginPage = () => {
                     type={showPassword ? "text" : "password"}
                     name="password"
                     minLength="8"
-                    placeholder="password"
+                    placeholder={t('auth.password')}
                     className={`input-register ${errors.password ? "error" : ""}`}
                     value={formData.password}
                     onChange={handleChange}
@@ -149,11 +151,11 @@ const LoginPage = () => {
                     type="button"
                     className="password-toggle"
                     onClick={toggleShowPassword}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   >
                       <img
                         src={showPassword ? eyeOpen : eyeClosed}
-                        alt={showPassword ? "Hide password" : "Show password"}
+                        alt={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                         className="eye-icon"
                       />
                   </button>
@@ -167,7 +169,7 @@ const LoginPage = () => {
                 className={`sign-button ${!isFormValid() || isLoading ? "disabled" : "active"}`}
                 disabled={!isFormValid() || isLoading}
               >
-                  {isLoading ? "Loading..." : "Sign in!"}
+                  {isLoading ? t('auth.loading') : t('auth.signInBtn')}
               </button>
           </form>
       </div>

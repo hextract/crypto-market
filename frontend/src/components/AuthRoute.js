@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { isAuthenticated } from '../api/authService';
+import { useTranslation } from 'react-i18next';
 
 const AuthRoute = ({ children }) => {
   const [authStatus, setAuthStatus] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -14,7 +16,7 @@ const AuthRoute = ({ children }) => {
   }, []);
 
   if (authStatus === null) {
-    return <div>Loading...</div>; // или ваш лоадер
+    return <div>{t('auth.loading')}</div>;
   }
 
   return authStatus ? children : <Navigate to="/login" replace />;

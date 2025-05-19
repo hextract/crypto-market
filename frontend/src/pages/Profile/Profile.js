@@ -8,6 +8,7 @@ import {
 } from '../../api/marketService';
 import './Profile.css';
 import logo from '../../assets/logo-purple.svg';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [trades, setTrades] = useState([]);
+  const { t } = useTranslation();
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -42,16 +44,15 @@ const Profile = () => {
       } else {
         const params = buildTradeFilters();
         const data = await getTradesHistory(params);
-        console.log(data);
         setTrades(data.map(mapTrade));
       }
     } catch (error) {
       console.error('Failed to load data:', error);
-      showError('Failed to load history. Please try again later.');
+      showError(t('profile.modals.errorLoading'));
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, filters]);
+  }, [activeTab, filters, t]);
 
   useEffect(() => {
     loadData();
@@ -99,11 +100,13 @@ const Profile = () => {
   const mapTransaction = (item) => ({
     id: item.id,
     date: new Date(item.date * 1000),
-    type: item.operation,
+    type: mapOperation(item.operation),
+    type_style: item.operation,
     currency: item.currency,
     amount: item.amount,
     fee: item.commission || 0,
-    status: item.status,
+    status: mapTradeStatus(item.status),
+    status_style: item.status,
     wallet: item.address,
     rawStatus: item.status
   });
@@ -117,16 +120,25 @@ const Profile = () => {
     amount: item.amount_to_buy,
     fee: item.commission || 0,
     status: mapTradeStatus(item.status),
+    status_style: item.status,
     completedAmount: item.bought_amount || 0,
     rawStatus: item.status
   });
 
+  const mapOperation = (op) => {
+    switch (op) {
+      case 'withdraw': return t('profile.withdraw');
+      case 'deposit': return t('profile.deposit');
+      default: return op;
+    }
+  };
+
   const mapTradeStatus = (status) => {
     switch (status) {
-      case 'finished': return 'completed';
-      case 'processing': return 'partial';
-      case 'pending': return 'pending';
-      case 'cancelled': return 'failed';
+      case 'finished': return t('profile.filters.statuses.completed');
+      case 'processing': return t('profile.filters.statuses.processing');
+      case 'pending': return t('profile.filters.statuses.pending');
+      case 'cancelled': return t('profile.filters.statuses.cancelled');
       default: return status;
     }
   };
@@ -197,8 +209,6 @@ const Profile = () => {
     if (activeTab === 'transactions' && filters.type !== 'all' && item.type !== filters.type) return false;
 
     return !(filters.status !== 'all' && item.rawStatus !== filters.status);
-
-
   });
 
   const formatDate = (date) => {
@@ -216,12 +226,11 @@ const Profile = () => {
   const confirmCancel = async () => {
     try {
       await cancelTrade(cancelModal.id);
-      // Обновляем данные после отмены
       await loadData();
       setCancelModal({ show: false, id: null, type: null });
     } catch (error) {
       console.error('Failed to cancel trade:', error);
-      showError('Failed to cancel trade. Please try again.');
+      showError(t('profile.modals.errorCancel'));
       setCancelModal({ show: false, id: null, type: null });
     }
   };
@@ -235,12 +244,12 @@ const Profile = () => {
       <nav className="navbar-main">
         <div className="logo">
           <img src={logo} alt="Logo" className="logo-purple"/>
-          <span>CONT</span>
+          <span>{t('navbar.logo')}</span>
         </div>
         <div className="nav-links">
-          <a href="/main">trade</a>
-          <a href="/profile" className="active">profile</a>
-          <button onClick={handleLogout} className="logout-btn">Logout</button>
+          <a href="/main">{t('navbar.trade')}</a>
+          <a href="/profile" className="active">{t('navbar.profile')}</a>
+          <button onClick={handleLogout} className="logout-btn">{t('navbar.logout')}</button>
         </div>
       </nav>
 
@@ -250,57 +259,57 @@ const Profile = () => {
             className={activeTab === 'trades' ? 'active' : ''}
             onClick={() => setActiveTab('trades')}
           >
-            Trades
+            {t('profile.tabs.trades')}
           </button>
           <button
             className={activeTab === 'transactions' ? 'active' : ''}
             onClick={() => setActiveTab('transactions')}
           >
-            Transactions
+            {t('profile.tabs.transactions')}
           </button>
         </div>
 
         <div className="filters">
           <div className="filter-group">
-            <label>Time:</label>
+            <label>{t('profile.filters.time')}</label>
             <select
               value={filters.time}
               onChange={(e) => handleFilterChange('time', e.target.value)}
             >
-              <option value="all">All time</option>
-              <option value="hour">Last hour</option>
-              <option value="day">Last 24 hours</option>
-              <option value="week">Last week</option>
-              <option value="month">Last month</option>
-              <option value="year">Last year</option>
+              <option value="all">{t('profile.filters.allTime')}</option>
+              <option value="hour">{t('profile.filters.lastHour')}</option>
+              <option value="day">{t('profile.filters.lastDay')}</option>
+              <option value="week">{t('profile.filters.lastWeek')}</option>
+              <option value="month">{t('profile.filters.lastMonth')}</option>
+              <option value="year">{t('profile.filters.lastYear')}</option>
             </select>
           </div>
 
           {activeTab === 'transactions' && (
             <div className="filter-group">
-              <label>Type:</label>
+              <label>{t('profile.filters.type')}</label>
               <select
                 value={filters.type}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
               >
-                <option value="all">All types</option>
-                <option value="deposit">Deposits</option>
-                <option value="withdraw">Withdrawals</option>
+                <option value="all">{t('profile.filters.allTypes')}</option>
+                <option value="deposit">{t('profile.filters.deposits')}</option>
+                <option value="withdraw">{t('profile.filters.withdrawals')}</option>
               </select>
             </div>
           )}
 
           <div className="filter-group">
-            <label>Status:</label>
+            <label>{t('profile.filters.status')}</label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
             >
-              <option value="all">All statuses</option>
-              <option value="finished">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="all">{t('profile.filters.allStatuses')}</option>
+              <option value="finished">{t('profile.filters.statuses.completed')}</option>
+              <option value="pending">{t('profile.filters.statuses.pending')}</option>
+              <option value="processing">{t('profile.filters.statuses.processing')}</option>
+              <option value="cancelled">{t('profile.filters.statuses.cancelled')}</option>
             </select>
           </div>
 
@@ -308,51 +317,51 @@ const Profile = () => {
             onClick={resetFilters}
             className="clear-filters-btn"
           >
-            Clear filters
+            {t('profile.filters.clear')}
           </button>
         </div>
 
         <div className="history-table">
           {isLoading ? (
-            <div className="loading">Loading...</div>
+            <div className="loading">{t('profile.table.loading')}</div>
           ) : filteredData.length > 0 ? (
             <>
               <div className="table-header">
                 {activeTab === 'transactions' ? (
                   <>
                     <div onClick={() => handleSort('date')}>
-                      Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.date')} {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                     <div onClick={() => handleSort('type')}>
-                      Type {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.type')} {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                     <div onClick={() => handleSort('currency')}>
-                      Currency {sortConfig.key === 'currency' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.currency')} {sortConfig.key === 'currency' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
                     <div onClick={() => handleSort('amount')}>
-                      Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.amount')} {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>Fee</div>
+                    <div>{t('profile.table.fee')}</div>
                     <div onClick={() => handleSort('status')}>
-                      Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.status')} {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>Actions</div>
+                    <div>{t('profile.table.actions')}</div>
                   </>
                 ) : (
                   <>
                     <div onClick={() => handleSort('date')}>
-                      Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.date')} {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>Pair</div>
+                    <div>{t('profile.table.pair')}</div>
                     <div onClick={() => handleSort('amount')}>
-                      Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.amount')} {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>Fee</div>
+                    <div>{t('profile.table.fee')}</div>
                     <div onClick={() => handleSort('status')}>
-                      Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      {t('profile.table.status')} {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>Completed</div>
-                    <div>Actions</div>
+                    <div>{t('profile.table.completed')}</div>
+                    <div>{t('profile.table.actions')}</div>
                   </>
                 )}
               </div>
@@ -364,17 +373,17 @@ const Profile = () => {
                       {activeTab === 'transactions' ? (
                         <>
                           <div>{formatDate(item.date)}</div>
-                          <div className={`type-${item.type}`}>{item.type}</div>
+                          <div className={`type-${item.type_style}`}>{item.type}</div>
                           <div>{item.currency}</div>
                           <div>{item.amount}</div>
                           <div>{item.fee}</div>
-                          <div className={`status-${item.status}`}>{item.status}</div>
+                          <div className={`status-${item.status_style}`}>{item.status}</div>
                           <div className="actions">
                             <button
                               onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
                               className="details-btn"
                             >
-                              {expandedId === item.id ? 'Hide' : 'Details'}
+                              {expandedId === item.id ? t('profile.table.hide') : t('profile.table.details')}
                             </button>
                           </div>
                         </>
@@ -384,21 +393,21 @@ const Profile = () => {
                           <div>{item.sellCurrency}/{item.buyCurrency}</div>
                           <div>{item.amount}</div>
                           <div>{item.fee}</div>
-                          <div className={`status-${item.status}`}>{item.status}</div>
+                          <div className={`status-${item.status_style}`}>{item.status}</div>
                           <div>{item.completedAmount}/{item.amount}</div>
                           <div className="actions">
                             <button
                               onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
                               className="details-btn"
                             >
-                              {expandedId === item.id ? 'Hide' : 'Details'}
+                              {expandedId === item.id ? t('profile.table.hide') : t('profile.table.details')}
                             </button>
                             {(item.rawStatus === 'pending' || item.rawStatus === 'processing') && (
                               <button
                                 onClick={() => handleCancelClick(item.id)}
                                 className="cancel-btn"
                               >
-                                Cancel
+                                {t('profile.table.cancel')}
                               </button>
                             )}
                           </div>
@@ -410,15 +419,15 @@ const Profile = () => {
                       <div className="expanded-row">
                         {activeTab === 'transactions' ? (
                           <div className="wallet-info">
-                            <strong>Wallet:</strong> {item.wallet}
+                            <strong>{t('profile.table.wallet')}</strong> {item.wallet}
                           </div>
                         ) : (
                           <div className="trade-details">
-                            <div><strong>Sell:</strong> {item.sellCurrency}</div>
-                            <div><strong>Buy:</strong> {item.buyCurrency}</div>
-                            <div><strong>Progress:</strong> {item.amount > 0 ? (item.completedAmount / item.amount * 100).toFixed(2) : 0}%</div>
+                            <div><strong>{t('profile.table.sell')}</strong> {item.sellCurrency}</div>
+                            <div><strong>{t('profile.table.buy')}</strong> {item.buyCurrency}</div>
+                            <div><strong>{t('profile.table.progress')}</strong> {item.amount > 0 ? (item.completedAmount / item.amount * 100).toFixed(2) : 0}%</div>
                             {item.cancelledDate && item.cancelledDate.getFullYear() > 1 && (
-                              <div><strong>Completed Date:</strong> {formatDate(item.cancelledDate)}</div>
+                              <div><strong>{t('profile.table.completedDate')}</strong> {formatDate(item.cancelledDate)}</div>
                             )}
                           </div>
                         )}
@@ -429,33 +438,32 @@ const Profile = () => {
               </div>
             </>
           ) : (
-            <div className="no-data">No records found</div>
+            <div className="no-data">{t('profile.table.noData')}</div>
           )}
         </div>
       </div>
 
-      {/* Модальное окно подтверждения отмены */}
       {cancelModal.show && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Confirm cancellation</h3>
+              <h3>{t('profile.modals.cancelTitle')}</h3>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
             <div className="modal-content">
-              <p>Are you sure you want to cancel this {cancelModal.type === 'trades' ? 'trade' : 'transaction'}?</p>
+              <p>{t('profile.modals.cancelMessage', { type: cancelModal.type === 'trades' ? t('profile.tabs.trades') : t('profile.tabs.transactions') })}</p>
               <div className="modal-buttons">
                 <button
                   onClick={confirmCancel}
                   className="modal-confirm-btn"
                 >
-                  Yes, cancel
+                  {t('profile.modals.cancelConfirm')}
                 </button>
                 <button
                   onClick={closeModal}
                   className="modal-cancel-btn"
                 >
-                  No, keep it
+                  {t('profile.modals.cancelKeep')}
                 </button>
               </div>
             </div>
@@ -463,12 +471,11 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Модальное окно ошибки */}
       {errorModal.show && (
         <div className="modal-overlay" onClick={closeErrorModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Error</h3>
+              <h3>{t('profile.modals.errorTitle')}</h3>
               <button className="modal-close" onClick={closeErrorModal}>×</button>
             </div>
             <div className="modal-content">
@@ -478,7 +485,7 @@ const Profile = () => {
                   onClick={closeErrorModal}
                   className="modal-confirm-btn"
                 >
-                  OK
+                  {t('common.ok')}
                 </button>
               </div>
             </div>
