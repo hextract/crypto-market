@@ -22,11 +22,11 @@ func (h *Handler) UpdateOrderStatusHandler(params operations.UpdateOrderStatusPa
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
-	totalPriceFrom := (*params.Body.Price) * (*params.Body.BoughtAmount)
 	totalPriceTo := (*params.Body.BoughtAmount)
-
-	h.Database.UpdateUserCurrencyBalance(params.OrderID, *bid.FromCurrency, -totalPriceFrom)
 	h.Database.UpdateUserCurrencyBalance(params.OrderID, *bid.ToCurrency, totalPriceTo)
+
+	totalPriceFrom := (*bid.MaxPrice - *params.Body.Price) * (*params.Body.BoughtAmount)
+	h.Database.UpdateUserCurrencyBalance(params.OrderID, *bid.FromCurrency, totalPriceFrom)
 
 	order_id, err := h.Database.UpdateOrderStatus(params.OrderID, *params.Body.Status, params.Body.BoughtAmount)
 	if err != nil {
