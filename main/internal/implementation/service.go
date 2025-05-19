@@ -5,13 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
-	"strings"
-
 	"github.com/h4x4d/crypto-market/main/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"io"
+	"net/http"
+	"os"
+	"strings"
 )
 
 type MatchingEngineService interface {
@@ -25,9 +25,9 @@ type MatchingEngineStub struct {
 }
 
 func NewMatcingEngineStub() *MatchingEngineStub {
-	host := os.Getenv("MARKET_MAKER_HOST")
-	port := os.Getenv("MARKET_MAKER_REST_PORT")
-	baseURL := fmt.Sprintf("http://%s:%s", strings.TrimRight(host, "/"), port)
+	_ = os.Getenv("MAIN_HOST")
+	port := os.Getenv("MARKET_MAKER_PORT")
+	baseURL := fmt.Sprintf("http://matching_engine:%s", port)
 	return &MatchingEngineStub{
 		HTTPClient: &http.Client{},
 		BaseURL:    baseURL,
@@ -42,22 +42,30 @@ func (me *MatchingEngineStub) PlaceOrder(bid models.Bid) error {
 			return fmt.Errorf("invalid bid ID format: %v", err)
 		}
 	}
+	var indicator = true
+
+	if *bid.FromCurrency == "USDT" {
+		indicator = false
+	}
 
 	requestBody := map[string]interface{}{
-		"order_id":   orderID,
-		"price_low":  bid.MinPrice,
-		"price_high": bid.MaxPrice,
-		"volume":     bid.AmountToBuy,
-		"speed":      bid.BuySpeed,
+		"order_id":           orderID,
+		"price_low":          *bid.MinPrice,
+		"price_high":         *bid.MaxPrice,
+		"amount":             *bid.AmountToBuy,
+		"speed":              *bid.BuySpeed,
+		"buy_sell_indicator": indicator,
+		"pair":               []string{"ETH", "USDT"},
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
+	println(string(jsonBody))
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
-
+	fmt.Println(me.BaseURL + "/create-order")
 	resp, err := me.HTTPClient.Post(
-		me.BaseURL+"/place-order",
+		me.BaseURL+"/create-order",
 		"application/json",
 		bytes.NewBuffer(jsonBody),
 	)
@@ -67,6 +75,9 @@ func (me *MatchingEngineStub) PlaceOrder(bid models.Bid) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		buf := new(strings.Builder)
+		_, _ = io.Copy(buf, resp.Body)
+		fmt.Println("response status:", resp.Status, "body:", buf.String())
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 

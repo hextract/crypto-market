@@ -1,5 +1,7 @@
 services:
   db:
+    networks:
+      - net
     image: postgres:16.4-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -18,6 +20,8 @@ services:
       timeout: 5s
       retries: 5
   main:
+    networks:
+      - net
     container_name: main-svc
     env_file:
       - .env
@@ -30,6 +34,8 @@ services:
     ports:
       - "${MAIN_REST_PORT}:${MAIN_REST_PORT}"
   auth:
+    networks:
+      - net
     container_name: auth-svc
     build:
       context: ./
@@ -43,6 +49,8 @@ services:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
 
   keycloak:
+    networks:
+      - net
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
     command: start -Dkeycloak.import=/opt/keycloak/data/import/realm-export.json --import-realm --db postgres --hostname-strict false --http-enabled true
@@ -72,6 +80,8 @@ services:
       timeout: 5s
 
   zookeeper:
+    networks:
+      - net
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper
     ports:
@@ -81,6 +91,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
+    networks:
+      - net
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka
     ports:
@@ -102,6 +114,8 @@ services:
 
 
   frontend:
+    networks:
+      - net
     container_name: frontend-svc
     build:
       context: ./frontend
@@ -123,11 +137,19 @@ services:
       retries: 5
 
   matching_engine:
+    networks:
+      - net
+    env_file:
+      - .env
     build:
       context: ./matching_engine
       dockerfile: Dockerfile
     ports:
-      - "18888:18888"
+      - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
 
 volumes:
   postgres_data:
+
+networks:
+  net:
+    driver: bridge

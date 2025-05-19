@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -42,8 +43,8 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 
 	bidID, err := h.Database.CreateBid(
 		user.UserID,
-		string(*params.Body.FromCurrency),
-		string(*params.Body.ToCurrency),
+		*params.Body.FromCurrency,
+		*params.Body.ToCurrency,
 		float32(*params.Body.MinPrice),
 		float32(*params.Body.MaxPrice),
 		float32(*params.Body.AmountToBuy),
@@ -52,25 +53,31 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 	if err != nil {
 		return utils.HandleInternalError(err)
 	}
+	updateErr := h.Database.UpdateUserCurrencyBalance(bidID, *params.Body.FromCurrency, -needBalance)
+	if updateErr != nil {
+		return utils.HandleInternalError(err)
+	}
+
+	placeErr := h.MatchingEngine.PlaceOrder(models.Bid{
+		ID:           &bidID,
+		AmountToBuy:  params.Body.AmountToBuy,
+		MinPrice:     params.Body.MinPrice,
+		MaxPrice:     params.Body.MaxPrice,
+		BuySpeed:     &buySpeed,
+		FromCurrency: params.Body.FromCurrency,
+		ToCurrency:   params.Body.ToCurrency,
+	})
+	if placeErr != nil {
+		fmt.Println(placeErr)
+		cancelErr := h.Database.CancelBid(bidID)
+		if cancelErr != nil {
+		}
+		return utils.HandleError(fmt.Sprintf("couldn't place order, %s", cancelErr), http.StatusInternalServerError)
+	}
 
 	result := new(operations.CreateBidOK)
 	result.SetPayload(&operations.CreateBidOKBody{
 		ID: bidID,
 	})
-
-	err = h.MatchingEngine.PlaceOrder(models.Bid{
-		ID:          &bidID,
-		AmountToBuy: params.Body.AmountToBuy,
-		MinPrice:    params.Body.MinPrice,
-		MaxPrice:    params.Body.MaxPrice,
-		BuySpeed:    &buySpeed,
-	})
-	if err != nil {
-		err := h.Database.CancelBid(bidID)
-		if err != nil {
-		}
-		return utils.HandleError("couldn't place order", http.StatusInternalServerError)
-	}
-
 	return result
 }
