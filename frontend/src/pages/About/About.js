@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { isAuthenticated } from '../../api/authService';
 import { useEffect } from 'react';
 import logo from "../../assets/logo.svg";
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
@@ -23,16 +25,14 @@ const About = () => {
             <img src={logo} alt="Logo" className="logo" />
           </div>
           <div className="text-container">
-            <h1 className="title-about">CONT - first continuous order trading platform</h1>
+            <h1 className="title-about">{t('about.title')}</h1>
             <p className="text-about">
-              Experience seamless, high-speed trading with our continuous order book. 
-              Deep liquidity, ultra-low latency, and advanced security—everything you need to trade smarter. 
-              Join now and stay ahead in the crypto market.
+              {t('about.description')}
             </p>
           </div>
           <div className="button-container">
-            <button className="btn register" onClick={() => navigate("/register")}>register</button>
-            <button className="btn signin" onClick={() => navigate("/login")}>sign in</button>
+            <button className="btn register" onClick={() => navigate("/register")}>{t('about.register')}</button>
+            <button className="btn signin" onClick={() => navigate("/login")}>{t('about.signIn')}</button>
           </div>
         </div>
       </div>

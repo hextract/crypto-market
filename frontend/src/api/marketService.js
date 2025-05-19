@@ -68,8 +68,6 @@ export const getMarketData = async () => {
     const response = {
       data: {
         current_price: 0.00001,
-        high_24h: 0.0001,
-        price_change_percentage_24h: 10
       }
     };
     return response.data;
