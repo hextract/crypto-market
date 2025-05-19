@@ -34,6 +34,7 @@
     "signIn": "войти"
   },
   "main": {
+    "priceUndefined": "не определена",
     "tradingPair": "USDT/BTC",
     "high": "максимум за день:",
     "change": "за день",

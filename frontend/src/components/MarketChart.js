@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { getCurvesData } from '../api/matchingEngineService';
 import { useTranslation } from 'react-i18next';
+import useInterval from '../hooks/useInterval';
 
 const CustomizedAxisTick = ({ x, y, payload }) => {
   return (
@@ -32,20 +33,17 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
 
 export default function MarketChart() {
   const { t } = useTranslation();
-
   const [supply, setSupply] = useState([]);
   const [demand, setDemand] = useState([]);
   const [intersection, setIntersection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bounds, setBounds] = useState({ min: 400, max: 600 });
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-      // Функция для линейной интерполяции значения
       const interpolateValue = (data, targetPrice) => {
         if (!data || data.length === 0) return null;
-
         const sorted = [...data].sort((a, b) => a.price - b.price);
-
         if (targetPrice <= sorted[0].price) return sorted[0].volume;
         if (targetPrice >= sorted[sorted.length - 1].price) return sorted[sorted.length - 1].volume;
 
@@ -108,64 +106,58 @@ export default function MarketChart() {
     return null;
   };
 
+  const fetchData = async () => {
+    try {
+      const data = await getCurvesData();
+
+      const minPrice = 400;
+      const maxPrice = 600;
+      const padding = (maxPrice - minPrice) * 0.1;
+      const adjustedMin = Math.max(0, minPrice - padding);
+      const adjustedMax = maxPrice + padding;
+
+      setBounds({ min: adjustedMin, max: adjustedMax });
+
+      const parsedSupply = (data.supply || []).map(p => ({
+        price: parseFloat(p.price),
+        volume: parseFloat(p.volume),
+      })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
+
+      const parsedDemand = (data.demand || []).map(p => ({
+        price: parseFloat(p.price),
+        volume: parseFloat(p.volume),
+      })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
+
+      const price = data.clearing_price || (adjustedMin + adjustedMax) / 2;
+
+      const supplyPoint = parsedSupply.reduce((prev, curr) =>
+        Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
+      );
+
+      const demandPoint = parsedDemand.reduce((prev, curr) =>
+        Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
+      );
+
+      setSupply(parsedSupply);
+      setDemand(parsedDemand);
+      setIntersection({
+        price,
+        volume: (supplyPoint.volume + demandPoint.volume) / 2
+      });
+    } catch (error) {
+      console.error('Error fetching curves data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getCurvesData(bounds.min, bounds.max);
-
-        // const allPrices = [
-        //   ...(data.supply || []).map(p => parseFloat(p.price)),
-        //   ...(data.demand || []).map(p => parseFloat(p.price))
-        // ];
-
-        const minPrice = 400;
-        const maxPrice = 600;
-        const padding = (maxPrice - minPrice) * 0.1; // 10% padding
-
-        const adjustedMin = Math.max(0, minPrice - padding);
-        const adjustedMax = maxPrice + padding;
-
-        setBounds({
-          min: adjustedMin,
-          max: adjustedMax
-        });
-
-        const parsedSupply = (data.supply || []).map(p => ({
-          price: parseFloat(p.price),
-          volume: parseFloat(p.volume),
-        })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
-
-        const parsedDemand = (data.demand || []).map(p => ({
-          price: parseFloat(p.price),
-          volume: parseFloat(p.volume),
-        })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
-
-        const price = data.clearingPrice || (adjustedMin + adjustedMax) / 2;
-
-        // Находим точки пересечения
-        const supplyPoint = parsedSupply.reduce((prev, curr) =>
-          Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
-        );
-
-        const demandPoint = parsedDemand.reduce((prev, curr) =>
-          Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
-        );
-
-        setSupply(parsedSupply);
-        setDemand(parsedDemand);
-        setIntersection({
-          price,
-          volume: (supplyPoint.volume + demandPoint.volume) / 2
-        });
-      } catch (error) {
-        console.error('Error fetching curves data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
+
+  useInterval(() => {
+    fetchData();
+  }, 1000);
 
   if (loading) {
     return <div style={{
@@ -240,7 +232,6 @@ export default function MarketChart() {
           <Tooltip
             content={<CustomTooltip />}
             cursor={{ stroke: '#a74aff', strokeWidth: 1, strokeDasharray: '3 3' }}
-
           />
 
           <Legend
@@ -283,21 +274,22 @@ export default function MarketChart() {
             isAnimationActive={false}
           />
 
-          <ReferenceDot
-                x={intersection.price}
-                y={intersection.volume}
-                r={6}
-                fill="#00ff00"
-                stroke="#fff"
-                strokeWidth={2}
-                label={{
-                  value:  `{${t("main.chart.clearing")} : ${intersection.price.toFixed(2)}}`,
-                  position: 'right',
-                  fill: '#ffffff',
-                  fontSize: 12
-                }}
-              />
-          )
+          {intersection && (
+            <ReferenceDot
+              x={intersection.price}
+              y={intersection.volume}
+              r={6}
+              fill="#00ff00"
+              stroke="#fff"
+              strokeWidth={2}
+              label={{
+                value: `{${t("main.chart.clearing")} : ${intersection.price.toFixed(2)}}`,
+                position: 'right',
+                fill: '#ffffff',
+                fontSize: 12
+              }}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

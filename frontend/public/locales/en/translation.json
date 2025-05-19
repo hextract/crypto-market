@@ -34,6 +34,7 @@
     "signIn": "sign in"
   },
   "main": {
+    "priceUndefined": "undefined",
     "tradingPair": "USDT/BTC",
     "high": "high this day:",
     "change": "this day",

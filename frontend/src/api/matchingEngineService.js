@@ -8,22 +8,18 @@ const api = axios.create({
   timeout: parseInt(API_TIMEOUT),
 });
 
-// Добавляем интерцептор для авторизации
-api.interceptors.request.use(config => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers['api_key'] = token;
-  }
-  return config;
-});
-
-
-export const getCurvesData = async (left_boundary_price, right_boundary_price) => {
+export const getClearingPrice = async () => {
   try {
-    // const response = await api.get('/curves', {
-    //   left_boundary_price,
-    //   right_boundary_price,
-    // });
+    const response = await api.get('/clearing-price');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getCurvesData = async () => {
+  try {
+    // Test data
     const response1 = {
       data: {
         supply: [{'price': '0', 'volume': '23244'}, {'price': '200.576', 'volume': '23244'}, {'price': '312.728', 'volume': '23209.8'}, {'price': '320.615', 'volume': '23175.3'}, {'price': '329.278', 'volume': '22984.3'}, {'price': '347.878', 'volume': '22502.1'}, {'price': '360.837', 'volume': '22142'}, {'price': '362.256', 'volume': '22127.7'}, {'price': '373.171', 'volume': '21961.8'}, {'price': '381.301', 'volume': '21786.7'}, {'price': '382.991', 'volume': '21749.9'}, {'price': '384.366', 'volume': '21706.9'}, {'price': '386.211', 'volume': '21645.2'}, {'price': '387.013', 'volume': '21618.4'}, {'price': '394.854', 'volume': '21331.6'}, {'price': '406.045', 'volume': '20889.1'}, {'price': '407.683', 'volume': '20812.2'}, {'price': '408.356', 'volume': '20778.4'}, {'price': '429.679', 'volume': '19465.3'}, {'price': '436.881', 'volume': '18993.1'}, {'price': '448.164', 'volume': '17960.3'}, {'price': '451.531', 'volume': '17646.9'}, {'price': '452.399', 'volume': '17570.5'}, {'price': '455.062', 'volume': '17366.6'}, {'price': '460.449', 'volume': '16937.7'}, {'price': '464.114', 'volume': '16394.6'}, {'price': '466.3', 'volume': '16084.5'}, {'price': '466.942', 'volume': '15989.4'}, {'price': '468.252', 'volume': '15749.3'}, {'price': '469.807', 'volume': '15570.9'}, {'price': '470.454', 'volume': '15496'}, {'price': '472.871', 'volume': '15158'}, {'price': '481.127', 'volume': '14218.1'}, {'price': '481.178', 'volume': '14211.2'}, {'price': '482.398', 'volume': '14059'}, {'price': '483.549', 'volume': '13955.7'}, {'price': '485.495', 'volume': '13781.7'}, {'price': '490.418', 'volume': '13324.2'}, {'price': '495.93', 'volume': '12797.7'}, {'price': '504.928', 'volume': '11906.9'}, {'price': '510.34', 'volume': '11344.4'}, {'price': '511.208', 'volume': '11257.2'}, {'price': '511.861', 'volume': '11207.5'}, {'price': '512.999', 'volume': '11118.8'}, {'price': '513.571', 'volume': '11071.4'}, {'price': '515.158', 'volume': '10946.3'}, {'price': '516.253', 'volume': '10857.4'}, {'price': '516.872', 'volume': '10803.5'}, {'price': '521.808', 'volume': '10367.4'}, {'price': '525.079', 'volume': '10102.7'}, {'price': '526.213', 'volume': '10015.6'}, {'price': '527.249', 'volume': '9957.11'}, {'price': '531.345', 'volume': '8737.01'}, {'price': '538.36', 'volume': '8341.13'}, {'price': '543.481', 'volume': '8067.39'}, {'price': '556.414', 'volume': '7308.11'}, {'price': '560.923', 'volume': '7029.82'}, {'price': '561.259', 'volume': '7009.58'}, {'price': '564.743', 'volume': '6672.54'}, {'price': '569.901', 'volume': '6068.22'}, {'price': '575.025', 'volume': '5484.32'}, {'price': '575.94', 'volume': '5366.65'}, {'price': '581.713', 'volume': '4641.04'}, {'price': '582.142', 'volume': '4602.75'}, {'price': '587.521', 'volume': '4201.76'}, {'price': '588.771', 'volume': '4110.5'}, {'price': '588.858', 'volume': '4104.5'}, {'price': '598.753', 'volume': '3623.38'}, {'price': '599.683', 'volume': '3584.07'}, {'price': '602.259', 'volume': '3481.19'}, {'price': '610.971', 'volume': '3027.71'}, {'price': '614.514', 'volume': '2860.36'}, {'price': '631.872', 'volume': '2005.79'}, {'price': '638.854', 'volume': '1675.01'}, {'price': '643.092', 'volume': '1495.18'}, {'price': '646.704', 'volume': '1354.46'}, {'price': '660.907', 'volume': '813.104'}, {'price': '664.766', 'volume': '688.326'}, {'price': '664.814', 'volume': '686.916'}, {'price': '666.218', 'volume': '653.22'}, {'price': '670.261', 'volume': '566.675'}, {'price': '685.117', 'volume': '428.577'}, {'price': '690.227', 'volume': '382.312'}, {'price': '708.519', 'volume': '272.845'}, {'price': '754.317', 'volume': '99.7851'}, {'price': '777.477', 'volume': '13.4675'}, {'price': '785.264', 'volume': '0'}, {'price': '979.073', 'volume': '0'}],
@@ -32,14 +28,38 @@ export const getCurvesData = async (left_boundary_price, right_boundary_price) =
       }
     };
     return response1.data;
+
+    // Получаем текущую цену клиринга
+    const clearingPriceResponse = await getClearingPrice();
+    const clearingPrice = clearingPriceResponse.data.price;
+
+    // Вычисляем границы (+/- 10% от цены клиринга)
+    const leftBoundary = clearingPrice * 0.9;
+    const rightBoundary = clearingPrice * 1.1;
+
+    // Запрашиваем данные спроса и предложения параллельно
+    const [demandResponse, supplyResponse] = await Promise.all([
+      api.get('/bid-curve', {
+        params: {
+          left_boundary_price: leftBoundary,
+          right_boundary_price: rightBoundary
+        }
+      }),
+      api.get('/ask-curve', {
+        params: {
+          left_boundary_price: leftBoundary,
+          right_boundary_price: rightBoundary
+        }
+      })
+    ]);
+
+    return {
+      supply: supplyResponse.data,
+      demand: demandResponse.data,
+      clearing_price: clearingPrice
+    };
   } catch (error) {
+    console.error('Error fetching curves data:', error);
     throw error;
   }
-};
-
-// Вспомогательная функция для получения токена
-const getAuthToken = () => {
-  const cookies = document.cookie.split(';');
-  const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
-  return tokenCookie ? tokenCookie.split('=')[1] : null;
 };

@@ -17,7 +17,6 @@ class HTTPServer {
  public:
   using GetCurveHandlerType = std::function<std::vector<CurveFracture>(size_t left_boundary_price,
                                                                        size_t right_boundary_price)>;
-
   explicit HTTPServer(const std::shared_ptr<IOrderBookConfiguration>& order_book_config)
       : order_book_config_(order_book_config), mapper_(order_book_config) {
     SetupHandlers();
@@ -60,15 +59,26 @@ class HTTPServer {
     GetClearingPriceHandler();
   }
 
-  void CreateOrderHandler() {
-    CROW_ROUTE(app_, "/create-order").methods(crow::HTTPMethod::Post)(
-        [this](const crow::request& req) {
-          auto body_obj = crow::json::load(req.body);
-          if (!body_obj) {
-            return crow::response(400, "Invalid JSON!");
-          }
+  static crow::response GetCorsResponse() {
+    crow::response response;
+    response.add_header("Access-Control-Allow-Origin", "*");
+    response.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.add_header("Access-Control-Allow-Headers", "*");
+    return response;
+  }
 
+  void CreateOrderHandler() {
+    CROW_ROUTE(app_, "/create-order").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)(
+        [this](const crow::request& req) {
+          crow::response response = GetCorsResponse();
+          if (req.method == crow::HTTPMethod::Options) {
+            return response;
+          }
           try {
+            auto body_obj = crow::json::load(req.body);
+            if (!body_obj) {
+              return crow::response(400, "Invalid JSON!");
+            }
             ContinuousOrder order = mapper_.ToDomainOrder(body_obj);
 
             create_order_cb_(order);
@@ -76,17 +86,24 @@ class HTTPServer {
             crow::json::wvalue result;
             result["status"] = "ok";
 
-            return crow::response{result};
+            response.body = result.dump();
+            return response;
           } catch (const std::exception& ex) {
-            return crow::response(400, std::string("Error parsing fields: ") + ex.what());
+            response.code = 400;
+            response.body = std::string("Error parsing fields: ") + ex.what();
+            return response;
           }
         }
     );
   }
 
   void GetClearingPriceHandler() {
-    CROW_ROUTE(app_, "/clearing-price").methods(crow::HTTPMethod::GET)(
+    CROW_ROUTE(app_, "/clearing-price").methods(crow::HTTPMethod::GET, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
+          crow::response response = GetCorsResponse();
+          if (req.method == crow::HTTPMethod::Options) {
+            return response;
+          }
           try {
             std::optional<size_t> domain_price = get_clearing_price_handler_();
             if (!domain_price.has_value()) {
@@ -98,17 +115,24 @@ class HTTPServer {
             crow::json::wvalue result;
             result["price"] = price;
 
-            return crow::response{result};
+            response.body = result.dump();
+            return response;
           } catch (const std::exception& ex) {
-            return crow::response(400, std::string("Error during getting clearing price: ") + ex.what());
+            response.code = 400;
+            response.body = std::string("Error during getting clearing price: ") + ex.what();
+            return response;
           }
         }
     );
   }
 
   void GetBidCurveHandler() {
-    CROW_ROUTE(app_, "/bid-curve").methods(crow::HTTPMethod::Get)(
+    CROW_ROUTE(app_, "/bid-curve").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
+          crow::response response = GetCorsResponse();
+          if (req.method == crow::HTTPMethod::Options) {
+            return response;
+          }
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
@@ -138,17 +162,24 @@ class HTTPServer {
 
             crow::json::wvalue result = std::move(json_fractures);
 
-            return crow::response{result};
+            response.body = result.dump();
+            return response;
           } catch (const std::exception& ex) {
-            return crow::response(400, std::string("Error parsing fields: ") + ex.what());
+            response.code = 400;
+            response.body = std::string("Error parsing fields: ") + ex.what();
+            return response;
           }
         }
     );
   }
 
   void GetAskCurveHandler() {
-    CROW_ROUTE(app_, "/ask-curve").methods(crow::HTTPMethod::Get)(
+    CROW_ROUTE(app_, "/ask-curve").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
+          crow::response response = GetCorsResponse();
+          if (req.method == crow::HTTPMethod::Options) {
+            return response;
+          }
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
@@ -173,22 +204,29 @@ class HTTPServer {
 
             crow::json::wvalue result = std::move(json_fractures);
 
-            return crow::response{result};
+            response.body = result.dump();
+            return response;
           } catch (const std::exception& ex) {
-            return crow::response(400, std::string("Error parsing fields: ") + ex.what());
+            response.code = 400;
+            response.body = std::string("Error parsing fields: ") + ex.what();
+            return response;
           }
         }
     );
   }
 
   void CancelOrderHandler() {
-    CROW_ROUTE(app_, "/cancel-order").methods(crow::HTTPMethod::Post)(
+    CROW_ROUTE(app_, "/cancel-order").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          auto body_obj = crow::json::load(req.body);
-          if (!body_obj) {
-            return crow::response(400, "Invalid JSON!");
+          crow::response response = GetCorsResponse();
+          if (req.method == crow::HTTPMethod::Options) {
+            return response;
           }
           try {
+            auto body_obj = crow::json::load(req.body);
+            if (!body_obj) {
+              return crow::response(400, "Invalid JSON!");
+            }
             CancelOrder cancel_order = mapper_.ToDomainCancelOrder(body_obj);
 
             cancel_order_cb_(cancel_order);
@@ -196,9 +234,12 @@ class HTTPServer {
             crow::json::wvalue result;
             result["status"] = "ok";
 
-            return crow::response{result};
+            response.body = result.dump();
+            return response;
           } catch (const std::exception& ex) {
-            return crow::response(400, std::string("Error parsing fields: ") + ex.what());
+            response.code = 400;
+            response.body = std::string("Error parsing fields: ") + ex.what();
+            return response;
           }
         }
     );

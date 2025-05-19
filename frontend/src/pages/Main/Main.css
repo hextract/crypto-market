@@ -100,7 +100,7 @@
 }
 
 .price {
-  font-size: 36px;
+  font-size: 26px;
 }
 
 /* Блок с инпутами */
@@ -368,7 +368,7 @@
   }
 
   .price {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .high-price,

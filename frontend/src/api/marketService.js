@@ -59,23 +59,6 @@ export const createBid = async (bidData) => {
   }
 };
 
-export const getMarketData = async () => {
-  try {
-    // Здесь нужно указать правильный эндпоинт для получения данных о рынке
-    // В вашем swagger такого эндпоинта нет, возможно нужно добавить
-    // const response = await api.get('/market-data');
-    // Пока возвращаем заглушку
-    const response = {
-      data: {
-        current_price: 0.00001,
-      }
-    };
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 // Вспомогательная функция для получения токена
 const getAuthToken = () => {
   const cookies = document.cookie.split(';');
