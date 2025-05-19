@@ -1,0 +1,146 @@
+{
+  "navbar": {
+    "logo": "CONT",
+    "trade": "trade",
+    "profile": "profile",
+    "logout": "Logout",
+    "about": "about",
+    "login": "login",
+    "register": "register"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "email": "email",
+    "password": "password",
+    "loading": "Loading...",
+    "signInBtn": "Sign in!",
+    "signUpBtn": "Sign up!",
+    "errors": {
+      "emailRequired": "Email is required",
+      "invalidEmail": "Invalid email format",
+      "passwordRequired": "Password is required",
+      "minPassword": "Min 8 characters required",
+      "incorrectCredentials": "Incorrect email or password",
+      "serverUnavailable": "Server is unavailable, please try later",
+      "networkError": "Network error, please try later",
+      "emailRegistered": "This email is already registered"
+    }
+  },
+  "about": {
+    "title": "CONT - first continuous order trading platform",
+    "description": "Experience seamless, high-speed trading with our continuous order book. Deep liquidity, ultra-low latency, and advanced security—everything you need to trade smarter. Join now and stay ahead in the crypto market.",
+    "register": "register",
+    "signIn": "sign in"
+  },
+  "main": {
+    "tradingPair": "USDT/BTC",
+    "high": "high this day:",
+    "change": "this day",
+    "buy": "buy",
+    "sell": "sell",
+    "minPrice": "min price",
+    "maxPrice": "max price",
+    "amount": "amount to {{action}}",
+    "speed": "buy speed (stocks/hour)",
+    "proceed": "proceed",
+    "withdraw": "withdraw",
+    "deposit": "deposit",
+    "withdrawModal": {
+      "title": "Withdraw {{currency}}",
+      "amount": "Amount ({{currency}})",
+      "wallet": "Your wallet address",
+      "confirm": "Confirm Withdraw",
+      "errors": {
+        "amountRequired": "Amount is required",
+        "mustBeNumber": "Must be a number",
+        "mustBePositive": "Must be positive",
+        "insufficientBalance": "Insufficient balance",
+        "walletRequired": "Wallet is required"
+      }
+    },
+    "depositModal": {
+      "title": "Deposit",
+      "instructions": "Send funds to the following address:",
+      "note": "Please make sure you're sending the correct currency to this address. The deposit will be credited after 3 network confirmations.",
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "chart" : {
+      "volume_hour": "volume per hour",
+      "clearing": "Clearing",
+      "price": "Price",
+      "supply": "Supply",
+      "demand": "Demand"
+    },
+    "success": "Order created successfully!",
+    "error": "Failed to create order",
+    "invalidData": "Invalid data",
+    "insufficientBalance": "Insufficient balance"
+  },
+  "profile": {
+    "tabs": {
+      "trades": "Trades",
+      "transactions": "Transactions"
+    },
+    "withdraw": "withdraw",
+    "deposit": "deposit",
+    "filters": {
+      "time": "Time:",
+      "allTime": "All time",
+      "lastHour": "Last hour",
+      "lastDay": "Last 24 hours",
+      "lastWeek": "Last week",
+      "lastMonth": "Last month",
+      "lastYear": "Last year",
+      "type": "Type:",
+      "allTypes": "All types",
+      "deposits": "Deposits",
+      "withdrawals": "Withdrawals",
+      "status": "Status:",
+      "allStatuses": "All statuses",
+      "statuses": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "processing": "Processing",
+        "cancelled": "Cancelled"
+      },
+      "clear": "Clear filters"
+    },
+    "table": {
+      "date": "Date",
+      "type": "Type",
+      "currency": "Currency",
+      "amount": "Amount",
+      "fee": "Fee",
+      "status": "Status",
+      "actions": "Actions",
+      "pair": "Pair",
+      "completed": "Completed",
+      "details": "Details",
+      "hide": "Hide",
+      "cancel": "Cancel",
+      "wallet": "Wallet:",
+      "sell": "Sell:",
+      "buy": "Buy:",
+      "progress": "Progress:",
+      "completedDate": "Completed Date:",
+      "noData": "No records found",
+      "loading": "Loading..."
+    },
+    "modals": {
+      "cancelTitle": "Confirm cancellation",
+      "cancelMessage": "Are you sure you want to cancel this {{type}}?",
+      "cancelConfirm": "Yes, cancel",
+      "cancelKeep": "No, keep it",
+      "errorTitle": "Error",
+      "errorLoading": "Failed to load history. Please try again later.",
+      "errorCancel": "Failed to cancel trade. Please try again."
+    }
+  },
+  "common": {
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success"
+  }
+}

@@ -156,7 +156,7 @@
     color: #F44336;
 }
 
-.status-completed {
+.status-finished {
     color: #4CAF50;
 }
 
@@ -189,7 +189,7 @@
     border: none;
     cursor: pointer;
     font-size: 14px;
-    width: 80px;
+    width: 100px;
     transition: all 0.3s;
 }
 
@@ -293,7 +293,6 @@
     }
 
     .actions {
-        flex-direction: row;
         gap: 5px;
     }
 

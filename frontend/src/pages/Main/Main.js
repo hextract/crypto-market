@@ -11,6 +11,7 @@ import {
 } from '../../api/marketService';
 import './Main.css';
 import logo from '../../assets/logo-purple.svg';
+import { useTranslation } from 'react-i18next';
 
 const Main = () => {
   const navigate = useNavigate();
@@ -34,13 +35,12 @@ const Main = () => {
   const [marketData, setMarketData] = useState({
     pair: 'USDT/BTC',
     price: 0,
-    high: 0,
-    change: 0
   });
   const [errorModal, setErrorModal] = useState({
     show: false,
     message: ''
   });
+  const { t } = useTranslation();
 
   // States for modals
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -64,7 +64,6 @@ const Main = () => {
     };
     checkAuth();
 
-    // Загружаем баланс и данные рынка
     if (isAuth) {
       loadData();
     }
@@ -72,7 +71,6 @@ const Main = () => {
 
   const loadData = async () => {
     try {
-      // Загружаем баланс
       const balanceResponse = await getBalance();
       const newBalances = { USDT: 0, BTC: 0 };
       balanceResponse.forEach(item => {
@@ -80,17 +78,14 @@ const Main = () => {
       });
       setBalances(newBalances);
 
-      // Загружаем данные рынка
       const marketResponse = await getMarketData();
       setMarketData({
         pair: 'USDT/BTC',
         price: marketResponse.current_price,
-        high: marketResponse.high_24h,
-        change: marketResponse.price_change_percentage_24h
       });
     } catch (error) {
       console.error('Failed to load data:', error);
-      showError('Failed to load data. Please try again later.');
+      showError(t('main.error'));
     }
   };
 
@@ -116,7 +111,7 @@ const Main = () => {
       })
       .catch(err => {
         console.error('Failed to copy: ', err);
-        showError('Failed to copy address');
+        showError(t('main.error'));
       });
   };
 
@@ -132,16 +127,16 @@ const Main = () => {
   const validateField = (name, value) => {
     if (name === "speed") {
       const numValue = parseFloat(value);
-      if (!value.trim()) return "Enter stocks/hour";
-      if (isNaN(numValue)) return "Must be a number";
-      if (numValue <= 0) return "Must be positive";
+      if (!value.trim()) return t('main.withdrawModal.errors.amountRequired');
+      if (isNaN(numValue)) return t('main.withdrawModal.errors.mustBeNumber');
+      if (numValue <= 0) return t('main.withdrawModal.errors.mustBePositive');
       return null;
     }
 
     const numValue = parseFloat(value);
-    if (!value.trim()) return "This field is required";
-    if (isNaN(numValue)) return "Must be a number";
-    if (numValue <= 0) return "Must be positive";
+    if (!value.trim()) return t('main.withdrawModal.errors.amountRequired');
+    if (isNaN(numValue)) return t('main.withdrawModal.errors.mustBeNumber');
+    if (numValue <= 0) return t('main.withdrawModal.errors.mustBePositive');
     return null;
   };
 
@@ -182,25 +177,22 @@ const Main = () => {
       };
 
       await createBid(bidData);
-      // Обновляем баланс после успешной сделки
       await loadData();
-      // Можно показать уведомление об успехе
-      showError('Order created successfully!');
+      showError(t('main.success'));
     } catch (error) {
       console.error('Failed to create bid:', error);
-      let errorMessage = 'Failed to create order';
+      let errorMessage = t('main.error');
       if (error.response) {
         if (error.response.status === 400) {
-          errorMessage = error.response.data.error_message || 'Invalid data';
+          errorMessage = error.response.data.error_message || t('main.invalidData');
         } else if (error.response.status === 403) {
-          errorMessage = 'Insufficient balance';
+          errorMessage = t('main.insufficientBalance');
         }
       }
       showError(errorMessage);
     }
   };
 
-  // Modal handlers
   const handleWithdrawClick = (currency) => {
     setWithdrawCurrency(currency);
     setShowWithdrawModal(true);
@@ -213,7 +205,7 @@ const Main = () => {
       setShowDepositModal(true);
     } catch (error) {
       console.error('Failed to get deposit address:', error);
-      showError('Failed to get deposit address. Please try again.');
+      showError(t('main.error'));
     }
   };
 
@@ -232,18 +224,18 @@ const Main = () => {
     if (name === 'amount') {
       const numValue = parseFloat(value);
       if (!value.trim()) {
-        setWithdrawErrors(prev => ({ ...prev, amount: 'Amount is required' }));
+        setWithdrawErrors(prev => ({ ...prev, amount: t('main.withdrawModal.errors.amountRequired') }));
       } else if (isNaN(numValue)) {
-        setWithdrawErrors(prev => ({ ...prev, amount: 'Must be a number' }));
+        setWithdrawErrors(prev => ({ ...prev, amount: t('main.withdrawModal.errors.mustBeNumber') }));
       } else if (numValue <= 0) {
-        setWithdrawErrors(prev => ({ ...prev, amount: 'Must be positive' }));
+        setWithdrawErrors(prev => ({ ...prev, amount: t('main.withdrawModal.errors.mustBePositive') }));
       } else if (numValue > balances[withdrawCurrency]) {
-        setWithdrawErrors(prev => ({ ...prev, amount: 'Insufficient balance' }));
+        setWithdrawErrors(prev => ({ ...prev, amount: t('main.withdrawModal.errors.insufficientBalance') }));
       } else {
         setWithdrawErrors(prev => ({ ...prev, amount: null }));
       }
     } else if (name === 'wallet' && !value.trim()) {
-      setWithdrawErrors(prev => ({ ...prev, wallet: 'Wallet is required' }));
+      setWithdrawErrors(prev => ({ ...prev, wallet: t('main.withdrawModal.errors.walletRequired') }));
     } else if (name === 'wallet') {
       setWithdrawErrors(prev => ({ ...prev, wallet: null }));
     }
@@ -253,11 +245,11 @@ const Main = () => {
     e.preventDefault();
 
     const newErrors = {
-      amount: !withdrawForm.amount ? 'Amount is required' :
-        isNaN(parseFloat(withdrawForm.amount)) ? 'Must be a number' :
-          parseFloat(withdrawForm.amount) <= 0 ? 'Must be positive' :
-            parseFloat(withdrawForm.amount) > balances[withdrawCurrency] ? 'Insufficient balance' : null,
-      wallet: !withdrawForm.wallet.trim() ? 'Wallet is required' : null
+      amount: !withdrawForm.amount ? t('main.withdrawModal.errors.amountRequired') :
+        isNaN(parseFloat(withdrawForm.amount)) ? t('main.withdrawModal.errors.mustBeNumber') :
+          parseFloat(withdrawForm.amount) <= 0 ? t('main.withdrawModal.errors.mustBePositive') :
+            parseFloat(withdrawForm.amount) > balances[withdrawCurrency] ? t('main.withdrawModal.errors.insufficientBalance') : null,
+      wallet: !withdrawForm.wallet.trim() ? t('main.withdrawModal.errors.walletRequired') : null
     };
 
     setWithdrawErrors(newErrors);
@@ -272,18 +264,17 @@ const Main = () => {
         parseFloat(withdrawForm.amount),
         withdrawForm.wallet
       );
-      // Обновляем баланс после успешного вывода
       await loadData();
       closeModal();
-      showError('Withdrawal request created successfully!');
+      showError(t('main.success'));
     } catch (error) {
       console.error('Failed to create withdrawal:', error);
-      let errorMessage = 'Failed to create withdrawal';
+      let errorMessage = t('main.error');
       if (error.response) {
         if (error.response.status === 400) {
-          errorMessage = error.response.data.error_message || 'Invalid data';
+          errorMessage = error.response.data.error_message || t('main.invalidData');
         } else if (error.response.status === 403) {
-          errorMessage = 'Insufficient balance';
+          errorMessage = t('main.insufficientBalance');
         }
       }
       showError(errorMessage);
@@ -291,7 +282,7 @@ const Main = () => {
   };
 
   if (isAuth === null) {
-    return <div className="loading-screen">Loading...</div>;
+    return <div className="loading-screen">{t('auth.loading')}</div>;
   }
 
   return (
@@ -299,12 +290,12 @@ const Main = () => {
       <nav className="navbar-main">
         <div className="logo">
           <img src={logo} alt="Logo" className="logo-purple"/>
-          <span>CONT</span>
+          <span>{t('navbar.logo')}</span>
         </div>
         <div className="nav-links">
-          <a href="/main" className="active">trade</a>
-          <a href="/profile">profile</a>
-          <button onClick={handleLogout} className="logout-btn">Logout</button>
+          <a href="/main" className="active">{t('navbar.trade')}</a>
+          <a href="/profile">{t('navbar.profile')}</a>
+          <button onClick={handleLogout} className="logout-btn">{t('navbar.logout')}</button>
         </div>
       </nav>
 
@@ -316,14 +307,8 @@ const Main = () => {
         <div className="trade-panel">
           <div className="market-info">
             <div className="main-info">
-              <span className="trading-pair">{marketData.pair}</span>
+              <span className="trading-pair">{t('main.tradingPair')}</span>
               <span className="price">{marketData.price.toFixed(6)}</span>
-            </div>
-            <div className="add-info">
-              <p className="high-price">high this day: {marketData.high.toFixed(6)}</p>
-              <p className={`price-change ${marketData.change >= 0 ? 'positive' : 'negative'}`}>
-                {marketData.change >= 0 ? '+' : ''}{marketData.change.toFixed(2)}% this day
-              </p>
             </div>
           </div>
 
@@ -333,13 +318,13 @@ const Main = () => {
                 className={tradeType === "buy" ? "active" : ""}
                 onClick={() => handleTradeTypeChange("buy")}
               >
-                buy
+                {t('main.buy')}
               </button>
               <button
                 className={tradeType === "sell" ? "active" : ""}
                 onClick={() => handleTradeTypeChange("sell")}
               >
-                sell
+                {t('main.sell')}
               </button>
             </div>
 
@@ -348,7 +333,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="minPrice"
-                  placeholder="min price"
+                  placeholder={t('main.minPrice')}
                   value={formData.minPrice}
                   onChange={handleChange}
                   className={`input ${errors.minPrice ? "error" : ""}`}
@@ -362,7 +347,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="maxPrice"
-                  placeholder="max price"
+                  placeholder={t('main.maxPrice')}
                   value={formData.maxPrice}
                   onChange={handleChange}
                   className={`input ${errors.maxPrice ? "error" : ""}`}
@@ -376,7 +361,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="amount"
-                  placeholder={`amount to ${tradeType}`}
+                  placeholder={t('main.amount', { action: tradeType })}
                   value={formData.amount}
                   onChange={handleChange}
                   className={`input ${errors.amount ? "error" : ""}`}
@@ -390,7 +375,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="speed"
-                  placeholder="buy speed (stocks/hour)"
+                  placeholder={t('main.speed')}
                   value={formData.speed}
                   onChange={handleChange}
                   className={`input ${errors.speed ? "error" : ""}`}
@@ -405,7 +390,7 @@ const Main = () => {
                 className={`proceed-btn ${Object.values(errors).some(e => e) ? "disabled" : "active"}`}
                 disabled={Object.values(errors).some(e => e)}
               >
-                proceed
+                {t('main.proceed')}
               </button>
             </form>
           </div>
@@ -420,13 +405,13 @@ const Main = () => {
               className="balance-btn withdraw-btn"
               onClick={() => handleWithdrawClick('USDT')}
             >
-              withdraw
+              {t('main.withdraw')}
             </button>
             <button
               className="balance-btn deposit-btn"
               onClick={() => handleDepositClick('USDT') }
             >
-              deposit
+              {t('main.deposit')}
             </button>
           </div>
         </div>
@@ -439,25 +424,24 @@ const Main = () => {
               className="balance-btn withdraw-btn disabled"
               onClick={() => handleWithdrawClick('BTC')}
             >
-              withdraw
+              {t('main.withdraw')}
             </button>
             <button
               disabled={true}
               className="balance-btn deposit-btn disabled"
               onClick={() => handleDepositClick('BTC') }
             >
-              deposit
+              {t('main.deposit')}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Withdraw Modal */}
       {showWithdrawModal && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Withdraw {withdrawCurrency}</h3>
+              <h3>{t('main.withdrawModal.title', { currency: withdrawCurrency })}</h3>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
             <form onSubmit={handleWithdrawSubmit} className="modal-form">
@@ -465,7 +449,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="amount"
-                  placeholder={`Amount (${withdrawCurrency})`}
+                  placeholder={t('main.withdrawModal.amount', { currency: withdrawCurrency })}
                   value={withdrawForm.amount}
                   onChange={handleWithdrawChange}
                   className={`modal-input ${withdrawErrors.amount ? 'error' : ''}`}
@@ -479,7 +463,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="wallet"
-                  placeholder="Your wallet address"
+                  placeholder={t('main.withdrawModal.wallet')}
                   value={withdrawForm.wallet}
                   onChange={handleWithdrawChange}
                   className={`modal-input ${withdrawErrors.wallet ? 'error' : ''}`}
@@ -494,23 +478,22 @@ const Main = () => {
                 className="modal-submit-btn"
                 disabled={!!withdrawErrors.amount || !!withdrawErrors.wallet}
               >
-                Confirm Withdraw
+                {t('main.withdrawModal.confirm')}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Deposit Modal */}
       {showDepositModal && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Deposit</h3>
+              <h3>{t('main.depositModal.title')}</h3>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
             <div className="modal-content">
-              <p>Send funds to the following address:</p>
+              <p>{t('main.depositModal.instructions')}</p>
               <div className="wallet-address-container">
                 <div className="wallet-address">
                   {depositAddress}
@@ -518,26 +501,24 @@ const Main = () => {
                 <button
                   className="copy-btn"
                   onClick={copyToClipboard}
-                  title="Copy to clipboard"
+                  title={t('main.depositModal.copy')}
                 >
-                  {isCopied ? 'Copied!' : 'Copy'}
+                  {isCopied ? t('main.depositModal.copied') : t('main.depositModal.copy')}
                 </button>
               </div>
               <p className="wallet-note">
-                Please make sure you're sending the correct currency to this address.
-                The deposit will be credited after 3 network confirmations.
+                {t('main.depositModal.note')}
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Error Modal */}
       {errorModal.show && (
         <div className="modal-overlay" onClick={closeErrorModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{errorModal.message.includes('success') ? 'Success' : 'Error'}</h3>
+              <h3>{errorModal.message.includes('success') ? t('common.success') : t('common.error')}</h3>
               <button className="modal-close" onClick={closeErrorModal}>×</button>
             </div>
             <div className="modal-content">
@@ -547,7 +528,7 @@ const Main = () => {
                   onClick={closeErrorModal}
                   className="modal-confirm-btn"
                 >
-                  OK
+                  {t('common.ok')}
                 </button>
               </div>
             </div>
