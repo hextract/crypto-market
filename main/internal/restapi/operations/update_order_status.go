@@ -7,29 +7,24 @@ package operations
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
-
-	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // UpdateOrderStatusHandlerFunc turns a function with the right signature into a update order status handler
-type UpdateOrderStatusHandlerFunc func(UpdateOrderStatusParams, *models.User) middleware.Responder
+type UpdateOrderStatusHandlerFunc func(UpdateOrderStatusParams) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn UpdateOrderStatusHandlerFunc) Handle(params UpdateOrderStatusParams, principal *models.User) middleware.Responder {
-	return fn(params, principal)
+func (fn UpdateOrderStatusHandlerFunc) Handle(params UpdateOrderStatusParams) middleware.Responder {
+	return fn(params)
 }
 
 // UpdateOrderStatusHandler interface for that can handle valid update order status params
 type UpdateOrderStatusHandler interface {
-	Handle(UpdateOrderStatusParams, *models.User) middleware.Responder
+	Handle(UpdateOrderStatusParams) middleware.Responder
 }
 
 // NewUpdateOrderStatus creates a new http.Handler for the update order status operation
@@ -38,7 +33,7 @@ func NewUpdateOrderStatus(ctx *middleware.Context, handler UpdateOrderStatusHand
 }
 
 /*
-	UpdateOrderStatus swagger:route PATCH /market-maker/{order_id}/status updateOrderStatus
+	UpdateOrderStatus swagger:route POST /market-maker/statuses updateOrderStatus
 
 Update order status
 */
@@ -53,158 +48,14 @@ func (o *UpdateOrderStatus) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		*r = *rCtx
 	}
 	var Params = NewUpdateOrderStatusParams()
-	uprinc, aCtx, err := o.Context.Authorize(r, route)
-	if err != nil {
-		o.Context.Respond(rw, r, route.Produces, route, err)
-		return
-	}
-	if aCtx != nil {
-		*r = *aCtx
-	}
-	var principal *models.User
-	if uprinc != nil {
-		principal = uprinc.(*models.User) // this is really a models.User, I promise
-	}
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
-	res := o.Handler.Handle(Params, principal) // actually handle the request
+	res := o.Handler.Handle(Params) // actually handle the request
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
-}
-
-// UpdateOrderStatusBody update order status body
-//
-// swagger:model UpdateOrderStatusBody
-type UpdateOrderStatusBody struct {
-
-	// bought amount
-	// Minimum: 0
-	BoughtAmount *float32 `json:"bought_amount,omitempty"`
-
-	// price
-	// Minimum: 0
-	Price *float32 `json:"price,omitempty"`
-
-	// status
-	// Required: true
-	// Enum: ["finished","cancelled"]
-	Status *string `json:"status"`
-}
-
-// Validate validates this update order status body
-func (o *UpdateOrderStatusBody) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := o.validateBoughtAmount(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validatePrice(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := o.validateStatus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (o *UpdateOrderStatusBody) validateBoughtAmount(formats strfmt.Registry) error {
-	if swag.IsZero(o.BoughtAmount) { // not required
-		return nil
-	}
-
-	if err := validate.Minimum("body"+"."+"bought_amount", "body", float64(*o.BoughtAmount), 0, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (o *UpdateOrderStatusBody) validatePrice(formats strfmt.Registry) error {
-	if swag.IsZero(o.Price) { // not required
-		return nil
-	}
-
-	if err := validate.Minimum("body"+"."+"price", "body", float64(*o.Price), 0, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var updateOrderStatusBodyTypeStatusPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["finished","cancelled"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		updateOrderStatusBodyTypeStatusPropEnum = append(updateOrderStatusBodyTypeStatusPropEnum, v)
-	}
-}
-
-const (
-
-	// UpdateOrderStatusBodyStatusFinished captures enum value "finished"
-	UpdateOrderStatusBodyStatusFinished string = "finished"
-
-	// UpdateOrderStatusBodyStatusCancelled captures enum value "cancelled"
-	UpdateOrderStatusBodyStatusCancelled string = "cancelled"
-)
-
-// prop value enum
-func (o *UpdateOrderStatusBody) validateStatusEnum(path, location string, value string) error {
-	if err := validate.EnumCase(path, location, value, updateOrderStatusBodyTypeStatusPropEnum, true); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *UpdateOrderStatusBody) validateStatus(formats strfmt.Registry) error {
-
-	if err := validate.Required("body"+"."+"status", "body", o.Status); err != nil {
-		return err
-	}
-
-	// value enum
-	if err := o.validateStatusEnum("body"+"."+"status", "body", *o.Status); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this update order status body based on context it is used
-func (o *UpdateOrderStatusBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *UpdateOrderStatusBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *UpdateOrderStatusBody) UnmarshalBinary(b []byte) error {
-	var res UpdateOrderStatusBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
 }
 
 // UpdateOrderStatusOKBody update order status o k body
@@ -212,9 +63,9 @@ func (o *UpdateOrderStatusBody) UnmarshalBinary(b []byte) error {
 // swagger:model UpdateOrderStatusOKBody
 type UpdateOrderStatusOKBody struct {
 
-	// id
-	// Example: bid_123
-	ID string `json:"id,omitempty"`
+	// status
+	// Example: ok
+	Status string `json:"status,omitempty"`
 }
 
 // Validate validates this update order status o k body

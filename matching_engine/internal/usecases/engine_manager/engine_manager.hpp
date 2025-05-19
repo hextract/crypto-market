@@ -29,6 +29,10 @@ class EngineManager {
 
   void Run();
 
+  void SetBackendClient(const std::shared_ptr<IBackendClient>& client) {
+    user_order_book_->SetBackendClient(client);
+  }
+
  private:
   size_t time_delta_{0};
   std::shared_ptr<IOrderQueue> order_queue_{nullptr};

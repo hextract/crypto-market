@@ -8,6 +8,13 @@ class UserAccountManager {
  public:
   UserAccountManager() = default;
 
+  [[nodiscard]] FillDetails GetFillDetails(const ContinuousOrder& order) const {
+    if (!filled_details_.contains(order)) {
+      return {};
+    }
+    return filled_details_.at(order);
+  }
+
   [[nodiscard]] size_t GetBaseCoinFilled(const ContinuousOrder& order) const {
     if (!filled_details_.contains(order)) {
       return 0;

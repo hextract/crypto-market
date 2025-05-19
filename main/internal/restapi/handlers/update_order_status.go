@@ -2,40 +2,29 @@ package handlers
 
 import (
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/h4x4d/crypto-market/main/internal/models"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/operations"
 	"github.com/h4x4d/crypto-market/main/internal/utils"
 )
 
-func (h *Handler) UpdateOrderStatusHandler(params operations.UpdateOrderStatusParams, principal interface{}) middleware.Responder {
-	if *params.Body.Status == "cancelled" {
-		order_id, err := h.Database.UpdateOrderStatus(params.OrderID, *params.Body.Status, nil)
-		if err != nil {
-			return utils.HandleInternalError(err)
+func (h *Handler) UpdateOrderStatusHandler(params operations.UpdateOrderStatusParams) (responder middleware.Responder) {
+	defer utils.CatchPanic(&responder)
+
+	for _, bidUpdate := range params.Body {
+		if *bidUpdate.Status == models.BidUpdateStatusCancelled {
+			cancelErr := h.Database.CancelBid(*bidUpdate.OrderID)
+			if cancelErr != nil {
+				return utils.HandleInternalError(cancelErr)
+			}
+		} else {
+			positiveErr := h.Database.PositiveBid(bidUpdate)
+			if positiveErr != nil {
+				return utils.HandleInternalError(positiveErr)
+			}
 		}
-		result := new(operations.CreateBidOK)
-		result.SetPayload(&operations.CreateBidOKBody{
-			ID: order_id,
-		})
-		return result
 	}
-
-	bid, err := h.Database.GetBidByID(params.OrderID)
-	if err != nil {
-		return utils.HandleInternalError(err)
-	}
-	totalPriceTo := (*params.Body.BoughtAmount)
-	h.Database.UpdateUserCurrencyBalance(params.OrderID, *bid.ToCurrency, totalPriceTo)
-
-	totalPriceFrom := (*bid.MaxPrice - *params.Body.Price) * (*params.Body.BoughtAmount)
-	h.Database.UpdateUserCurrencyBalance(params.OrderID, *bid.FromCurrency, totalPriceFrom)
-
-	order_id, err := h.Database.UpdateOrderStatus(params.OrderID, *params.Body.Status, params.Body.BoughtAmount)
-	if err != nil {
-		return utils.HandleInternalError(err)
-	}
-	result := new(operations.CreateBidOK)
-	result.SetPayload(&operations.CreateBidOKBody{
-		ID: order_id,
-	})
+	result := new(operations.UpdateOrderStatusOK)
+	payload := operations.UpdateOrderStatusOKBody{Status: "ok"}
+	result.SetPayload(&payload)
 	return result
 }

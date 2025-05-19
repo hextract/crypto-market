@@ -59,18 +59,20 @@ class HTTPServer {
     GetClearingPriceHandler();
   }
 
-  static crow::response GetCorsResponse() {
-    crow::response response;
+  static void SetHeaders(crow::response& response) {
     response.add_header("Access-Control-Allow-Origin", "*");
     response.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     response.add_header("Access-Control-Allow-Headers", "*");
-    return response;
+//    response.set_header("Content-Length", std::to_string(response.body.size()));
   }
+
+
 
   void CreateOrderHandler() {
     CROW_ROUTE(app_, "/create-order").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          crow::response response = GetCorsResponse();
+          crow::response response;
+          SetHeaders(response);
           if (req.method == crow::HTTPMethod::Options) {
             return response;
           }
@@ -100,7 +102,8 @@ class HTTPServer {
   void GetClearingPriceHandler() {
     CROW_ROUTE(app_, "/clearing-price").methods(crow::HTTPMethod::GET, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          crow::response response = GetCorsResponse();
+          crow::response response;
+          SetHeaders(response);
           if (req.method == crow::HTTPMethod::Options) {
             return response;
           }
@@ -129,7 +132,8 @@ class HTTPServer {
   void GetBidCurveHandler() {
     CROW_ROUTE(app_, "/bid-curve").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          crow::response response = GetCorsResponse();
+          crow::response response;
+          SetHeaders(response);
           if (req.method == crow::HTTPMethod::Options) {
             return response;
           }
@@ -174,11 +178,15 @@ class HTTPServer {
   void GetAskCurveHandler() {
     CROW_ROUTE(app_, "/ask-curve").methods(crow::HTTPMethod::Get, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          crow::response response = GetCorsResponse();
+          crow::response response;
+          SetHeaders(response);
           if (req.method == crow::HTTPMethod::Options) {
             return response;
           }
           try {
+            if (req.url_params.get_dict("left_boundary_price").empty() || req.url_params.get_dict("right_boundary_price").empty()) {
+              throw std::runtime_error("error during parsing boundary parameters");
+            }
             std::pair<std::string, std::string> params_boundaries =
                 std::make_pair(req.url_params.get("left_boundary_price"), req.url_params.get("right_boundary_price"));
             std::pair<double, double> dto_boundaries =
@@ -214,7 +222,8 @@ class HTTPServer {
   void CancelOrderHandler() {
     CROW_ROUTE(app_, "/cancel-order").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
-          crow::response response = GetCorsResponse();
+          crow::response response;
+          SetHeaders(response);
           if (req.method == crow::HTTPMethod::Options) {
             return response;
           }

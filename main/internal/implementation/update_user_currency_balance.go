@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 func (ds *DatabaseService) UpdateUserCurrencyBalance(orderID, currency string, amount float32) error {
@@ -54,16 +54,20 @@ func (ds *DatabaseService) UpdateUserCurrencyBalance(orderID, currency string, a
 
 	// 2. Получаем currency_id
 	var currencyID int
-	err = tx.QueryRow(context.Background(),
-		`SELECT currency_id FROM currencies WHERE name = $1`,
-		currency).Scan(&currencyID)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			logEntry.Error("Currency not found")
-			return errors.New("currency not found")
+	if value, err := strconv.Atoi(currency); err == nil {
+		currencyID = value
+	} else {
+		err = tx.QueryRow(context.Background(),
+			`SELECT currency_id FROM currencies WHERE name = $1`,
+			currency).Scan(&currencyID)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				logEntry.Error("Currency not found")
+				return errors.New("currency not found")
+			}
+			logEntry.WithError(err).Error("Failed to get currency")
+			return fmt.Errorf("failed to get currency: %w", err)
 		}
-		logEntry.WithError(err).Error("Failed to get currency")
-		return fmt.Errorf("failed to get currency: %w", err)
 	}
 
 	// 3. Обновляем баланс (увеличиваем или уменьшаем)

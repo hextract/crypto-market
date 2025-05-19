@@ -16,8 +16,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/runtime/middleware"
-
 	"github.com/h4x4d/crypto-market/main/internal/models"
 	"github.com/h4x4d/crypto-market/main/internal/restapi/operations"
 )
@@ -45,7 +43,6 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.JSONConsumer = runtime.JSONConsumer()
 
 	api.JSONProducer = runtime.JSONProducer()
-	api.TxtProducer = runtime.TextProducer()
 
 	// Applies when the "api_key" header is set
 	manager, err := client.NewClient()
@@ -85,19 +82,6 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 		log.Println(hotErr)
 	}
 
-	if api.MetricsKeyAuth == nil {
-		api.MetricsKeyAuth = func(token string) (*models.User, error) {
-			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
-		}
-	}
-
-	api.GetAccountBalanceHandler = operations.GetAccountBalanceHandlerFunc(handler.GetBalanceHandler)
-
-	if api.GetMetricsHandler == nil {
-		api.GetMetricsHandler = operations.GetMetricsHandlerFunc(func(params operations.GetMetricsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetMetrics has not yet been implemented")
-		})
-	}
 	api.GetBidsHandler = operations.GetBidsHandlerFunc(handler.GetBidsHandler)
 	api.GetTransactionsTransfersHandler = operations.GetTransactionsTransfersHandlerFunc(handler.GetTransactionsTransfersHandler)
 
@@ -108,6 +92,10 @@ func configureAPI(api *operations.MarketMainAPI) http.Handler {
 	api.CreateBidHandler = operations.CreateBidHandlerFunc(handler.CreateBidHandler)
 
 	api.GetBidByIDHandler = operations.GetBidByIDHandlerFunc(handler.GetBidByID)
+
+	api.UpdateOrderStatusHandler = operations.UpdateOrderStatusHandlerFunc(handler.UpdateOrderStatusHandler)
+
+	api.GetAccountBalanceHandler = operations.GetAccountBalanceHandlerFunc(handler.GetBalanceHandler)
 
 	api.PreServerShutdown = func() {}
 

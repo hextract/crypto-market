@@ -12,8 +12,8 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/validate"
+
+	"github.com/h4x4d/crypto-market/main/internal/models"
 )
 
 // NewUpdateOrderStatusParams creates a new UpdateOrderStatusParams object
@@ -37,12 +37,7 @@ type UpdateOrderStatusParams struct {
 	  Required: true
 	  In: body
 	*/
-	Body UpdateOrderStatusBody
-	/*ID of bid to update
-	  Required: true
-	  In: path
-	*/
-	OrderID string
+	Body []*models.BidUpdate
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -56,7 +51,7 @@ func (o *UpdateOrderStatusParams) BindRequest(r *http.Request, route *middleware
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body UpdateOrderStatusBody
+		var body []*models.BidUpdate
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("body", "body", ""))
@@ -64,14 +59,16 @@ func (o *UpdateOrderStatusParams) BindRequest(r *http.Request, route *middleware
 				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 		} else {
-			// validate body object
-			if err := body.Validate(route.Formats); err != nil {
-				res = append(res, err)
-			}
 
-			ctx := validate.WithOperationRequest(r.Context())
-			if err := body.ContextValidate(ctx, route.Formats); err != nil {
-				res = append(res, err)
+			// validate array of body objects
+			for i := range body {
+				if body[i] == nil {
+					continue
+				}
+				if err := body[i].Validate(route.Formats); err != nil {
+					res = append(res, err)
+					break
+				}
 			}
 
 			if len(res) == 0 {
@@ -81,27 +78,8 @@ func (o *UpdateOrderStatusParams) BindRequest(r *http.Request, route *middleware
 	} else {
 		res = append(res, errors.Required("body", "body", ""))
 	}
-
-	rOrderID, rhkOrderID, _ := route.Params.GetOK("order_id")
-	if err := o.bindOrderID(rOrderID, rhkOrderID, route.Formats); err != nil {
-		res = append(res, err)
-	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-// bindOrderID binds and validates parameter OrderID from path.
-func (o *UpdateOrderStatusParams) bindOrderID(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	// Required: true
-	// Parameter is provided by construction from the route
-	o.OrderID = raw
-
 	return nil
 }

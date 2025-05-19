@@ -253,13 +253,8 @@ func init() {
         }
       }
     },
-    "/market-maker/{order_id}/status": {
-      "patch": {
-        "security": [
-          {
-            "market_maker_key": []
-          }
-        ],
+    "/market-maker/statuses": {
+      "post": {
         "consumes": [
           "application/json"
         ],
@@ -274,35 +269,11 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "status"
-              ],
-              "properties": {
-                "bought_amount": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "price": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "cancelled"
-                  ]
-                }
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid_update"
               }
             }
-          },
-          {
-            "type": "string",
-            "description": "ID of bid to update",
-            "name": "order_id",
-            "in": "path",
-            "required": true
           }
         ],
         "responses": {
@@ -311,9 +282,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
+                "status": {
                   "type": "string",
-                  "example": "bid_123"
+                  "example": "ok"
                 }
               }
             }
@@ -421,34 +392,6 @@ func init() {
           },
           "403": {
             "description": "No access",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/metrics": {
-      "get": {
-        "security": [
-          {
-            "metrics_key": []
-          }
-        ],
-        "description": "Returns Prometheus-compatible metrics for the service",
-        "produces": [
-          "text/plain; version=0.0.4"
-        ],
-        "summary": "Prometheus metrics",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -765,6 +708,34 @@ func init() {
         }
       }
     },
+    "bid_update": {
+      "type": "object",
+      "required": [
+        "status",
+        "order_id"
+      ],
+      "properties": {
+        "bought_amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "order_id": {
+          "type": "string"
+        },
+        "paid_price": {
+          "type": "number",
+          "format": "float"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "cancelled",
+            "partial"
+          ]
+        }
+      }
+    },
     "deposit_request": {
       "type": "object",
       "required": [
@@ -983,16 +954,6 @@ func init() {
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
-      "in": "header"
-    },
-    "market_maker_key": {
-      "type": "apiKey",
-      "name": "market_maker",
-      "in": "header"
-    },
-    "metrics_key": {
-      "type": "apiKey",
-      "name": "metrics_key",
       "in": "header"
     }
   }
@@ -1219,13 +1180,8 @@ func init() {
         }
       }
     },
-    "/market-maker/{order_id}/status": {
-      "patch": {
-        "security": [
-          {
-            "market_maker_key": []
-          }
-        ],
+    "/market-maker/statuses": {
+      "post": {
         "consumes": [
           "application/json"
         ],
@@ -1240,37 +1196,11 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "type": "object",
-              "required": [
-                "status"
-              ],
-              "properties": {
-                "bought_amount": {
-                  "type": "number",
-                  "format": "float",
-                  "minimum": 0
-                },
-                "price": {
-                  "type": "number",
-                  "format": "float",
-                  "minimum": 0
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "finished",
-                    "cancelled"
-                  ]
-                }
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/bid_update"
               }
             }
-          },
-          {
-            "type": "string",
-            "description": "ID of bid to update",
-            "name": "order_id",
-            "in": "path",
-            "required": true
           }
         ],
         "responses": {
@@ -1279,9 +1209,9 @@ func init() {
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
+                "status": {
                   "type": "string",
-                  "example": "bid_123"
+                  "example": "ok"
                 }
               }
             }
@@ -1389,34 +1319,6 @@ func init() {
           },
           "403": {
             "description": "No access",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/metrics": {
-      "get": {
-        "security": [
-          {
-            "metrics_key": []
-          }
-        ],
-        "description": "Returns Prometheus-compatible metrics for the service",
-        "produces": [
-          "text/plain; version=0.0.4"
-        ],
-        "summary": "Prometheus metrics",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1765,6 +1667,36 @@ func init() {
         }
       }
     },
+    "bid_update": {
+      "type": "object",
+      "required": [
+        "status",
+        "order_id"
+      ],
+      "properties": {
+        "bought_amount": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0
+        },
+        "order_id": {
+          "type": "string"
+        },
+        "paid_price": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "finished",
+            "cancelled",
+            "partial"
+          ]
+        }
+      }
+    },
     "deposit_request": {
       "type": "object",
       "required": [
@@ -1988,16 +1920,6 @@ func init() {
     "api_key": {
       "type": "apiKey",
       "name": "api_key",
-      "in": "header"
-    },
-    "market_maker_key": {
-      "type": "apiKey",
-      "name": "market_maker",
-      "in": "header"
-    },
-    "metrics_key": {
-      "type": "apiKey",
-      "name": "metrics_key",
       "in": "header"
     }
   }

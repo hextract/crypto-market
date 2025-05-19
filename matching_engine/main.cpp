@@ -106,10 +106,17 @@ void run() {
   server.Run();
 }
 
-
 int main() {
-  MatchingEngineService service;
-  service.Run();
+  Config::Init("./.env");
+  std::shared_ptr<MatchingEngineService> service = std::make_shared<MatchingEngineService>();
+  std::thread service_worker([service](){ service->Run(); });
+  std::thread drogon_worker([](){
+    std::cout << "directly before drogon app run" << std::endl;
+    drogon::app().run();
+  });
+  service_worker.join();
+  drogon_worker.join();
+
   // run();
   // ExchangeConnectorClient client;
   // std::function<void(const Success &)> success_cb =

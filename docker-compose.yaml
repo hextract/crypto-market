@@ -140,7 +140,7 @@ services:
     networks:
       - net
     env_file:
-      - .env
+      - matching_engine/.env
     build:
       context: ./matching_engine
       dockerfile: Dockerfile

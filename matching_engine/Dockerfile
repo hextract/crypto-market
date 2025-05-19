@@ -30,6 +30,8 @@ RUN git clone --recursive https://github.com/drogonframework/drogon  && \
     ls -la /usr/local/lib/cmake/Drogon/ || \
     (echo "Файлы конфигурации Drogon не найдены!" && exit 1)
 
+RUN ln -s /usr/include/jsoncpp/json/ /usr/include/json
+
 WORKDIR /app
 COPY . .
 
