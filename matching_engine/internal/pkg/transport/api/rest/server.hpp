@@ -134,12 +134,10 @@ class HTTPServer {
             return response;
           }
           try {
-            auto body_obj = crow::json::load(req.body);
-            if (!body_obj) {
-              throw std::runtime_error("Invalid JSON!");
-            }
-
-            std::pair<double, double> dto_boundaries = mapper_.ToDtoCurvePriceBoundaries(body_obj);
+            std::pair<std::string, std::string> params_boundaries =
+                std::make_pair(req.url_params.get("left_boundary_price"), req.url_params.get("right_boundary_price"));
+            std::pair<double, double> dto_boundaries =
+                std::make_pair(std::stod(params_boundaries.first), std::stod(params_boundaries.second));
             if (dto_boundaries.first < 0 || dto_boundaries.second < 0) {
               throw std::runtime_error("non-positive price boundaries");
             }
@@ -181,12 +179,10 @@ class HTTPServer {
             return response;
           }
           try {
-            auto body_obj = crow::json::load(req.body);
-            if (!body_obj) {
-              throw std::runtime_error("Invalid JSON!");
-            }
-
-            std::pair<double, double> dto_boundaries = mapper_.ToDtoCurvePriceBoundaries(body_obj);
+            std::pair<std::string, std::string> params_boundaries =
+                std::make_pair(req.url_params.get("left_boundary_price"), req.url_params.get("right_boundary_price"));
+            std::pair<double, double> dto_boundaries =
+                std::make_pair(std::stod(params_boundaries.first), std::stod(params_boundaries.second));
             if (dto_boundaries.first < 0 || dto_boundaries.second < 0) {
               throw std::runtime_error("non-positive price boundaries");
             }

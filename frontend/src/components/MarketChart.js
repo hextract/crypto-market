@@ -8,10 +8,11 @@ import {
   CartesianGrid,
   Legend,
   ResponsiveContainer,
-  ReferenceDot,
+  ReferenceLine,
   Label,
+  ReferenceDot
 } from 'recharts';
-import { getCurvesData } from '../api/matchingEngineService';
+import { getCurvesData, getClearingPrice } from '../api/matchingEngineService';
 import { useTranslation } from 'react-i18next';
 import useInterval from '../hooks/useInterval';
 
@@ -26,7 +27,7 @@ const CustomizedAxisTick = ({ x, y, payload }) => {
       fontSize={14}
       fontWeight={500}
     >
-      {payload.value}
+      {payload.value.toFixed(3)}
     </text>
   );
 };
@@ -35,9 +36,60 @@ export default function MarketChart() {
   const { t } = useTranslation();
   const [supply, setSupply] = useState([]);
   const [demand, setDemand] = useState([]);
-  const [intersection, setIntersection] = useState(null);
+  const [intersection, setIntersection] = useState({ price: 0, volume: 0 });
   const [loading, setLoading] = useState(true);
-  const [bounds, setBounds] = useState({ min: 400, max: 600 });
+  const [bounds, setBounds] = useState({ min: 0, max: 0 });
+
+  // Функция для нахождения точки пересечения кривых
+  const findIntersection = (supplyCurve, demandCurve, clearingPrice) => {
+    // Сортируем кривые по цене
+    const sortedSupply = [...supplyCurve].sort((a, b) => a.price - b.price);
+    const sortedDemand = [...demandCurve].sort((a, b) => a.price - b.price);
+
+    // Находим ближайшие точки вокруг цены клиринга
+    let supplyBefore = 0, supplyAfter = 0;
+    for (let i = 0; i < sortedSupply.length - 1; i++) {
+      if (sortedSupply[i].price <= clearingPrice && sortedSupply[i+1].price >= clearingPrice) {
+        supplyBefore = sortedSupply[i];
+        supplyAfter = sortedSupply[i+1];
+        break;
+      }
+    }
+
+    let demandBefore = 0, demandAfter = 0;
+    for (let i = 0; i < sortedDemand.length - 1; i++) {
+      if (sortedDemand[i].price <= clearingPrice && sortedDemand[i+1].price >= clearingPrice) {
+        demandBefore = sortedDemand[i];
+        demandAfter = sortedDemand[i+1];
+        break;
+      }
+    }
+
+    // Если не нашли подходящих точек, используем крайние значения
+    if (!supplyBefore || !demandBefore) {
+      return {
+        price: clearingPrice,
+        volume: (sortedSupply[0].volume + sortedDemand[0].volume) / 2
+      };
+    }
+
+    // Линейная интерполяция для нахождения объемов при цене клиринга
+    const supplyVolume = supplyBefore.volume +
+      (clearingPrice - supplyBefore.price) *
+      (supplyAfter.volume - supplyBefore.volume) /
+      (supplyAfter.price - supplyBefore.price);
+
+    const demandVolume = demandBefore.volume +
+      (clearingPrice - demandBefore.price) *
+      (demandAfter.volume - demandBefore.volume) /
+      (demandAfter.price - demandBefore.price);
+
+    // Среднее значение объемов для точки пересечения
+    return {
+      price: clearingPrice,
+      volume: (supplyVolume + demandVolume) / 2
+    };
+  };
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -74,7 +126,7 @@ export default function MarketChart() {
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>
-            {t("main.chart.price")}: {label.toFixed(2)}
+            {t("main.chart.price")}: {label.toFixed(3)}
           </div>
           {supplyValue !== null && (
             <div style={{ color: '#ff4f81', display: 'flex', alignItems: 'center' }}>
@@ -108,42 +160,34 @@ export default function MarketChart() {
 
   const fetchData = async () => {
     try {
-      const data = await getCurvesData();
+      const clearingPrice = (await getClearingPrice()).price;
+      const minPrice = clearingPrice * 0.5;
+      const maxPrice = clearingPrice * 1.5;
 
-      const minPrice = 400;
-      const maxPrice = 600;
-      const padding = (maxPrice - minPrice) * 0.1;
-      const adjustedMin = Math.max(0, minPrice - padding);
-      const adjustedMax = maxPrice + padding;
-
-      setBounds({ min: adjustedMin, max: adjustedMax });
+      const data = await getCurvesData(minPrice, maxPrice);
+      setBounds({ min: minPrice, max: maxPrice });
 
       const parsedSupply = (data.supply || []).map(p => ({
         price: parseFloat(p.price),
         volume: parseFloat(p.volume),
-      })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
+      }));
 
       const parsedDemand = (data.demand || []).map(p => ({
         price: parseFloat(p.price),
         volume: parseFloat(p.volume),
-      })).filter(p => p.price >= adjustedMin && p.price <= adjustedMax);
+      }));
 
-      const price = data.clearing_price || (adjustedMin + adjustedMax) / 2;
-
-      const supplyPoint = parsedSupply.reduce((prev, curr) =>
-        Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
-      );
-
-      const demandPoint = parsedDemand.reduce((prev, curr) =>
-        Math.abs(curr.price - price) < Math.abs(prev.price - price) ? curr : prev
+      // Используем новую функцию для расчета точки пересечения
+      const intersectionPoint = findIntersection(
+        parsedSupply,
+        parsedDemand,
+        parseFloat(clearingPrice)
       );
 
       setSupply(parsedSupply);
       setDemand(parsedDemand);
-      setIntersection({
-        price,
-        volume: (supplyPoint.volume + demandPoint.volume) / 2
-      });
+      console.log(typeof (intersection.volume));
+      setIntersection(intersectionPoint);
     } catch (error) {
       console.error('Error fetching curves data:', error);
     } finally {
@@ -168,7 +212,6 @@ export default function MarketChart() {
       Loading chart data...
     </div>;
   }
-
   return (
     <div className="chart-section" style={{
       position: 'relative',
@@ -187,13 +230,14 @@ export default function MarketChart() {
           <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" opacity={0.5} />
 
           <XAxis
+            allowDataOverflow={true}
             dataKey="price"
             domain={[bounds.min, bounds.max]}
             tick={<CustomizedAxisTick />}
             tickMargin={10}
             tickCount={8}
             stroke="#ffffff"
-            tickFormatter={(value) => value.toFixed(2)}
+            tickFormatter={(value) => value.toFixed(3)}
             type="number"
           >
             <Label
@@ -209,6 +253,8 @@ export default function MarketChart() {
           </XAxis>
 
           <YAxis
+            domain={['auto', 'auto']}
+            allowDataOverflow={true}
             type="number"
             tickMargin={15}
             stroke="#ffffff"
@@ -274,22 +320,49 @@ export default function MarketChart() {
             isAnimationActive={false}
           />
 
-          {intersection && (
             <ReferenceDot
               x={intersection.price}
               y={intersection.volume}
-              r={6}
+              r={4}
               fill="#00ff00"
               stroke="#fff"
               strokeWidth={2}
-              label={{
-                value: `{${t("main.chart.clearing")} : ${intersection.price.toFixed(2)}}`,
-                position: 'right',
-                fill: '#ffffff',
-                fontSize: 12
-              }}
             />
-          )}
+               <ReferenceLine
+                x={intersection.price}
+                stroke="#00ff00"
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                label={{
+                  value: `Clearing: ${intersection.price.toFixed(3)}`,
+                  position: 'bottom',
+                  fill: '#00ff00',
+                  fontSize: 12,
+                  z_index: 100
+
+                }}
+                segment={[
+                  { x: intersection.price, y: 0 },
+                  { x: intersection.price, y: intersection.volume }
+                ]}
+              />
+              <ReferenceLine
+                y={intersection.volume}
+                stroke="#00ff00"
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                label={{
+                  value: `Volume: ${intersection.volume.toFixed(4)}`,
+                  position: 'left',
+                  fill: '#00ff00',
+                  fontSize: 12,
+                  z_index: 100
+                }}
+                segment={[
+                  { x: 0, y: intersection.volume },
+                  { x: intersection.price, y: intersection.volume }
+                ]}
+              />
         </LineChart>
       </ResponsiveContainer>
     </div>
