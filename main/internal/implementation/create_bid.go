@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func (ds *DatabaseService) CreateBid(userID string, fromCurrency, toCurrency string, minPrice, maxPrice, amountToBuy, buySpeed float32) (string, error) {
-	bidID := fmt.Sprintf("bid_%s", uuid.New().String())
+	bidID := fmt.Sprintf("bid_%d", int(time.Now().UnixNano()))
 
 	query := `
 		INSERT INTO bids (

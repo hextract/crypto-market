@@ -16,6 +16,7 @@ func (h *Handler) UpdateOrderStatusHandler(params operations.UpdateOrderStatusPa
 		result.SetPayload(&operations.CreateBidOKBody{
 			ID: order_id,
 		})
+		return result
 	}
 
 	bid, err := h.Database.GetBidByID(params.OrderID)
