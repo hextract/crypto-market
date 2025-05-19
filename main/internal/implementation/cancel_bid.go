@@ -14,6 +14,9 @@ func (ds *DatabaseService) CancelBid(ID string) error {
 	args := []any{ID}
 
 	rows, err := ds.pool.Query(context.Background(), query, args...)
+	if err != nil {
+		return err
+	}
 	rows.Close()
-	return err
+	return nil
 }

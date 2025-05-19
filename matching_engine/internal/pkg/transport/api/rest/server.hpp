@@ -77,7 +77,7 @@ class HTTPServer {
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
-              return crow::response(400, "Invalid JSON!");
+              throw std::runtime_error("Invalid JSON!");
             }
             ContinuousOrder order = mapper_.ToDomainOrder(body_obj);
 
@@ -136,7 +136,7 @@ class HTTPServer {
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
-              return crow::response(400, "Invalid JSON!");
+              throw std::runtime_error("Invalid JSON!");
             }
 
             std::pair<double, double> dto_boundaries = mapper_.ToDtoCurvePriceBoundaries(body_obj);
@@ -183,7 +183,7 @@ class HTTPServer {
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
-              return crow::response(400, "Invalid JSON!");
+              throw std::runtime_error("Invalid JSON!");
             }
 
             std::pair<double, double> dto_boundaries = mapper_.ToDtoCurvePriceBoundaries(body_obj);
@@ -225,7 +225,7 @@ class HTTPServer {
           try {
             auto body_obj = crow::json::load(req.body);
             if (!body_obj) {
-              return crow::response(400, "Invalid JSON!");
+              throw std::runtime_error("Invalid JSON!");
             }
             CancelOrder cancel_order = mapper_.ToDomainCancelOrder(body_obj);
 

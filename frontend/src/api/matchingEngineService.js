@@ -31,7 +31,7 @@ export const getCurvesData = async () => {
 
     // Получаем текущую цену клиринга
     const clearingPriceResponse = await getClearingPrice();
-    const clearingPrice = clearingPriceResponse.data.price;
+    const clearingPrice = clearingPriceResponse.price;
 
     // Вычисляем границы (+/- 10% от цены клиринга)
     const leftBoundary = clearingPrice * 0.9;
