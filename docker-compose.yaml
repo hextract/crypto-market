@@ -122,6 +122,12 @@ services:
       timeout: 5s
       retries: 5
 
+  matching_engine:
+    build:
+      context: ./matching_engine
+      dockerfile: Dockerfile
+    ports:
+      - "18888:18888"
 
 volumes:
   postgres_data:
