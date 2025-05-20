@@ -26,7 +26,7 @@ type BidUpdate struct {
 
 	// order id
 	// Required: true
-	OrderID *string `json:"order_id"`
+	OrderID *int64 `json:"order_id"`
 
 	// paid price
 	// Minimum: 0

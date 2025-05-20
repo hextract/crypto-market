@@ -614,4 +614,5 @@ definitions:
         format: float
         minimum: 0
       order_id:
-        type: "string"
+        type: integer
+        format: int64

@@ -28,7 +28,7 @@ void BackendClient::SendUpdate(const ContinuousOrder& order, const FillDetails& 
       for (auto [order_id, accumulated_order_update] : accumulated_order_updates_) {
         Json::Value order_update;
         order_update["order_id"] = static_cast<int64_t>(order_id);
-        order_update["payed_amount"] = accumulated_order_update.price;
+        order_update["paid_price"] = accumulated_order_update.price;
         order_update["bought_amount"] = accumulated_order_update.volume;
         order_update["status"] = accumulated_order_update.status;
         body.append(order_update);
@@ -38,7 +38,7 @@ void BackendClient::SendUpdate(const ContinuousOrder& order, const FillDetails& 
       accumulated_order_updates_.clear();
       accumulated_order_updates_count_ = 0;
 
-      req->setMethod(HttpMethod::Patch);
+      req->setMethod(HttpMethod::Post);
       req->setPath("/market-maker/statuses");
       client_->sendRequest(
           req,

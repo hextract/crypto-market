@@ -29,31 +29,31 @@ void EngineManager::Step() {
     return;
   }
   size_t clearing_price = clearing_price_opt.value();
-  std::cout << "Clearing price - " << clearing_price << std::endl;
+//  std::cout << "Clearing price - " << clearing_price << std::endl;
   MatchedDetails matched_details = user_order_book_->MatchOrders(clearing_price);
   price_calculator_->ChangeImbalance(matched_details.GetImbalance());
 
   std::vector<ContinuousOrder> buy_filled = std::move(matched_details.GetBuyFilled());
   std::vector<ContinuousOrder> sell_filled = std::move(matched_details.GetSellFilled());
 
-  std::cout << "step was done!\n";
-  std::cout << "filled buy orders:\n";
+//  std::cout << "step was done!\n";
+//  std::cout << "filled buy orders:\n";
   if (buy_filled.empty()) {
-    std::cout << "no buy orders filled!";
+//    std::cout << "no buy orders filled!";
   } else {
     for (const auto& buy_order : buy_filled) {
-      std::cout << buy_order.GetOrderId() << " ";
+//      std::cout << buy_order.GetOrderId() << " ";
     }
   }
-  std::cout << "\nfilled sell orders:\n";
+//  std::cout << "\nfilled sell orders:\n";
   if (sell_filled.empty()) {
-    std::cout << "no sell orders filled!";
+//    std::cout << "no sell orders filled!";
   } else {
     for (const auto& sell_order : sell_filled) {
-      std::cout << sell_order.GetOrderId() << " ";
+//      std::cout << sell_order.GetOrderId() << " ";
     }
   }
-  std::cout << '\n';
+//  std::cout << '\n';
 
   for (const auto& buy_order : buy_filled) {
     buy_order_book_->DeleteOrder(buy_order);

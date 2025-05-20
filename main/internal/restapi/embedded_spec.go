@@ -720,7 +720,8 @@ func init() {
           "format": "float"
         },
         "order_id": {
-          "type": "string"
+          "type": "integer",
+          "format": "int64"
         },
         "paid_price": {
           "type": "number",
@@ -1680,7 +1681,8 @@ func init() {
           "minimum": 0
         },
         "order_id": {
-          "type": "string"
+          "type": "integer",
+          "format": "int64"
         },
         "paid_price": {
           "type": "number",

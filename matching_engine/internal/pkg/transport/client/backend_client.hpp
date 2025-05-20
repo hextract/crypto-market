@@ -39,7 +39,7 @@ class BackendClient : public IBackendClient {
     std::string status;
   };
 
-  static const size_t kAccumulatedOrderUpdatesReleaseCount = 1e5;
+  static const size_t kAccumulatedOrderUpdatesReleaseCount = 10;
   size_t accumulated_order_updates_count_ = 0;
   std::unordered_map<size_t, AccumulatedOrderUpdate> accumulated_order_updates_;
   std::shared_ptr<std::atomic<bool>> app_ready_;
