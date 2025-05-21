@@ -34,6 +34,8 @@
     "signIn": "войти"
   },
   "main": {
+    "type_buy": "покупки",
+    "type_sell": "продажи",
     "priceUndefined": "не определена",
     "tradingPair": "USDT/BTC",
     "high": "максимум за день:",
@@ -103,7 +105,7 @@
       "statuses": {
         "completed": "Завершено",
         "pending": "В ожидании",
-        "processing": "В обработке",
+        "partial": "Частично",
         "cancelled": "Отменено"
       },
       "clear": "Сбросить фильтры"

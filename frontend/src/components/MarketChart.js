@@ -189,7 +189,6 @@ export default function MarketChart() {
       console.log(typeof (intersection.volume));
       setIntersection(intersectionPoint);
     } catch (error) {
-      console.error('Error fetching curves data:', error);
     } finally {
       setLoading(false);
     }

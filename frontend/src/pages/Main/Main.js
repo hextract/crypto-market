@@ -15,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import useInterval from '../../hooks/useInterval';
 
 const Main = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(null);
   const [tradeType, setTradeType] = useState("buy");
@@ -39,7 +41,6 @@ const Main = () => {
     show: false,
     message: ''
   });
-  const { t } = useTranslation();
 
   // States for modals
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -74,7 +75,6 @@ const Main = () => {
       setClearingPrice(priceResponse.price);
       setPriceError(false);
     } catch (error) {
-      console.error('Failed to load clearing price:', error);
       setPriceError(true);
     }
   };
@@ -102,6 +102,7 @@ const Main = () => {
   }, 1000);
 
   const showError = (message) => {
+    console.log(message);
     setErrorModal({
       show: true,
       message
@@ -375,7 +376,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="amount"
-                  placeholder={t('main.amount', {action: tradeType})}
+                  placeholder={t('main.amount', {action: t(`main.type_${tradeType}`)})}
                   value={formData.amount}
                   onChange={handleChange}
                   className={`input ${errors.amount ? "error" : ""}`}
@@ -532,7 +533,7 @@ const Main = () => {
         <div className="modal-overlay" onClick={closeErrorModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{errorModal.message.includes('success') ? t('common.success') : t('common.error')}</h3>
+              <h3>{(errorModal.message.includes('success') || errorModal.message.includes('успешно')) ? t('common.success') : t('common.error')}</h3>
               <button className="modal-close" onClick={closeErrorModal}>×</button>
             </div>
             <div className="modal-content">
