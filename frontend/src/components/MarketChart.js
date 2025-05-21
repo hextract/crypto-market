@@ -333,7 +333,7 @@ export default function MarketChart() {
                 strokeWidth={1}
                 strokeDasharray="3 3"
                 label={{
-                  value: `Clearing: ${intersection.price.toFixed(3)}`,
+                  value: `${t("main.chart.clearing")}: ${intersection.price.toFixed(3)}`,
                   position: 'bottom',
                   fill: '#00ff00',
                   fontSize: 12,
@@ -351,7 +351,7 @@ export default function MarketChart() {
                 strokeWidth={1}
                 strokeDasharray="3 3"
                 label={{
-                  value: `Volume: ${intersection.volume.toFixed(4)}`,
+                  value: `${t("main.chart.volume")}: ${intersection.volume.toFixed(4)}`,
                   position: 'left',
                   fill: '#00ff00',
                   fontSize: 12,

@@ -97,7 +97,7 @@ const Main = () => {
   // Обновляем цену каждую секунду
   useInterval(() => {
     if (isAuth) {
-      loadPrice();
+      loadData();
     }
   }, 1000);
 
