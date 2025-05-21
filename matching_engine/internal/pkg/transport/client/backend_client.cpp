@@ -35,13 +35,14 @@ bool BackendClient::SendFillDetails(const std::unordered_map<ContinuousOrder, Fi
         *req,
         [updated_orders_count](ReqResult result,
                                const HttpResponsePtr& resp) {
-          std::cout << "First team backend notified about " << updated_orders_count << " orders"
-                    << std::endl;
           if (result != ReqResult::Ok || !resp || resp->getStatusCode() != k200OK) {
             std::cout << "Failed to update status for orders"
                       << "; result=" << to_string(result)
                       << ", status="
                       << (resp ? resp->getStatusCode() : 0);
+          } else {
+            std::cout << "First team backend notified about " << updated_orders_count << " orders"
+                      << std::endl;
           }
         });
   });
@@ -72,13 +73,14 @@ bool BackendClient::SendCancelled(const std::vector<ContinuousOrder>& cancelled_
         *req,
         [cancelled_count](ReqResult result,
                                const HttpResponsePtr& resp) {
-          std::cout << "First team backend notified about cancelling " << cancelled_count << " orders"
-                    << std::endl;
           if (result != ReqResult::Ok || !resp || resp->getStatusCode() != k200OK) {
             std::cout << "Failed to update status for orders"
                       << "; result=" << to_string(result)
                       << ", status="
                       << (resp ? resp->getStatusCode() : 0);
+          } else {
+            std::cout << "First team backend notified about cancelling " << cancelled_count << " orders"
+                      << std::endl;
           }
         });
   });

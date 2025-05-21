@@ -161,8 +161,8 @@ export default function MarketChart() {
   const fetchData = async () => {
     try {
       const clearingPrice = (await getClearingPrice()).price;
-      const minPrice = clearingPrice * 0.5;
-      const maxPrice = clearingPrice * 1.5;
+      const minPrice = clearingPrice * 0.95;
+      const maxPrice = clearingPrice * 1.05;
 
       const data = await getCurvesData(minPrice, maxPrice);
       setBounds({ min: minPrice, max: maxPrice });
