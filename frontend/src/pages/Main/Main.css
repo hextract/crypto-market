@@ -96,10 +96,12 @@
 }
 
 .trading-pair {
+  margin-top: -3px;
   font-size: 36px;
 }
 
 .price {
+  margin-top: 4px;
   font-size: 26px;
 }
 
