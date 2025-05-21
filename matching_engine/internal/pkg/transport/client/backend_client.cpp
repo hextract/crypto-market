@@ -13,7 +13,7 @@ bool BackendClient::SendFillDetails(const std::unordered_map<ContinuousOrder, Fi
     double payedAmount = static_cast<double>(fill_details.GetFilledQuoteSize()) / tickSize / partCount;
 
     order_update["order_id"] = static_cast<int64_t>(order.GetOrderId());
-    order_update["payed_amount"] = payedAmount;
+    order_update["paid_price"] = payedAmount;
     order_update["bought_amount"] = boughtAmount;
 
     std::string status = (fill_details.GetFilledBaseSize() >= order.GetVolume())
@@ -24,7 +24,7 @@ bool BackendClient::SendFillDetails(const std::unordered_map<ContinuousOrder, Fi
   }
 
   auto req = std::make_shared<HttpRequestPtr>(HttpRequest::newHttpJsonRequest(body));
-  (*req)->setMethod(HttpMethod::Patch);
+  (*req)->setMethod(HttpMethod::Post);
   (*req)->setPath("/market-maker/statuses");
 
   while (!app_ready_->load()) {
