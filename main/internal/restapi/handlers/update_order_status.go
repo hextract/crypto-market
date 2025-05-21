@@ -22,10 +22,11 @@ func (h *Handler) UpdateOrderStatusHandler(params operations.UpdateOrderStatusPa
 		log.Println("Bid: ", bidId, " continued")
 
 		if *bidUpdate.Status == models.BidStatusCancelled {
-			cancelErr := h.Database.CancelBid(bidId)
-			if cancelErr != nil {
-				return utils.HandleInternalError(cancelErr)
-			}
+			//cancelErr := h.Database.CancelBid(bidId)
+			//if cancelErr != nil {
+			//	return utils.HandleInternalError(cancelErr)
+			//}
+			log.Println("Bid: ", bidId, " cancel skipped")
 		} else {
 			positiveErr := h.Database.PositiveBid(bidUpdate)
 			if positiveErr != nil {
