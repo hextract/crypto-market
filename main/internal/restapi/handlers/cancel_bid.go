@@ -22,10 +22,5 @@ func (h *Handler) CancelBidHandler(params operations.CancelBidParams, user *mode
 		return utils.HandleError("couldn't cancel order", http.StatusInternalServerError)
 	}
 
-	err = h.Database.CancelBid(params.BidID)
-	if err != nil {
-		return utils.HandleInternalError(err)
-	}
-
 	return result
 }

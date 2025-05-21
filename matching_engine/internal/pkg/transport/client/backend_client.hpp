@@ -28,20 +28,12 @@ class BackendClient : public IBackendClient {
     });
   }
 
-  void SendUpdate(const ContinuousOrder& order, const FillDetails& fill_details) override;
+  bool SendFillDetails(const std::unordered_map<ContinuousOrder,FillDetails>& orders_fill_details) override;
+  bool SendCancelled(const std::vector<ContinuousOrder>& cancelled_orders) override;
 
   ~BackendClient() override = default;
 
  private:
-  struct AccumulatedOrderUpdate {
-    double price = 0;
-    double volume = 0;
-    std::string status;
-  };
-
-  static const size_t kAccumulatedOrderUpdatesReleaseCount = 10;
-  size_t accumulated_order_updates_count_ = 0;
-  std::unordered_map<size_t, AccumulatedOrderUpdate> accumulated_order_updates_;
   std::shared_ptr<std::atomic<bool>> app_ready_;
   std::shared_ptr<IOrderBookConfiguration> cfg_{nullptr};
   std::shared_ptr<HttpClient> client_{nullptr};

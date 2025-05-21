@@ -1,6 +1,7 @@
 add_library(transport
         notification/kafka/kafka.cpp
         client/backend_client.cpp
+        order_updates_sender/order_updates_sender.cpp
 )
 
 target_link_libraries(transport

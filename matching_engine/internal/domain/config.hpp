@@ -18,7 +18,7 @@ class Config {
 
   static size_t GetServerPort() {
     const char *v = std::getenv("SERVER_PORT");
-    return v ? std::stoul(v) : 18080;
+    return v ? std::stoul(v) : 18888;
   }
 
   static std::string GetExchangeConnectorUrl() {

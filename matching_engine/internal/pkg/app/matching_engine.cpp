@@ -1,18 +1,22 @@
 #include <memory>
 
 #include "matching_engine.hpp"
+
 #include "usecases/cancel_queue/cancel_queue.hpp"
 #include "usecases/order_queue/order_queue.hpp"
 #include "usecases/order_book/order_book.hpp"
 #include "usecases/user_order_book/user_order_book.hpp"
 #include "usecases/price_calculator/segment_treap/segment_treap_price_calculator.hpp"
+
+#include "pkg/transport/client/backend_client.hpp"
+#include "pkg/transport/order_updates_sender/order_updates_sender.hpp"
+
 #include "pkg/repository/order_book/linear/linear.hpp"
 #include "pkg/repository/user_order_book/linear/linear.hpp"
-
 #include "pkg/repository/order_book/optimal/ask_curve_repository.hpp"
 #include "pkg/repository/order_book/optimal/bid_curve_repository.hpp"
 #include "pkg/repository/user_order_book/optimal/orders_repository.hpp"
-#include "pkg/transport/client/backend_client.hpp"
+
 
 MatchingEngineService::MatchingEngineService() {
   TradingPair pair(Asset("ETH"), Asset("USDT"));
@@ -23,14 +27,18 @@ MatchingEngineService::MatchingEngineService() {
   auto user_order_book_repo = std::make_shared<OrdersRepository>();
   auto buy_order_book_repo = std::make_shared<BidCurveRepository>();
   auto sell_order_book_repo = std::make_shared<AskCurveRepository>();
-  auto user_order_book = std::make_shared<UserOrderBook>(pair, user_order_book_repo);
   auto buy_order_book = std::make_shared<OrderBook>(buy_order_book_repo);
   auto sell_order_book = std::make_shared<OrderBook>(sell_order_book_repo);
   auto price_calc = std::make_shared<SegmentTreapPriceCalculator>(buy_order_book_repo, sell_order_book_repo);
 
   auto order_queue = std::make_shared<OrderQueue>();
   auto cancel_queue = std::make_shared<CancelQueue>();
-  auto backend_client = std::make_shared<BackendClient>(order_book_config_);
+
+  auto backend_client = std::make_shared<BackendClient>(order_book_config_
+      );
+  auto order_updates_sender = std::make_shared<OrderUpdatesSender>(backend_client);
+  auto user_order_book = std::make_shared<UserOrderBook>(pair, user_order_book_repo, order_updates_sender);
+
   std::function<void(const ContinuousOrder &)> create_cb =
       [order_queue](const ContinuousOrder &order) {
         order_queue->AddOrder(order);
@@ -65,8 +73,7 @@ MatchingEngineService::MatchingEngineService() {
   http_server_->SetPair(pair);
 
   engine_manager_ =
-      std::make_shared<EngineManager>(order_queue, user_order_book, buy_order_book, sell_order_book, price_calc);
-  engine_manager_->SetBackendClient(backend_client);
+      std::make_shared<EngineManager>(order_queue, cancel_queue, user_order_book, buy_order_book, sell_order_book, price_calc);
 }
 
 void MatchingEngineService::Run() {

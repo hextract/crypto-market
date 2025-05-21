@@ -2,10 +2,13 @@
 #include "domain/continuous_order.hpp"
 #include "domain/matched_details.hpp"
 
+#include <thread>
+#include <ranges>
+#include <vector>
+
 
 MatchedDetails UserOrderBook::MatchOrders(size_t price) {
   std::unordered_set<ContinuousOrder> orders = storage_->GetOrders(price);
-  std::cout << "orders count - " << orders.size() <<  std::endl;
   std::vector<ContinuousOrder> buy_orders;
   std::vector<ContinuousOrder> sell_orders;
   MatchedDetails matched_details;
@@ -30,7 +33,6 @@ MatchedDetails UserOrderBook::MatchOrders(size_t price) {
       storage_->RemoveOrder(order);
     }
     account_manager_.AddFilledQuantity(order, price, std::min(need_buy, remains));
-    backend_client_->SendUpdate(order, account_manager_.GetFillDetails(order));
   }
   for (const auto& order: sell_orders) {
     size_t cur_speed = order.GetRoundedSpeed(price);
@@ -38,23 +40,23 @@ MatchedDetails UserOrderBook::MatchOrders(size_t price) {
     size_t remains = order.GetVolume() - account_manager_.GetBaseCoinFilled(order);
     if (need_sell >= remains) {
       imbalance += static_cast<int64_t>(need_sell - remains);
-      account_manager_.AddFilledQuantity(order, price, remains);
       if (order.GetPair().GetBase().GetName() == "") {
         throw std::runtime_error("");
       }
       matched_details.AddSellFilled(order);
       storage_->RemoveOrder(order);
-    } else {
-      account_manager_.AddFilledQuantity(order, price, need_sell);
     }
-    backend_client_->SendUpdate(order, account_manager_.GetFillDetails(order));
+    account_manager_.AddFilledQuantity(order, price, std::min(need_sell, remains));
   }
+  std::vector<std::vector<ContinuousOrder>> all_orders = {buy_orders, sell_orders};
+
+  // saving updates
+  for (const auto& order : std::ranges::join_view(all_orders)) {
+    order_updates_sender_->SendFillDetails(order, account_manager_.GetFillDetails(order));
+  }
+
   matched_details.AddImbalance(imbalance);
   return matched_details;
-}
-
-void UserOrderBook::SetBackendClient(const std::shared_ptr<IBackendClient>& client) {
-  backend_client_ = client;
 }
 
 void UserOrderBook::AddOrder(const ContinuousOrder &order) {
@@ -63,5 +65,10 @@ void UserOrderBook::AddOrder(const ContinuousOrder &order) {
 
 void UserOrderBook::RemoveOrder(const ContinuousOrder &order) {
   storage_->RemoveOrder(order);
+}
+
+void UserOrderBook::CancellOrder(const ContinuousOrder& order) {
+  order_updates_sender_->SendCancelled(order);
+  RemoveOrder(order);
 }
 

@@ -72,6 +72,7 @@ class UserAccountManager {
     filled_details_.erase(order);
   }
 
+
  private:
   std::unordered_map<ContinuousOrder, FillDetails> filled_details_;
 };

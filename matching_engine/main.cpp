@@ -56,31 +56,31 @@ std::vector<ContinuousOrder> readOrdersFromCSV(const std::string &filename) {
 }
 
 
-void test() {
-  TradingPair pair(Asset("BTC"), Asset("USDT"));
-  auto user_order_book_repo = std::make_shared<LinearUserOrderBookRepo>(pair);
-  auto buy_order_book_repo = std::make_shared<LinearOrderBookRepo>(1000000);
-  auto sell_order_book_repo = std::make_shared<LinearOrderBookRepo>(1000000);
-  auto user_order_book = std::make_shared<UserOrderBook>(pair, user_order_book_repo);
-  auto buy_order_book = std::make_shared<OrderBook>(buy_order_book_repo);
-  auto sell_order_book = std::make_shared<OrderBook>(sell_order_book_repo);
-  auto price_calc = std::make_shared<LinearPriceCalculator>(buy_order_book_repo, sell_order_book_repo, 1000000);
-  auto order_queue = std::make_shared<OrderQueue>();
-
-  EngineManager engine_manager{order_queue, user_order_book, buy_order_book, sell_order_book, price_calc};
-
-  // ContinuousOrder order_1(1, pair, OrderSide::Buy, 15, 15, 15, 5);
-  // ContinuousOrder order_2(2, pair, OrderSide::Sell, 15, 15, 15, 5);
-
-  auto orders = readOrdersFromCSV("./orders.csv");
-  for (const auto &i: orders) {
-    order_queue->AddOrder(i);
-  }
-
-  for (int i = 0; i < 100; ++i) {
-    engine_manager.Step();
-  }
-}
+//void test() {
+//  TradingPair pair(Asset("BTC"), Asset("USDT"));
+//  auto user_order_book_repo = std::make_shared<LinearUserOrderBookRepo>(pair);
+//  auto buy_order_book_repo = std::make_shared<LinearOrderBookRepo>(1000000);
+//  auto sell_order_book_repo = std::make_shared<LinearOrderBookRepo>(1000000);
+//  auto user_order_book = std::make_shared<UserOrderBook>(pair, user_order_book_repo, order_updates_sender);
+//  auto buy_order_book = std::make_shared<OrderBook>(buy_order_book_repo);
+//  auto sell_order_book = std::make_shared<OrderBook>(sell_order_book_repo);
+//  auto price_calc = std::make_shared<LinearPriceCalculator>(buy_order_book_repo, sell_order_book_repo, 1000000);
+//  auto order_queue = std::make_shared<OrderQueue>();
+//
+//  EngineManager engine_manager{order_queue, user_order_book, buy_order_book, sell_order_book, price_calc};
+//
+//  // ContinuousOrder order_1(1, pair, OrderSide::Buy, 15, 15, 15, 5);
+//  // ContinuousOrder order_2(2, pair, OrderSide::Sell, 15, 15, 15, 5);
+//
+//  auto orders = readOrdersFromCSV("./orders.csv");
+//  for (const auto &i: orders) {
+//    order_queue->AddOrder(i);
+//  }
+//
+//  for (int i = 0; i < 100; ++i) {
+//    engine_manager.Step();
+//  }
+//}
 
 void run() {
   TradingPair pair(Asset("ETH"), Asset("USDT"));

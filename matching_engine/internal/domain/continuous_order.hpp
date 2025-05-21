@@ -51,6 +51,10 @@ class ContinuousOrder {
     return std::floor(d_price);
   }
 
+  ContinuousOrder& operator=(const ContinuousOrder& other_order) = default;
+
+  ContinuousOrder(const ContinuousOrder& other_order) = default;
+
  private:
   size_t order_id_;
   TradingPair pair_;

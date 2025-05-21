@@ -7,6 +7,7 @@ add_library(repository
         order_book/optimal/ask_curve_repository.cpp
         order_book/optimal/bid_curve_repository.cpp
         order_book/optimal/segment_treap/segment_treap.ipp
+        fill_details_repo/fill_details_repo.cpp
 )
 
 target_include_directories(repository PUBLIC

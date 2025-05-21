@@ -66,8 +66,6 @@ class HTTPServer {
 //    response.set_header("Content-Length", std::to_string(response.body.size()));
   }
 
-
-
   void CreateOrderHandler() {
     CROW_ROUTE(app_, "/create-order").methods(crow::HTTPMethod::Post, crow::HTTPMethod::Options)(
         [this](const crow::request& req) {
