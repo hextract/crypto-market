@@ -107,8 +107,9 @@ func (ds *DatabaseService) PositiveBid(update *models.BidUpdate) error {
 		prevAvg = new(float32)
 		*prevAvg = 0.0
 	}
+	fmt.Println("Params:", maxPrice, *prevAmount, *prevAvg, *update.BoughtAmount, *update.PaidPrice, "\n BALANCE DIFF: ", maxPrice*(*update.BoughtAmount)-(*update.PaidPrice)-(maxPrice*(*prevAvg)-(*prevAmount)*(*prevAvg)))
 	balanceErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(fromId),
-		maxPrice*(*update.BoughtAmount)-(*update.PaidPrice)-(maxPrice*(*prevAvg)-(*prevAmount)*(*prevAvg)))
+		maxPrice*(*update.BoughtAmount-*prevAmount)-(*update.PaidPrice-(*prevAmount)*(*prevAvg)))
 	fmt.Println("UPDATED_BALANCE", balanceErr)
 	if balanceErr != nil {
 		return balanceErr
