@@ -20,6 +20,9 @@ func (h *Handler) CreateBidHandler(params operations.CreateBidParams, user *mode
 	}
 
 	needBalance := *params.Body.MaxPrice * *params.Body.AmountToBuy
+	if *params.Body.FromCurrency == "BTC" {
+		needBalance = *params.Body.AmountToBuy
+	}
 
 	balances, err := h.Database.GetAccountBalance(user)
 
