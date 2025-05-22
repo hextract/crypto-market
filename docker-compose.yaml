@@ -73,7 +73,6 @@ services:
       - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
     labels:
       - "com.github.nginx-proxy.port=18888"
-      - "com.github.nginx-proxy.nginx=true"
     environment:
       - VIRTUAL_HOST=engine.cont-exchange.ru
       - VIRTUAL_PORT=18888
@@ -166,7 +165,6 @@ services:
       - nginx-proxy
     environment:
       - NGINX_PROXY_CONTAINER=nginx-proxy
-      - LETSENCRYPT_FORCE_RENEW=true
 
   redpanda:
     command: ${REDPANDA_START_COMMAND}
