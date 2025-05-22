@@ -123,7 +123,7 @@ services:
     env_file:
       - .env
     environment:
-      - VIRTUAL_HOST=cont-exchange.ru,213.171.24.206
+      - VIRTUAL_HOST=cont-exchange.ru
       - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
@@ -147,6 +147,7 @@ services:
       - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
   nginx-proxy:
     image: jwilder/nginx-proxy
+    container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
@@ -164,16 +165,17 @@ services:
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
     volumes:
       - certs:/etc/nginx/certs
       - vhost.d:/etc/nginx/vhost.d
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy
     networks:
       - net
     depends_on:
       - nginx-proxy
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
 
 volumes:
   postgres_data:
