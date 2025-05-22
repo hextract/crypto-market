@@ -148,7 +148,7 @@ services:
       - net
     depends_on:
       - nginx
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --server https://acme-v02.api.letsencrypt.org/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email sidenkoleg@gmail.com --server https://acme-v02.api.letsencrypt.org/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
 
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
