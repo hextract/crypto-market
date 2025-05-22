@@ -122,6 +122,9 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      - VIRTUAL_HOST=cont-exchange.ru
+      - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
