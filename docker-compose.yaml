@@ -70,7 +70,7 @@ services:
       context: ./matching_engine
       dockerfile: Dockerfile
     ports:
-      - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
+      - "18888:18888"
     labels:
       - "com.github.nginx-proxy.port=18888"
     environment:
