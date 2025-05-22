@@ -41,6 +41,8 @@ func (useCase *CreateContinuousOrderFromOrderBookSnapshotUseCase) Execute(snapsh
 	result.PriceHigh = snapshot.BestAsk
 	if result.PriceLow > result.PriceHigh {
 		result.PriceLow, result.PriceHigh = result.PriceHigh, result.PriceLow
+	} else if result.PriceLow == result.PriceHigh {
+		return nil, errors.New("BestBid equals BestAsk can not creat order with such prices")
 	}
 	return result, nil
 }
