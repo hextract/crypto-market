@@ -108,14 +108,20 @@ func (ds *DatabaseService) PositiveBid(update *models.BidUpdate) error {
 		*prevAvg = 0.0
 	}
 	fmt.Println("Params:", maxPrice, *prevAmount, *prevAvg, *update.BoughtAmount, *update.PaidPrice, "\n BALANCE DIFF: ", maxPrice*(*update.BoughtAmount)-(*update.PaidPrice)-(maxPrice*(*prevAvg)-(*prevAmount)*(*prevAvg)))
-	balanceErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(fromId),
-		maxPrice*(*update.BoughtAmount-*prevAmount)-(*update.PaidPrice-(*prevAmount)*(*prevAvg)))
-	fmt.Println("UPDATED_BALANCE", balanceErr)
-	if balanceErr != nil {
-		return balanceErr
+	if fromId == 1 {
+		balanceErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(fromId),
+			maxPrice*(*update.BoughtAmount-*prevAmount)-(*update.PaidPrice-(*prevAmount)*(*prevAvg)))
+		fmt.Println("UPDATED_BALANCE", balanceErr)
+		if balanceErr != nil {
+			return balanceErr
+		}
+		addErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(toId),
+			(*update.BoughtAmount)-(*prevAmount))
+		fmt.Println("UPDATED_ADDITION", addErr)
+		return addErr
 	}
 	addErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(toId),
-		(*update.BoughtAmount)-(*prevAmount))
+		*update.PaidPrice-(*prevAmount)*(*prevAvg))
 	fmt.Println("UPDATED_ADDITION", addErr)
 	return addErr
 }
