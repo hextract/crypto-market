@@ -140,12 +140,16 @@ services:
       - certs:/etc/letsencrypt
       - webroot:/etc/letsencrypt/webroot
       - ./certbot/logs:/var/log/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - net
     depends_on:
       - nginx
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --server https://api.buypass.com/acme/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --server https://acme-v02.api.letsencrypt.org/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
+
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
 #    env_file:
