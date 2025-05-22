@@ -130,6 +130,10 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - VIRTUAL_HOST=cont-exchange.ru
+      - LETSENCRYPT_HOST=cont-exchange.ru
+      - LETSENCRYPT_EMAIL=sidenkoleg@gmail.com
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT}"]
       interval: 10s
@@ -147,9 +151,36 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - net
+    depends_on:
+      - frontend
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+    depends_on:
+      - nginx-proxy
 
 volumes:
   postgres_data:
+  vhost.d:
+  html:
 
 networks:
   net:

@@ -17,10 +17,10 @@ func (ds *DatabaseService) UpdateOrderStatus(
 	status string,
 	boughtAmount *float32,
 	paidPrice *float32,
-) (prevBoughtAmount *float32, prevAvgPrice *float32, fromId int, toId int, err error) {
+) (prevBoughtAmount *float32, prevAvgPrice *float32, fromId int, toId int, maxPrice float32, err error) {
 	tx, err := ds.pool.Begin(context.Background())
 	if err != nil {
-		return nil, nil, 0, 0, fmt.Errorf("failed to begin transaction: %w", err)
+		return nil, nil, 0, 0, 0.0, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -29,15 +29,15 @@ func (ds *DatabaseService) UpdateOrderStatus(
 	}()
 
 	err = tx.QueryRow(context.Background(),
-		`SELECT bought_amount, avg_price, from_id, to_id FROM bids WHERE id = $1 FOR UPDATE`,
+		`SELECT bought_amount, avg_price, from_id, to_id, max_price FROM bids WHERE id = $1 FOR UPDATE`,
 		orderID,
-	).Scan(&prevBoughtAmount, &prevAvgPrice, &fromId, &toId)
+	).Scan(&prevBoughtAmount, &prevAvgPrice, &fromId, &toId, &maxPrice)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return nil, nil, 0, 0, fmt.Errorf("order with id %s not found", orderID)
+			return nil, nil, 0, 0, 0.0, fmt.Errorf("order with id %s not found", orderID)
 		}
-		return nil, nil, 0, 0, fmt.Errorf("failed to get current order values: %w", err)
+		return nil, nil, 0, 0, 0.0, fmt.Errorf("failed to get current order values: %w", err)
 	}
 
 	var (
@@ -79,28 +79,36 @@ func (ds *DatabaseService) UpdateOrderStatus(
 
 	rows, err := tx.Query(context.Background(), query, args...)
 	if err != nil {
-		return prevBoughtAmount, prevAvgPrice, 0, 0,
+		return prevBoughtAmount, prevAvgPrice, 0, 0, 0.0,
 			fmt.Errorf("failed to update order: %w", err)
 	}
 	rows.Close()
 
 	if err = tx.Commit(context.Background()); err != nil {
-		return prevBoughtAmount, prevAvgPrice, 0, 0,
+		return prevBoughtAmount, prevAvgPrice, 0, 0, 0.0,
 			fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return prevBoughtAmount, prevAvgPrice, fromId, toId, nil
+	return prevBoughtAmount, prevAvgPrice, fromId, toId, maxPrice, nil
 }
 func (ds *DatabaseService) PositiveBid(update *models.BidUpdate) error {
 	BidId := "bid_" + strconv.Itoa(int(*update.OrderID))
 	fmt.Println(BidId, *update.Status, update.BoughtAmount, update.PaidPrice)
-	prevAmount, prevAvg, fromId, toId, err := ds.UpdateOrderStatus(BidId, *update.Status, update.BoughtAmount, update.PaidPrice)
-	fmt.Println("UPDATED_STATUS", err)
+	prevAmount, prevAvg, fromId, toId, maxPrice, err := ds.UpdateOrderStatus(BidId, *update.Status, update.BoughtAmount, update.PaidPrice)
+	fmt.Println("UPDATED_STATUS", err, prevAmount, prevAvg, fromId, toId)
 	if err != nil {
 		return err
 	}
+	if prevAmount == nil {
+		prevAmount = new(float32)
+		*prevAmount = 0.0
+	}
+	if prevAvg == nil {
+		prevAvg = new(float32)
+		*prevAvg = 0.0
+	}
 	balanceErr := ds.UpdateUserCurrencyBalance(BidId, strconv.Itoa(fromId),
-		*update.PaidPrice-(*prevAmount)*(*prevAvg))
+		maxPrice*(*update.BoughtAmount)-(*update.PaidPrice)-(maxPrice*(*prevAvg)-(*prevAmount)*(*prevAvg)))
 	fmt.Println("UPDATED_BALANCE", balanceErr)
 	if balanceErr != nil {
 		return balanceErr

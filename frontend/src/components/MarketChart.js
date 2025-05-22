@@ -46,49 +46,78 @@ export default function MarketChart() {
     const sortedSupply = [...supplyCurve].sort((a, b) => a.price - b.price);
     const sortedDemand = [...demandCurve].sort((a, b) => a.price - b.price);
 
-    // Находим ближайшие точки вокруг цены клиринга
-    let supplyBefore = 0, supplyAfter = 0;
-    for (let i = 0; i < sortedSupply.length - 1; i++) {
-      if (sortedSupply[i].price <= clearingPrice && sortedSupply[i+1].price >= clearingPrice) {
-        supplyBefore = sortedSupply[i];
-        supplyAfter = sortedSupply[i+1];
-        break;
-      }
-    }
+    // Функция для линейной интерполяции объема по цене
+    const getVolumeAtPrice = (curve, targetPrice) => {
+      // Если кривая пустая, возвращаем 0
+      if (curve.length === 0) return 0;
 
-    let demandBefore = 0, demandAfter = 0;
-    for (let i = 0; i < sortedDemand.length - 1; i++) {
-      if (sortedDemand[i].price <= clearingPrice && sortedDemand[i+1].price >= clearingPrice) {
-        demandBefore = sortedDemand[i];
-        demandAfter = sortedDemand[i+1];
-        break;
-      }
-    }
+      // Если цена ниже минимальной, возвращаем первый объем
+      if (targetPrice <= curve[0].price) return curve[0].volume;
 
-    // Если не нашли подходящих точек, используем крайние значения
-    if (!supplyBefore || !demandBefore) {
+      // Если цена выше максимальной, возвращаем последний объем
+      if (targetPrice >= curve[curve.length - 1].price) return curve[curve.length - 1].volume;
+
+      // Находим отрезок для интерполяции
+      for (let i = 0; i < curve.length - 1; i++) {
+        if (curve[i].price <= targetPrice && curve[i+1].price >= targetPrice) {
+          const ratio = (targetPrice - curve[i].price) / (curve[i+1].price - curve[i].price);
+          return curve[i].volume + ratio * (curve[i+1].volume - curve[i].volume);
+        }
+      }
+
+      return 0;
+    };
+
+    // Получаем объемы при цене клиринга
+    const supplyVolume = getVolumeAtPrice(sortedSupply, clearingPrice);
+    const demandVolume = getVolumeAtPrice(sortedDemand, clearingPrice);
+
+    // Если объемы совпадают - это наша точка пересечения
+    if (Math.abs(supplyVolume - demandVolume) < 0.0001) {
       return {
         price: clearingPrice,
-        volume: (sortedSupply[0].volume + sortedDemand[0].volume) / 2
+        volume: (supplyVolume + demandVolume) / 2
       };
     }
 
-    // Линейная интерполяция для нахождения объемов при цене клиринга
-    const supplyVolume = supplyBefore.volume +
-      (clearingPrice - supplyBefore.price) *
-      (supplyAfter.volume - supplyBefore.volume) /
-      (supplyAfter.price - supplyBefore.price);
+    // Если не нашли точного пересечения, ищем ближайшую точку между кривыми
+    let minDistance = Infinity;
+    let bestIntersection = { price: clearingPrice, volume: (supplyVolume + demandVolume) / 2 };
 
-    const demandVolume = demandBefore.volume +
-      (clearingPrice - demandBefore.price) *
-      (demandAfter.volume - demandBefore.volume) /
-      (demandAfter.price - demandBefore.price);
+    // Проверяем все возможные отрезки на кривых
+    for (let s = 0; s < sortedSupply.length - 1; s++) {
+      for (let d = 0; d < sortedDemand.length - 1; d++) {
+        const s1 = sortedSupply[s];
+        const s2 = sortedSupply[s+1];
+        const d1 = sortedDemand[d];
+        const d2 = sortedDemand[d+1];
 
-    // Среднее значение объемов для точки пересечения
-    return {
-      price: clearingPrice,
-      volume: (supplyVolume + demandVolume) / 2
-    };
+        // Проверяем пересечение отрезков
+        const denominator = (d2.volume - d1.volume) * (s2.price - s1.price) -
+            (d2.price - d1.price) * (s2.volume - s1.volume);
+
+        if (denominator === 0) continue; // Параллельные линии
+
+        const ua = ((d2.price - d1.price) * (s1.volume - d1.volume) -
+            (d2.volume - d1.volume) * (s1.price - d1.price)) / denominator;
+        const ub = ((s2.price - s1.price) * (s1.volume - d1.volume) -
+            (s2.volume - s1.volume) * (s1.price - d1.price)) / denominator;
+
+        if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
+          // Нашли пересечение отрезков
+          const x = s1.price + ua * (s2.price - s1.price);
+          const y = s1.volume + ua * (s2.volume - s1.volume);
+
+          const distanceToClearing = Math.abs(x - clearingPrice);
+          if (distanceToClearing < minDistance) {
+            minDistance = distanceToClearing;
+            bestIntersection = { price: x, volume: y };
+          }
+        }
+      }
+    }
+
+    return bestIntersection;
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
