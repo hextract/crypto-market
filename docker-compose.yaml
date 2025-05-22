@@ -33,6 +33,12 @@ services:
         condition: service_healthy
     ports:
       - "${MAIN_REST_PORT}:${MAIN_REST_PORT}"
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
+      - "com.github.nginx-proxy.port=8880"
+    environment:
+      - VIRTUAL_HOST=main.cont-exchange.ru
+      - VIRTUAL_PORT=8880
   auth:
     networks:
       - net
@@ -47,6 +53,12 @@ services:
         condition: service_healthy
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
+      - "com.github.nginx-proxy.port=8800"
+    environment:
+      - VIRTUAL_HOST=auth.cont-exchange.ru
+      - VIRTUAL_PORT=8800
 
   keycloak:
     networks:
@@ -110,6 +122,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
+      - "com.github.nginx-proxy.port=18888"
+    environment:
+      - VIRTUAL_HOST=engine.cont-exchange.ru
+      - VIRTUAL_PORT=18888
+
   nginx-proxy:
     image: jwilder/nginx-proxy
     container_name: nginx-proxy
