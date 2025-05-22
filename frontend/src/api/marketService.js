@@ -61,15 +61,19 @@ export const createBid = async (bidData) => {
 
 // Вспомогательная функция для получения токена
 const getAuthToken = () => {
-  const isSafari = () => {
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  };
-  if (isSafari()) {
-    return localStorage.getItem("authToken");
-  }
-  const cookies = document.cookie.split(';');
-  const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
-  return tokenCookie ? tokenCookie.split('=')[1] : null;
+  // Checking for Safari
+  // const isSafari = () => {
+  //   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  // };
+  // if (isSafari()) {
+  //   return localStorage.getItem("authToken");
+  // }
+  return localStorage.getItem("authToken");
+
+  // Cookie Disabled
+  // const cookies = document.cookie.split(';');
+  // const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
+  // return tokenCookie ? tokenCookie.split('=')[1] : null;
 };
 
 export const getTransactionsHistory = async (filters = {}) => {

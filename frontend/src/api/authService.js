@@ -50,30 +50,37 @@ export const verifyToken = async () => {
 };
 
 export const setAuthToken = (token) => {
-  const expires = new Date();
-  const isSafari = () => {
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  };
-  expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000 * 5 ); // 5 дней
-  document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()}; Secure; SameSite=Strict`;
-  if (isSafari()) {
-    try {
-      localStorage.setItem('authToken', token);
-    } catch (e) {
-    }
-  }
+  // Cookie Disabled
+  // const expires = new Date();
+  // const isSafari = () => {
+  //   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  // };
+  // expires.setTime(expires.getTime() + 24 * 60 * 60 * 1000 * 5 ); // 5 дней
+  // document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()}; Secure; SameSite=Strict`;
+  // if (isSafari()) {
+  //   try {
+  //     localStorage.setItem('authToken', token);
+  //   } catch (e) {
+  //   }
+  // }
+  localStorage.setItem('authToken', token);
+
 };
 
 export const getAuthToken = () => {
-  const isSafari = () => {
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  };
-  if (isSafari()) {
-    return localStorage.getItem("authToken");
-  }
-  const cookies = document.cookie.split(';');
-  const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
-  return tokenCookie ? tokenCookie.split('=')[1] : null;
+  // Checking for Safari
+  // const isSafari = () => {
+  //   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  // };
+  // if (isSafari()) {
+  //   return localStorage.getItem("authToken");
+  // }
+  return localStorage.getItem("authToken");
+
+  // Cookie disabled
+  // const cookies = document.cookie.split(';');
+  // const tokenCookie = cookies.find(c => c.trim().startsWith('token='));
+  // return tokenCookie ? tokenCookie.split('=')[1] : null;
 };
 
 export const logout = () => {
