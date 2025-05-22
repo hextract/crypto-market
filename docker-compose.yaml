@@ -149,6 +149,7 @@ services:
       - frontend
     labels:
       - "com.github.nginx-proxy.nginx=true"
+      - "com.github.nginx-proxy.docker-gen=true"
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
