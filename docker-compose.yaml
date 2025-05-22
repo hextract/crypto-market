@@ -122,6 +122,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - certs:/etc/nginx/certs
+      - webroot:/etc/letsencrypt/webroot
     networks:
       - net
     depends_on:
@@ -135,12 +136,13 @@ services:
     container_name: certbot
     volumes:
       - certs:/etc/letsencrypt
+      - webroot:/etc/letsencrypt/webroot
       - ./certbot/logs:/var/log/letsencrypt
     networks:
       - net
     depends_on:
       - nginx
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --deploy-hook \"nginx -s reload\"; certbot renew; sleep 12h; done'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --server https://api.buypass.com/acme/directory --deploy-hook \"nginx -s reload\"; certbot renew; sleep 12h; done'"
 
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
@@ -255,6 +257,7 @@ services:
 volumes:
   postgres_data:
   certs:
+  webroot:
   redpanda-volume:
 
 networks:
