@@ -34,6 +34,7 @@ services:
     ports:
       - "${MAIN_REST_PORT}:${MAIN_REST_PORT}"
     labels:
+      - "com.github.nginx-proxy.nginx=true"
       - "com.github.nginx-proxy.port=8880"
     environment:
       - VIRTUAL_HOST=main.cont-exchange.ru
@@ -56,6 +57,7 @@ services:
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
     labels:
+      - "com.github.nginx-proxy.nginx=true"
       - "com.github.nginx-proxy.port=8800"
     environment:
       - VIRTUAL_HOST=auth.cont-exchange.ru
@@ -74,6 +76,7 @@ services:
     ports:
       - "18888:18888"
     labels:
+      - "com.github.nginx-proxy.nginx=true"
       - "com.github.nginx-proxy.port=18888"
     environment:
       - VIRTUAL_HOST=engine.cont-exchange.ru
@@ -124,6 +127,9 @@ services:
       - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
+      - "com.github.nginx-proxy.port=3000"
     depends_on:
       - main
       - auth
