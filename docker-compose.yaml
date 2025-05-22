@@ -144,6 +144,9 @@ services:
       - net
     depends_on:
       - frontend
+      - matching_engine
+      - auth
+      - main
     labels:
       - "com.github.nginx-proxy.nginx=true"
 
