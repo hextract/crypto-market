@@ -1,0 +1,133 @@
+---
+swagger: "2.0"
+info:
+  description: "Fetches market data from exchange"
+  version: "0.0.0"
+  title: "connector.fetcher"
+tags:
+  - name: "some tag"
+    description: "Some tag description"
+schemes:
+  #  - "https"
+  - "http"
+paths:
+  /info:
+    get:
+      summary: "Get info"
+      operationId: "info"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Info got"
+          schema:
+            properties:
+              info:
+                type: "string"
+                default: "Connector's market data fetcher service"
+  /get_balance:
+    get:
+      summary: "Get account balances for BTC, ETH and USDT"
+      operationId: "get_balance"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Returning balances"
+          schema:
+            $ref: "#/definitions/MyBalance"
+        500:
+          description: "Server error"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /get_market_data:
+    get:
+      summary: "Get last market data"
+      operationId: "get_last_market_data"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Returning market data"
+          schema:
+            $ref: "#/definitions/OrderBookData"
+        500:
+          description: "Something went wrong"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  OrderBookData:
+    type: "object"
+    required:
+      - snapshots
+    properties:
+      snapshots:
+        type: array
+        items:
+          $ref: "#/definitions/OrderBookSnapshot"
+
+
+  OrderBookSnapshot:
+    type: "object"
+    required:
+      - mid
+      - spread
+      - ask_volume
+      - bid_volume
+      - depth
+    properties:
+      mid:
+        type: "number"
+        format: "double"
+      spread:
+        type: "number"
+        format: "double"
+      ask_volume:
+        type: "number"
+        format: "double"
+      bid_volume:
+        type: "number"
+        format: "double"
+      depth:
+        type: "integer"
+        format: "int32"
+
+  MyBalance:
+    type: "object"
+    required:
+      - btc_free
+      - btc_locked
+      - eth_free
+      - eth_locked
+      - usdt_free
+      - usdt_locked
+    properties:
+      btc_free:
+        type: "number"
+        format: "double"
+      btc_locked:
+        type: "number"
+        format: "double"
+      eth_free:
+        type: "number"
+        format: "double"
+      eth_locked:
+        type: "number"
+        format: "double"
+      usdt_free:
+        type: "number"
+        format: "double"
+      usdt_locked:
+        type: "number"
+        format: "double"
+
+  Error:
+    type: "object"
+    required:
+      - "error_status_code"
+    properties:
+      error_message:
+        type: "string"
+      error_status_code:
+        type: integer

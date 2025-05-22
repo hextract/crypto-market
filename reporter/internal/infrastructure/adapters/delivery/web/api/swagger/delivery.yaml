@@ -1,0 +1,110 @@
+---
+swagger: "2.0"
+info:
+  description: "Delivers order results to the matching engine"
+  version: "0.0.0"
+  title: "fetcher.delivery"
+tags:
+  - name: "some tag"
+    description: "Some tag description"
+schemes:
+  #  - "https"
+  - "http"
+paths:
+  /order_results:
+    post:
+      summary: "Deliver singular order result"
+      operationId: "deliver_order_result"
+      produces:
+        - "application/json"
+      consumes:
+        - "application/json"
+      parameters:
+        - name: "object"
+          in: "body"
+          description: "Order result object to deliver"
+          required: true
+          schema:
+            $ref: "#/definitions/OrderResult"
+      responses:
+        200:
+          description: "Order result successfully received"
+          schema:
+            $ref: "#/definitions/Success"
+        500:
+          description: "Something went wrong"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Order:
+    type: "object"
+    required:
+      - user_id
+      - type
+      - indicator
+      - price
+      - volume
+      - ticker
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+      type:
+        type: "string"
+        enum:
+          - "market"
+          - "limit"
+      indicator:
+        type: "string"
+        enum:
+          - "buy"
+          - "sell"
+      price:
+        type: "number"
+        format: "double"
+      volume:
+        type: "number"
+        format: "double"
+      ticker:
+        type: "string"
+
+  ExecutionResult:
+    type: "object"
+    required:
+      - price
+      - volume
+    properties:
+      price:
+        type: "number"
+        format: "double"
+      volume:
+        type: "number"
+        format: "double"
+
+  OrderResult:
+    type: "object"
+    required:
+      - order
+      - execution_result
+    properties:
+      order:
+        $ref: "#/definitions/Order"
+      execution_result:
+        $ref: "#/definitions/ExecutionResult"
+
+  Success:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        default: "Successful operation"
+
+  Error:
+    type: "object"
+    required:
+      - "error_status_code"
+    properties:
+      error_message:
+        type: "string"
+      error_status_code:
+        type: integer

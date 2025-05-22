@@ -1,0 +1,99 @@
+---
+swagger: "2.0"
+info:
+  description: "Receives incoming orders"
+  version: "0.0.0"
+  title: "connector.receiver"
+tags:
+  - name: "some tag"
+    description: "Some tag description"
+schemes:
+  #  - "https"
+  - "http"
+paths:
+  /info:
+    get:
+      summary: "Get info"
+      operationId: "info"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Info got"
+          schema:
+            properties:
+              info:
+                type: "string"
+                default: "Connector's reporter service"
+  /place_order:
+    post:
+      summary: "Place order"
+      operationId: "receive_order"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "object"
+          in: "body"
+          description: "Receiving order eventually to execute"
+          required: true
+          schema:
+            $ref: "#/definitions/Order"
+      responses:
+        200:
+          description: "Order received and soon will be executed"
+          schema:
+            $ref: "#/definitions/Success"
+        500:
+          description: "Something went wrong"
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+  Success:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        default: "Successful operation"
+  Error:
+    type: "object"
+    required:
+      - "error_status_code"
+    properties:
+      error_message:
+        type: "string"
+      error_status_code:
+        type: integer
+  Order:
+    type: "object"
+    required:
+      - user_id
+      - type
+      - indicator
+      - price
+      - volume
+      - ticker
+    properties:
+      user_id:
+        type: "integer"
+        format: "int64"
+      type:
+        type: "string"
+        enum:
+          - "market"
+          - "limit"
+      indicator:
+        type: "string"
+        enum:
+          - "buy"
+          - "sell"
+      price:
+        type: "number"
+        format: "double"
+      volume:
+        type: "number"
+        format: "double"
+      ticker:
+        type: "string"
