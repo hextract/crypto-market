@@ -1,51 +1,22 @@
-# Биржа непрерывных во времени заявок
+# Continious crypto market | HSSE MIPT Project
+
+### Design idea: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2924640
+
+### Parts:
+
+1. Market maker - matches orders
+2. Exchange connector - translates orders from default markets to continious
+3. Backend - tracks users and their statuses
+4. Frontend - main point of communication with user
+
+
+### Easy-to-start
+Write .env file as mentioned in .env-example and run
+```bash
+make build
+```
+
+### DB design:
 
 ![db_diagram.png](etc/pic/db_diagram.png)
 
-```
-request_handler -> market_maker:
-
-REST
-JSON data format:
-	Create:
-		{
-			"user_id": "int",
-			"order_id": "int",
-			"pair": ["string", "string"],
-			"buy_sell_indicator": bool,
-			"amount": float,
-			"price_low": float,
-			"price_high": float,
-			"speed": float,
-		}
-	Cancel:
-		{
-			"user_id": "int"
-			"order_id": "int"
-		}
-
-
-market_maker -> request_handler
-
-Kafka connection
-JSON data format:
-	Every N seconds:
-		{
-			"order_id": "int",
-			"action": "string ('Partial', 'Full')",
-			"amount": "int",
-			"average_price": "optional:int"
-		}
-	
-
-price_calculator -> frontend
-
-WebSocket connect:
-JSON data format:
-	Every N ms:
-		{
-			"pair": ["string", "string"],
-			"price": float
-		}
-# Свеча - пока trading-view
-```
