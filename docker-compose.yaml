@@ -133,11 +133,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   matching_engine:
     container_name: engine-svc
