@@ -165,9 +165,11 @@ services:
       - net
     depends_on:
       - nginx-proxy
+    env_file:
+      - .env
     environment:
       - NGINX_PROXY_CONTAINER=nginx-proxy
-      - ACME_CA_URI=https://api.buypass.com/acme/directory
+      - ACME_CA_URI=https://acme.zerossl.com/v2/DV90
       - LETSENCRYPT_FORCE_RENEW=true
 
 #  redpanda:
