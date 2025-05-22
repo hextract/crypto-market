@@ -175,6 +175,7 @@ services:
 
 volumes:
   postgres_data:
+  certs:
   vhost.d:
   html:
 
