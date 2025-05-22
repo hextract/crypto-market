@@ -41,8 +41,8 @@ bool BackendClient::SendFillDetails(const std::unordered_map<ContinuousOrder, Fi
                       << ", status="
                       << (resp ? resp->getStatusCode() : 0);
           } else {
-            std::cout << "First team backend notified about " << updated_orders_count << " orders"
-                      << std::endl;
+//            std::cout << "First team backend notified about " << updated_orders_count << " orders"
+//                      << std::endl;
           }
         });
   });
