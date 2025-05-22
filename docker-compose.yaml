@@ -38,7 +38,7 @@ services:
     environment:
       - VIRTUAL_HOST=main.cont-exchange.ru
       - VIRTUAL_PORT=8880
-      - LETSENCRYPT_HOST=main.cont-exchange.ru
+#      - LETSENCRYPT_HOST=main.cont-exchange.ru
   auth:
     networks:
       - net
@@ -60,7 +60,7 @@ services:
     environment:
       - VIRTUAL_HOST=auth.cont-exchange.ru
       - VIRTUAL_PORT=8800
-      - LETSENCRYPT_HOST=auth.cont-exchange.ru
+#      - LETSENCRYPT_HOST=auth.cont-exchange.ru
 
   matching_engine:
     container_name: engine-svc
@@ -78,7 +78,7 @@ services:
     environment:
       - VIRTUAL_HOST=engine.cont-exchange.ru
       - VIRTUAL_PORT=18888
-      - LETSENCRYPT_HOST=engine.cont-exchange.ru
+#      - LETSENCRYPT_HOST=engine.cont-exchange.ru
 
   keycloak:
     networks:
@@ -121,7 +121,7 @@ services:
       - .env
     environment:
       - VIRTUAL_HOST=cont-exchange.ru
-      - LETSENCRYPT_HOST=cont-exchange.ru
+#      - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
@@ -152,18 +152,18 @@ services:
     labels:
       - "com.github.nginx-proxy.nginx=true"
 
-  letsencrypt:
-    image: certbot/certbot:latest
-    container_name: certbot
-    volumes:
-      - certs:/etc/letsencrypt
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-    networks:
-      - net
-    depends_on:
-      - nginx-proxy
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot --webroot-path=/usr/share/nginx/html -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --agree-tos --email sidenko.o.g@gmail.com --server https://acme.sectigo.com/v2/90daySSL; sleep 12h; done'"
+#  letsencrypt:
+#    image: certbot/certbot:latest
+#    container_name: certbot
+#    volumes:
+#      - certs:/etc/letsencrypt
+#      - vhost.d:/etc/nginx/vhost.d
+#      - html:/usr/share/nginx/html
+#    networks:
+#      - net
+#    depends_on:
+#      - nginx-proxy
+#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot --webroot-path=/usr/share/nginx/html -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --agree-tos --email sidenko.o.g@gmail.com --server https://acme.sectigo.com/v2/90daySSL; sleep 12h; done'"
 
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
