@@ -39,6 +39,7 @@ services:
     environment:
       - VIRTUAL_HOST=main.cont-exchange.ru
       - VIRTUAL_PORT=8880
+      - LETSENCRYPT_HOST=main.cont-exchange.ru
   auth:
     networks:
       - net
@@ -59,6 +60,7 @@ services:
     environment:
       - VIRTUAL_HOST=auth.cont-exchange.ru
       - VIRTUAL_PORT=8800
+      - LETSENCRYPT_HOST=auth.cont-exchange.ru
 
   keycloak:
     networks:
@@ -128,6 +130,7 @@ services:
     environment:
       - VIRTUAL_HOST=engine.cont-exchange.ru
       - VIRTUAL_PORT=18888
+      - LETSENCRYPT_HOST=engine.cont-exchange.ru
 
   nginx-proxy:
     image: jwilder/nginx-proxy
