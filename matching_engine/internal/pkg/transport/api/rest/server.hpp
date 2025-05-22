@@ -79,6 +79,7 @@ class HTTPServer {
             if (!body_obj) {
               throw std::runtime_error("Invalid JSON!");
             }
+            std::cout << body_obj;
             ContinuousOrder order = mapper_.ToDomainOrder(body_obj);
 
             create_order_cb_(order);
