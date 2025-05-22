@@ -5,17 +5,14 @@ import (
 	"errors"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/h4x4d/crypto-market/pkg/models"
-	"log"
 )
 
 func (c Client) CheckToken(token string) (user *models.User, err error) {
 	ctx := context.Background()
-	log.Println(token)
 	usrInfo, err := c.Client.GetUserInfo(ctx, token, c.Config.Realm)
 	if err != nil {
 		return nil, err
 	}
-	log.Println(usrInfo)
 	exact := true
 	params := gocloak.GetUsersParams{
 		Email: usrInfo.Email,
