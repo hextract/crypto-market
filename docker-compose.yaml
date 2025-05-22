@@ -51,6 +51,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      main:
+        condition: service_started
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
     labels:
