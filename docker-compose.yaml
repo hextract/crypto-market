@@ -33,12 +33,6 @@ services:
         condition: service_healthy
     ports:
       - "${MAIN_REST_PORT}:${MAIN_REST_PORT}"
-    labels:
-      - "com.github.nginx-proxy.port=8880"
-    environment:
-      - VIRTUAL_HOST=main.cont-exchange.ru
-      - VIRTUAL_PORT=8880
-      - LETSENCRYPT_HOST=main.cont-exchange.ru
   auth:
     networks:
       - net
@@ -55,12 +49,6 @@ services:
         condition: service_started
     ports:
       - "${AUTH_REST_PORT}:${AUTH_REST_PORT}"
-    labels:
-      - "com.github.nginx-proxy.port=8800"
-    environment:
-      - VIRTUAL_HOST=auth.cont-exchange.ru
-      - VIRTUAL_PORT=8800
-      - LETSENCRYPT_HOST=auth.cont-exchange.ru
 
   matching_engine:
     container_name: engine-svc
@@ -73,12 +61,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "18888:18888"
-    labels:
-      - "com.github.nginx-proxy.port=18888"
-    environment:
-      - VIRTUAL_HOST=engine.cont-exchange.ru
-      - VIRTUAL_PORT=18888
-      - LETSENCRYPT_HOST=engine.cont-exchange.ru
 
   keycloak:
     networks:
@@ -124,8 +106,6 @@ services:
       - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    labels:
-      - "com.github.nginx-proxy.port=3000"
     depends_on:
       - main
       - auth
@@ -133,17 +113,15 @@ services:
       - ./frontend:/app
       - /app/node_modules
 
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: nginx-proxy
+  nginx:
+    image: nginx:latest
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - certs:/etc/nginx/certs:ro
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - certs:/etc/nginx/certs
     networks:
       - net
     depends_on:
@@ -151,27 +129,18 @@ services:
       - matching_engine
       - auth
       - main
-    labels:
-      - "com.github.nginx-proxy.nginx=true"
 
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    container_name: letsencrypt
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
     volumes:
-      - certs:/etc/nginx/certs
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - acme:/etc/acme.sh
+      - certs:/etc/letsencrypt
+      - ./certbot/logs:/var/log/letsencrypt
     networks:
       - net
     depends_on:
-      - nginx-proxy
-    environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy
-      - ACME_CA_URI=https://api.buypass.com/acme/directory
-      - LETSENCRYPT_FORCE_RENEW=true
-
+      - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email your-email@example.com --deploy-hook \"nginx -s reload\"; certbot renew; sleep 12h; done'"
 
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
@@ -286,10 +255,7 @@ services:
 volumes:
   postgres_data:
   certs:
-  vhost.d:
-  html:
   redpanda-volume:
-  acme:
 
 networks:
   net:
