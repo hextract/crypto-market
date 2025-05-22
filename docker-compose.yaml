@@ -123,7 +123,7 @@ services:
     env_file:
       - .env
     environment:
-      - VIRTUAL_HOST=cont-exchange.ru
+      - VIRTUAL_HOST=cont-exchange.ru,213.171.24.206
       - LETSENCRYPT_HOST=cont-exchange.ru
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
