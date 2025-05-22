@@ -243,10 +243,10 @@ export default function MarketChart() {
   return (
     <div className="chart-section" style={{
       position: 'relative',
-      height: '100%',
+      min_height: '400px',
       width: '100%'
     }}>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" debounce={1}>
         <LineChart
           margin={{
             top: 10,
@@ -306,6 +306,7 @@ export default function MarketChart() {
           <Tooltip
             content={<CustomTooltip />}
             cursor={{ stroke: '#a74aff', strokeWidth: 1, strokeDasharray: '3 3' }}
+            trigger="click"
           />
 
           <Legend
