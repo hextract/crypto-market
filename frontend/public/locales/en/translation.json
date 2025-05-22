@@ -112,6 +112,10 @@
       "clear": "Clear filters"
     },
     "table": {
+      "minPrice": "Min Price",
+      "maxPrice": "Max Price",
+      "buySpeed": "Buy Speed",
+      "spentAmount": "Full Cost",
       "date": "Date",
       "type": "Type",
       "currency": "Currency",

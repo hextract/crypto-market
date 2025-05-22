@@ -104,7 +104,7 @@ const Profile = () => {
     type_style: item.operation,
     currency: item.currency,
     amount: item.amount,
-    fee: item.commission || 0,
+    // fee: item.commission || 0,
     status: mapTradeStatus(item.status),
     status_style: item.status,
     wallet: item.address,
@@ -118,11 +118,16 @@ const Profile = () => {
     sellCurrency: item.from_currency,
     buyCurrency: item.to_currency,
     amount: item.amount_to_buy,
-    fee: item.commission || 0,
+    // fee: item.commission || 0,
     status: mapTradeStatus(item.status),
     status_style: item.status,
     completedAmount: item.bought_amount || 0,
-    rawStatus: item.status
+    rawStatus: item.status,
+    minPrice: item.min_price,
+    maxPrice: item.max_price,
+    buySpeed: item.buy_speed,
+    avgPrice: item.avg_price,
+    spentAmount: item.avg_price && item.bought_amount ? item.avg_price * item.bought_amount : 0
   });
 
   const mapOperation = (op) => {
@@ -341,7 +346,7 @@ const Profile = () => {
                     <div onClick={() => handleSort('amount')}>
                       {t('profile.table.amount')} {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>{t('profile.table.fee')}</div>
+                     <div>{t('profile.table.fee')}</div>
                     <div onClick={() => handleSort('status')}>
                       {t('profile.table.status')} {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
@@ -356,7 +361,7 @@ const Profile = () => {
                     <div onClick={() => handleSort('amount')}>
                       {t('profile.table.amount')} {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
-                    <div>{t('profile.table.fee')}</div>
+                    {/*<div>{t('profile.table.fee')}</div>*/}
                     <div onClick={() => handleSort('status')}>
                       {t('profile.table.status')} {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                     </div>
@@ -376,7 +381,7 @@ const Profile = () => {
                           <div className={`type-${item.type_style}`}>{item.type}</div>
                           <div>{item.currency}</div>
                           <div>{item.amount}</div>
-                          <div>{item.fee}</div>
+                           {/*<div>{item.fee}</div>*/}
                           <div className={`status-${item.status_style}`}>{item.status}</div>
                           <div className="actions">
                             <button
@@ -392,7 +397,7 @@ const Profile = () => {
                           <div>{formatDate(item.date)}</div>
                           <div>{item.sellCurrency}/{item.buyCurrency}</div>
                           <div>{item.amount}</div>
-                          <div>{item.fee}</div>
+                          {/* <div>{item.fee}</div> */}
                           <div className={`status-${item.status_style}`}>{item.status}</div>
                           <div>{item.completedAmount}/{item.amount}</div>
                           <div className="actions">
@@ -426,6 +431,18 @@ const Profile = () => {
                             <div><strong>{t('profile.table.sell')}</strong> {item.sellCurrency}</div>
                             <div><strong>{t('profile.table.buy')}</strong> {item.buyCurrency}</div>
                             <div><strong>{t('profile.table.progress')}</strong> {item.amount > 0 ? (item.completedAmount / item.amount * 100).toFixed(2) : 0}%</div>
+                            {item.minPrice && item.minPrice > 0 && (
+                              <div><strong>{t('profile.table.minPrice')}</strong> {item.minPrice}</div>
+                            )}
+                            {item.maxPrice && item.maxPrice > 0 && (
+                              <div><strong>{t('profile.table.maxPrice')}</strong> {item.maxPrice}</div>
+                            )}
+                            {item.buySpeed && item.buySpeed > 0 && (
+                              <div><strong>{t('profile.table.buySpeed')}</strong> {item.buySpeed}</div>
+                            )}
+                            {item.spentAmount > 0 && (
+                              <div><strong>{t('profile.table.spentAmount')}</strong> {item.spentAmount.toFixed(8)}</div>
+                            )}
                             {item.cancelledDate && item.cancelledDate.getFullYear() > 1 && (
                               <div><strong>{t('profile.table.completedDate')}</strong> {formatDate(item.cancelledDate)}</div>
                             )}
