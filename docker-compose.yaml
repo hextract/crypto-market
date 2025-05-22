@@ -60,6 +60,25 @@ services:
       - VIRTUAL_PORT=8800
       - LETSENCRYPT_HOST=auth.cont-exchange.ru
 
+  matching_engine:
+    container_name: engine-svc
+    networks:
+      - net
+    env_file:
+      - matching_engine/.env
+    build:
+      context: ./matching_engine
+      dockerfile: Dockerfile
+    ports:
+      - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
+    labels:
+      - "com.github.nginx-proxy.port=18888"
+      - "com.github.nginx-proxy.nginx=true"
+    environment:
+      - VIRTUAL_HOST=engine.cont-exchange.ru
+      - VIRTUAL_PORT=18888
+      - LETSENCRYPT_HOST=engine.cont-exchange.ru
+
   keycloak:
     networks:
       - net
@@ -110,24 +129,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
-  matching_engine:
-    container_name: engine-svc
-    networks:
-      - net
-    env_file:
-      - matching_engine/.env
-    build:
-      context: ./matching_engine
-      dockerfile: Dockerfile
-    ports:
-      - "${MARKET_MAKER_PORT}:${MARKET_MAKER_PORT}"
-    labels:
-      - "com.github.nginx-proxy.port=18888"
-    environment:
-      - VIRTUAL_HOST=engine.cont-exchange.ru
-      - VIRTUAL_PORT=18888
-      - LETSENCRYPT_HOST=engine.cont-exchange.ru
 
   nginx-proxy:
     image: jwilder/nginx-proxy
