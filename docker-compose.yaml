@@ -155,10 +155,13 @@ services:
       - vhost.d:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - net
     depends_on:
       - frontend
+    labels:
+      - "com.github.nginx-proxy.nginx=true"
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -166,6 +169,8 @@ services:
       - certs:/etc/nginx/certs
       - vhost.d:/etc/nginx/vhost.d
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - NGINX_PROXY_CONTAINER=nginx-proxy
     networks:
       - net
     depends_on:
