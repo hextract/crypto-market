@@ -44,7 +44,7 @@
     "sell": "sell",
     "minPrice": "min price",
     "maxPrice": "max price",
-    "amount": "amount to {{action}}",
+    "amount": "amount BTC to {{action}}",
     "speed": "buy speed (stocks/hour)",
     "proceed": "proceed",
     "withdraw": "withdraw",

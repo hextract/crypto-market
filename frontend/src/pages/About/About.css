@@ -1,109 +1,108 @@
 .about-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    background:
-            radial-gradient(circle at left top, #50129E -200%, black 100%),
-            linear-gradient(135deg, #50129E -150%, black);
-    background-blend-mode: color-dodge;
-    color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background:
+          radial-gradient(circle at left top, #50129E -200%, black 100%),
+          linear-gradient(135deg, #50129E -150%, black);
+  background-blend-mode: color-dodge;
+  color: white;
+  text-align: center;
+}
+
+.about-wrapper {
+  margin-top: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo-purple {
+  width: 38px;
+  height: 38px;
+}
+
+.text-container {
+  max-width: 70vw; /* Ограничение ширины текста */
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title-about {
+  font-size: 54px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.text-about {
+  font-size: 20px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  width: 204px;
+  height: 55px;
+  padding: 12px 24px;
+  border: 2px solid #7a3aff;
+  border-radius: 10px;
+  font-size: 20px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.register {
+  background: linear-gradient(135deg, #8541F5, #4E268F);
+  border: none;
+  transition: ease-in-out;
+}
+
+.btn:hover {
+  background: #7a3aff;
+}
+
+
+@media (max-width: 768px) {
+  .about-content {
+    max-width: 90%;
     text-align: center;
   }
-  
-  .about-wrapper {
-    margin-top: 20vh;
-    display: flex;
+
+  .button-container {
     flex-direction: column;
-    align-items: center;
+    gap: 10px;
     width: 100%;
   }
-  
-  .logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .logo-purple {
-    width: 38px;
-    height: 38px;
-  }
-  
-  .text-container {
-    max-width: 70vw; /* Ограничение ширины текста */
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
+
   .title-about {
-    font-size: 54px;
-    font-weight: bold;
-    margin: 0 0 10px 0;
+    font-size: 20px;
   }
-  
+
   .text-about {
-    font-size: 20px;
-    line-height: 1.5;
-    opacity: 0.8;
+    font-size: 12px;
   }
-  
-  .button-container {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-  
+
   .btn {
-    width: 204px;
-    height: 55px;
-    padding: 12px 24px;
-    border: 2px solid #7a3aff;
-    border-radius: 10px;
-    font-size: 20px;
-    background: transparent;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
+    width: 100%;
+    padding: 12px;
   }
-
-  .register {
-    background: linear-gradient(135deg, #8541F5, #4E268F);
-    border: none;
-    transition: ease-in-out;
-  }
-
-  .btn:hover {
-    background: #7a3aff;
-  }
-  
-
-  @media (max-width: 768px) {
-    .about-content {
-      max-width: 90%;
-      text-align: center;
-    }
-  
-    .button-container {
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-    }
-
-    .title-about {
-      font-size: 20px;
-    }
-
-    .text-about {
-      font-size: 12px;
-    }
-  
-    .btn {
-      width: 100%;
-      padding: 12px;
-    }
-  }
-  
+}
