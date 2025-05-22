@@ -32,7 +32,10 @@ MatchedDetails UserOrderBook::MatchOrders(size_t price) {
       matched_details.AddBuyFilled(order);
       storage_->RemoveOrder(order);
     }
-    account_manager_.AddFilledQuantity(order, price, std::min(need_buy, remains));
+    size_t filled_quantity = std::min(need_buy, remains);
+    if (filled_quantity) {
+      account_manager_.AddFilledQuantity(order, price, filled_quantity);
+    }
   }
   for (const auto& order: sell_orders) {
     size_t cur_speed = order.GetRoundedSpeed(price);
@@ -46,7 +49,10 @@ MatchedDetails UserOrderBook::MatchOrders(size_t price) {
       matched_details.AddSellFilled(order);
       storage_->RemoveOrder(order);
     }
-    account_manager_.AddFilledQuantity(order, price, std::min(need_sell, remains));
+    size_t filled_quantity = std::min(need_sell, remains);
+    if (filled_quantity) {
+      account_manager_.AddFilledQuantity(order, price, filled_quantity);
+    }
   }
   std::vector<std::vector<ContinuousOrder>> all_orders = {buy_orders, sell_orders};
 

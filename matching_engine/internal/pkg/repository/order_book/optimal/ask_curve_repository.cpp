@@ -6,10 +6,13 @@ AskCurveRepository::AskCurveRepository() : constants_(0, std::plus(), std::great
                                            koeffs_(0, std::plus(), std::greater()) {}
 
 void AskCurveRepository::AddOrder(const ContinuousOrder& order) {
-  double koeff = static_cast<double>(order.GetSpeed())
-      / (static_cast<double>(order.GetHighPrice()) - static_cast<double>(order.GetLowPrice()));
+  double low_price = order.GetLowPrice();
+  double high_price = order.GetHighPrice();
+  double speed = order.GetSpeed();
+
+  double koeff = speed / (high_price - low_price);
   double constant = order.GetSpeed();
-  double line_shift = -koeff * order.GetLowPrice();
+  double line_shift = -koeff * low_price;
 
   // updating price fractures
   auto constants_first_fracture_upper = constants_.GetUpperKey(order.GetLowPrice() + 1);
@@ -60,10 +63,13 @@ void AskCurveRepository::AddOrder(const ContinuousOrder& order) {
 }
 
 void AskCurveRepository::DeleteOrder(const ContinuousOrder& order) {
-  double koeff = static_cast<double>(order.GetSpeed())
-      / (static_cast<double>(order.GetHighPrice()) - static_cast<double>(order.GetLowPrice()));
+  double low_price = order.GetLowPrice();
+  double high_price = order.GetHighPrice();
+  double speed = order.GetSpeed();
+
+  double koeff = speed / (high_price - low_price);
   double constant = order.GetSpeed();
-  double line_shift = -koeff * order.GetLowPrice();
+  double line_shift = -koeff * low_price;
 
   // removing order bid curve
   koeffs_.AddOnHalfInterval(order.GetHighPrice(),
@@ -105,7 +111,7 @@ void AskCurveRepository::DeleteOrder(const ContinuousOrder& order) {
 size_t AskCurveRepository::GetQuantity(size_t price) {
   double koeff = koeffs_.GetUpperValue(price);
   double constant = constants_.GetUpperValue(price);
-  return koeff * price + constant;
+  return koeff * static_cast<double>(price) + constant;
 }
 
 std::vector<CurveFracture> AskCurveRepository::GetCurve(size_t left_bound_price, size_t right_bound_price) {

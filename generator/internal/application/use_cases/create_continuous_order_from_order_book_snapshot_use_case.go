@@ -3,12 +3,14 @@ package use_cases
 import (
 	"errors"
 	"generator/internal/domain/entities"
+	"math"
 )
 
 const (
 	firstSyntheticContinuousOrderId int64   = 1000000000
 	volumeCoefficient               float64 = 0.1
 	secondsPerHour                          = 3600
+	priceEpsilon = 1e-9
 )
 
 type CreateContinuousOrderFromOrderBookSnapshotUseCase struct {
@@ -41,7 +43,8 @@ func (useCase *CreateContinuousOrderFromOrderBookSnapshotUseCase) Execute(snapsh
 	result.PriceHigh = snapshot.BestAsk
 	if result.PriceLow > result.PriceHigh {
 		result.PriceLow, result.PriceHigh = result.PriceHigh, result.PriceLow
-	} else if result.PriceLow == result.PriceHigh {
+	}
+	if math.Abs(result.PriceLow - result.PriceHigh) < priceEpsilon {
 		return nil, errors.New("BestBid equals BestAsk can not creat order with such prices")
 	}
 	return result, nil

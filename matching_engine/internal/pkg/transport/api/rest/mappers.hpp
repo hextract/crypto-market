@@ -33,6 +33,11 @@ class ServerMapper {
     size_t price_high = std::floor(body["price_high"].d() * static_cast<double>(order_book_config_->GetTickSize(pair)));
     size_t
         speed = std::floor(body["speed"].d() * static_cast<double>(order_book_config_->GetMinPartCnt(pair)) / 3600 / 1000);
+
+    if (price_high <= price_low) {
+      throw std::runtime_error("price_high must be GREATER than price_low");
+    }
+
     return ContinuousOrder{
         order_id, pair, side, amount, price_low, price_high, speed
     };
@@ -78,5 +83,3 @@ class ServerMapper {
   TradingPair pair_ = TradingPair(Asset(""), Asset(""));
   std::shared_ptr<IOrderBookConfiguration> order_book_config_{nullptr};
 };
-
-

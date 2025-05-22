@@ -1,15 +1,19 @@
 #include "bid_curve_repository.hpp"
 #include "constants.hpp"
 #include <functional>
+#include <iostream>
 
 BidCurveRepository::BidCurveRepository() : constants_(0, std::plus(), std::less()),
                                            koeffs_(0, std::plus(), std::less()) {}
 
 void BidCurveRepository::AddOrder(const ContinuousOrder& order) {
-  double koeff = static_cast<double>(order.GetSpeed())
-      / (static_cast<double>(order.GetLowPrice()) - static_cast<double>(order.GetHighPrice()));
+  double low_price = order.GetLowPrice();
+  double high_price = order.GetHighPrice();
+  double speed = order.GetSpeed();
+
+  double koeff = speed / (low_price - high_price);
   double constant = order.GetSpeed();
-  double line_shift = -koeff * order.GetLowPrice();
+  double line_shift = -koeff * low_price;
 
   // updating price fractures
   if (order.GetLowPrice() > 0) {
@@ -62,10 +66,13 @@ void BidCurveRepository::AddOrder(const ContinuousOrder& order) {
 }
 
 void BidCurveRepository::DeleteOrder(const ContinuousOrder& order) {
-  double koeff = static_cast<double>(order.GetSpeed())
-      / (static_cast<double>(order.GetLowPrice()) - static_cast<double>(order.GetHighPrice()));
+  double low_price = order.GetLowPrice();
+  double high_price = order.GetHighPrice();
+  double speed = order.GetSpeed();
+
+  double koeff = speed / (low_price - high_price);
   double constant = order.GetSpeed();
-  double line_shift = -koeff * order.GetLowPrice();
+  double line_shift = -koeff * low_price;
 
   // removing order bid curve
   koeffs_.AddOnHalfInterval(order.GetLowPrice(),
@@ -109,7 +116,7 @@ void BidCurveRepository::DeleteOrder(const ContinuousOrder& order) {
 size_t BidCurveRepository::GetQuantity(size_t price) {
   double koeff = koeffs_.GetUpperValue(price);
   double constant = constants_.GetUpperValue(price);
-  return koeff * price + constant;
+  return koeff * static_cast<double>(price) + constant;
 }
 
 std::vector<CurveFracture> BidCurveRepository::GetCurve(size_t left_bound_price, size_t right_bound_price) {
