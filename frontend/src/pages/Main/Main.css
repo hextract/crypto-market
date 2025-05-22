@@ -523,6 +523,10 @@
     font-size: 20px;
   }
 
+  .input {
+    margin-bottom: 10px;
+  }
+
   .modal-input {
     padding: 10px;
     font-size: 14px;

@@ -306,7 +306,6 @@ export default function MarketChart() {
           <Tooltip
             content={<CustomTooltip />}
             cursor={{ stroke: '#a74aff', strokeWidth: 1, strokeDasharray: '3 3' }}
-            trigger="click"
           />
 
           <Legend
