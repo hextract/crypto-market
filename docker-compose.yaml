@@ -113,42 +113,42 @@ services:
       - ./frontend:/app
       - /app/node_modules
 
-#  nginx:
-#    image: nginx:latest
-#    container_name: nginx
-#    volumes:
-#      - ./nginx/conf.d:/etc/nginx/conf.d
-#      - certs:/etc/nginx/certs
-#      - webroot:/etc/letsencrypt/webroot
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    networks:
-#      - net
-#    depends_on:
-#      - frontend
-#      - matching_engine
-#      - auth
-#      - main
-#
-#  certbot:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.certbot
-#    container_name: certbot
-#    volumes:
-#      - certs:/etc/letsencrypt
-#      - webroot:/etc/letsencrypt/webroot
-#      - ./certbot/logs:/var/log/letsencrypt
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#    dns:
-#      - 8.8.8.8
-#      - 1.1.1.1
-#    networks:
-#      - net
-#    depends_on:
-#      - nginx
-#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email sidenkoleg@gmail.com --server https://acme-v02.api.letsencrypt.org/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - certs:/etc/nginx/certs
+      - webroot:/etc/letsencrypt/webroot
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - net
+    depends_on:
+      - frontend
+      - matching_engine
+      - auth
+      - main
+
+  certbot:
+    build:
+      context: .
+      dockerfile: Dockerfile.certbot
+    container_name: certbot
+    volumes:
+      - certs:/etc/letsencrypt
+      - webroot:/etc/letsencrypt/webroot
+      - ./certbot/logs:/var/log/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - net
+    depends_on:
+      - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot certonly --webroot -w /etc/letsencrypt/webroot -d cont-exchange.ru -d main.cont-exchange.ru -d auth.cont-exchange.ru -d engine.cont-exchange.ru --non-interactive --agree-tos --email sidenkoleg@gmail.com --server https://acme-v02.api.letsencrypt.org/directory --deploy-hook \"docker exec nginx nginx -s reload\"; certbot renew; sleep 12h; done'"
 
 #  redpanda:
 #    command: ${REDPANDA_START_COMMAND}
