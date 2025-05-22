@@ -352,7 +352,6 @@
 
   .balance-card {
       width: 90%;
-      margin-bottom: 10px;
   }
 }
 
@@ -521,6 +520,11 @@
 
   .modal-header h3 {
     font-size: 20px;
+  }
+
+  .balance-button {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .input {
