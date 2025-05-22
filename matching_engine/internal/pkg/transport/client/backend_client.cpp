@@ -3,7 +3,6 @@
 #include <thread>
 
 bool BackendClient::SendFillDetails(const std::unordered_map<ContinuousOrder, FillDetails>& orders_fill_details) {
-    std::cout << "STARTED NOTIFYING\n\n";
   Json::Value body;
   for (const auto& [order, fill_details] : orders_fill_details) {
     Json::Value order_update;
