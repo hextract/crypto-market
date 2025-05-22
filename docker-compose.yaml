@@ -168,115 +168,115 @@ services:
     environment:
       - NGINX_PROXY_CONTAINER=nginx-proxy
 
-  redpanda:
-    command: ${REDPANDA_START_COMMAND}
-    env_file:
-      - .env
-    image: docker.redpanda.com/redpandadata/redpanda:v24.2.8
-    container_name: redpanda
-    volumes:
-      - redpanda-volume:/var/lib/redpanda/data
-    ports:
-      - "1${REDPANDA_REST_PORT}:${REDPANDA_REST_PORT}"
-    healthcheck:
-      test: [ "CMD", "rpk", "cluster", "health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - net
-  redpanda-console:
-    container_name: redpanda-console
-    image: docker.redpanda.com/redpandadata/console:v2.7.2
-    entrypoint: /bin/sh
-    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > ${CONSOLE_CONFIG_FILEPATH}; /app/console'
-    env_file:
-      - .env
-    environment:
-      CONFIG_FILEPATH: ${CONSOLE_CONFIG_FILEPATH}
-      CONSOLE_CONFIG_FILE: |
-        kafka:
-          brokers: ["redpanda:${REDPANDA_REST_PORT}"]
-        redpanda:
-          adminApi:
-            enabled: true
-            urls: ["http://redpanda:${ADMIN_API_PORT}"]
-    ports:
-      - "${CONSOLE_REST_PORT}:${CONSOLE_REST_PORT}"
-    depends_on:
-      - redpanda
-    networks:
-      - net
-  receiver:
-    container_name: receiver
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: ./receiver/Dockerfile
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    ports:
-      - "${RECEIVER_REST_PORT}:${RECEIVER_REST_PORT}"
-    networks:
-      - net
-  executor:
-    container_name: executor
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: ./executor/Dockerfile
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    ports:
-      - "${EXECUTOR_REST_PORT}:${EXECUTOR_REST_PORT}"
-    networks:
-      - net
-  reporter:
-    container_name: reporter
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: ./reporter/Dockerfile
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    ports:
-      - "${REPORTER_REST_PORT}:${REPORTER_REST_PORT}"
-    networks:
-      - net
-  fetcher:
-    container_name: fetcher
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: ./fetcher/Dockerfile
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    ports:
-      - "${FETCHER_REST_PORT}:${FETCHER_REST_PORT}"
-    networks:
-      - net
-  generator:
-    container_name: generator
-    env_file:
-      - .env
-    build:
-      context: ./
-      dockerfile: ./generator/Dockerfile
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    ports:
-      - "${GENERATOR_REST_PORT}:${GENERATOR_REST_PORT}"
-    networks:
-      - net
+#  redpanda:
+#    command: ${REDPANDA_START_COMMAND}
+#    env_file:
+#      - .env
+#    image: docker.redpanda.com/redpandadata/redpanda:v24.2.8
+#    container_name: redpanda
+#    volumes:
+#      - redpanda-volume:/var/lib/redpanda/data
+#    ports:
+#      - "1${REDPANDA_REST_PORT}:${REDPANDA_REST_PORT}"
+#    healthcheck:
+#      test: [ "CMD", "rpk", "cluster", "health" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+#    networks:
+#      - net
+#  redpanda-console:
+#    container_name: redpanda-console
+#    image: docker.redpanda.com/redpandadata/console:v2.7.2
+#    entrypoint: /bin/sh
+#    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > ${CONSOLE_CONFIG_FILEPATH}; /app/console'
+#    env_file:
+#      - .env
+#    environment:
+#      CONFIG_FILEPATH: ${CONSOLE_CONFIG_FILEPATH}
+#      CONSOLE_CONFIG_FILE: |
+#        kafka:
+#          brokers: ["redpanda:${REDPANDA_REST_PORT}"]
+#        redpanda:
+#          adminApi:
+#            enabled: true
+#            urls: ["http://redpanda:${ADMIN_API_PORT}"]
+#    ports:
+#      - "${CONSOLE_REST_PORT}:${CONSOLE_REST_PORT}"
+#    depends_on:
+#      - redpanda
+#    networks:
+#      - net
+#  receiver:
+#    container_name: receiver
+#    env_file:
+#      - .env
+#    build:
+#      context: ./
+#      dockerfile: ./receiver/Dockerfile
+#    depends_on:
+#      redpanda:
+#        condition: service_healthy
+#    ports:
+#      - "${RECEIVER_REST_PORT}:${RECEIVER_REST_PORT}"
+#    networks:
+#      - net
+#  executor:
+#    container_name: executor
+#    env_file:
+#      - .env
+#    build:
+#      context: ./
+#      dockerfile: ./executor/Dockerfile
+#    depends_on:
+#      redpanda:
+#        condition: service_healthy
+#    ports:
+#      - "${EXECUTOR_REST_PORT}:${EXECUTOR_REST_PORT}"
+#    networks:
+#      - net
+#  reporter:
+#    container_name: reporter
+#    env_file:
+#      - .env
+#    build:
+#      context: ./
+#      dockerfile: ./reporter/Dockerfile
+#    depends_on:
+#      redpanda:
+#        condition: service_healthy
+#    ports:
+#      - "${REPORTER_REST_PORT}:${REPORTER_REST_PORT}"
+#    networks:
+#      - net
+#  fetcher:
+#    container_name: fetcher
+#    env_file:
+#      - .env
+#    build:
+#      context: ./
+#      dockerfile: ./fetcher/Dockerfile
+#    depends_on:
+#      redpanda:
+#        condition: service_healthy
+#    ports:
+#      - "${FETCHER_REST_PORT}:${FETCHER_REST_PORT}"
+#    networks:
+#      - net
+#  generator:
+#    container_name: generator
+#    env_file:
+#      - .env
+#    build:
+#      context: ./
+#      dockerfile: ./generator/Dockerfile
+#    depends_on:
+#      redpanda:
+#        condition: service_healthy
+#    ports:
+#      - "${GENERATOR_REST_PORT}:${GENERATOR_REST_PORT}"
+#    networks:
+#      - net
 
 volumes:
   postgres_data:
