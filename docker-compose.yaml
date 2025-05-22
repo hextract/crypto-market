@@ -130,10 +130,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      - VIRTUAL_HOST=cont-exchange.ru
-      - LETSENCRYPT_HOST=cont-exchange.ru
-      - LETSENCRYPT_EMAIL=sidenkoleg@gmail.com
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${FRONTEND_PORT}"]
       interval: 10s
