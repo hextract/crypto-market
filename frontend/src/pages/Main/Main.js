@@ -7,13 +7,16 @@ import {
   createDeposit,
   createWithdraw,
   createBid,
-  getMarketData
 } from '../../api/marketService';
+import { getClearingPrice } from '../../api/matchingEngineService';
 import './Main.css';
 import logo from '../../assets/logo-purple.svg';
 import { useTranslation } from 'react-i18next';
+import useInterval from '../../hooks/useInterval';
 
 const Main = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(null);
   const [tradeType, setTradeType] = useState("buy");
@@ -32,15 +35,12 @@ const Main = () => {
   });
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [balances, setBalances] = useState({ USDT: 0, BTC: 0 });
-  const [marketData, setMarketData] = useState({
-    pair: 'USDT/BTC',
-    price: 0,
-  });
+  const [clearingPrice, setClearingPrice] = useState(0);
+  const [priceError, setPriceError] = useState(false);
   const [errorModal, setErrorModal] = useState({
     show: false,
     message: ''
   });
-  const { t } = useTranslation();
 
   // States for modals
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -69,6 +69,16 @@ const Main = () => {
     }
   }, [navigate, isAuth]);
 
+  const loadPrice = async () => {
+    try {
+      const priceResponse = await getClearingPrice();
+      setClearingPrice(priceResponse.price);
+      setPriceError(false);
+    } catch (error) {
+      setPriceError(true);
+    }
+  };
+
   const loadData = async () => {
     try {
       const balanceResponse = await getBalance();
@@ -77,19 +87,22 @@ const Main = () => {
         newBalances[item.currency] = item.amount;
       });
       setBalances(newBalances);
-
-      const marketResponse = await getMarketData();
-      setMarketData({
-        pair: 'USDT/BTC',
-        price: marketResponse.current_price,
-      });
+      await loadPrice();
     } catch (error) {
       console.error('Failed to load data:', error);
       showError(t('main.error'));
     }
   };
 
+  // Обновляем цену каждую секунду
+  useInterval(() => {
+    if (isAuth) {
+      loadData();
+    }
+  }, 1000);
+
   const showError = (message) => {
+    console.log(message);
     setErrorModal({
       show: true,
       message
@@ -301,14 +314,16 @@ const Main = () => {
 
       <div className="content">
         <div className="chart-section">
-          <MarketChart data={marketData.history || []} clearingPrice={marketData.price} />
+          <MarketChart />
         </div>
 
         <div className="trade-panel">
           <div className="market-info">
             <div className="main-info">
-              <span className="trading-pair">{t('main.tradingPair')}</span>
-              <span className="price">{marketData.price.toFixed(6)}</span>
+              <span className="trading-pair">BTC/USDT</span>
+              <span className="price" style={{color: priceError ? '#ff4f81' : '#ffffff'}}>
+                {priceError ? t('main.priceUndefined') : clearingPrice.toFixed(6)}
+              </span>
             </div>
           </div>
 
@@ -361,7 +376,7 @@ const Main = () => {
                 <input
                   type="text"
                   name="amount"
-                  placeholder={t('main.amount', { action: tradeType })}
+                  placeholder={t('main.amount', {action: t(`main.type_${tradeType}`)})}
                   value={formData.amount}
                   onChange={handleChange}
                   className={`input ${errors.amount ? "error" : ""}`}
@@ -409,7 +424,7 @@ const Main = () => {
             </button>
             <button
               className="balance-btn deposit-btn"
-              onClick={() => handleDepositClick('USDT') }
+              onClick={() => handleDepositClick('USDT')}
             >
               {t('main.deposit')}
             </button>
@@ -518,7 +533,7 @@ const Main = () => {
         <div className="modal-overlay" onClick={closeErrorModal}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{errorModal.message.includes('success') ? t('common.success') : t('common.error')}</h3>
+              <h3>{(errorModal.message.includes('success') || errorModal.message.includes('успешно')) ? t('common.success') : t('common.error')}</h3>
               <button className="modal-close" onClick={closeErrorModal}>×</button>
             </div>
             <div className="modal-content">

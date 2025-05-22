@@ -88,7 +88,7 @@ $$
     END
 $$;
 
-CREATE TYPE bid_status AS ENUM ('pending', 'processing', 'finished', 'cancelled');
+CREATE TYPE bid_status AS ENUM ('pending', 'partial', 'finished', 'cancelled');
 
 CREATE TABLE bids
 (

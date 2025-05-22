@@ -1,0 +1,106 @@
+---
+swagger: "2.0"
+info:
+  description: "Synthetic Orders Generator API"
+  version: "0.0.0"
+  title: "generator.synthetic_orders"
+tags:
+  - name: "order"
+    description: "Operations with synthetic orders"
+schemes:
+  - "http"
+basePath: "/"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+paths:
+  /create-order:
+    post:
+      summary: "Send a continuous order to execution engine"
+      description: "Accepts a synthetic continuous order and forwards it to the matching engine"
+      operationId: "sendContinuousOrder"
+      parameters:
+        - in: "body"
+          name: "order"
+          description: "The continuous order to be executed"
+          required: true
+          schema:
+            $ref: "#/definitions/ContinuousOrder"
+      responses:
+        200:
+          description: "Order successfully accepted"
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        500:
+          description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+  ContinuousOrder:
+    type: object
+    required:
+      - pair
+      - order_id
+      - buy_sell_indicator
+      - speed
+      - amount
+      - price_low
+      - price_high
+    properties:
+      pair:
+        type: array
+        items:
+          type: string
+        example: ["ETH", "USDT"]
+        description: "Trading pair (e.g., ETH/USDT)"
+      order_id:
+        type: integer
+        format: int64
+        example: 123
+        description: "Unique order identifier"
+      buy_sell_indicator:
+        type: boolean
+        example: true
+        description: "true for buy, false for sell"
+      speed:
+        type: number
+        format: double
+        example: 72000
+        description: "Speed of order generation in milliseconds"
+      amount:
+        type: number
+        format: double
+        example: 6000
+        description: "Amount to trade"
+      price_low:
+        type: number
+        format: double
+        example: 5
+        description: "Minimum acceptable price"
+      price_high:
+        type: number
+        format: double
+        example: 10
+        description: "Maximum acceptable price"
+
+  SuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        default: "Order received"
+
+  Error:
+    type: object
+    required:
+      - error_message
+      - error_status_code
+    properties:
+      error_message:
+        type: string
+      error_status_code:
+        type: integer
+        format: int32

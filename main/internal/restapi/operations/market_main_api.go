@@ -43,16 +43,12 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
-		TxtProducer:  runtime.TextProducer(),
 
 		GetAccountBalanceHandler: GetAccountBalanceHandlerFunc(func(params GetAccountBalanceParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccountBalance has not yet been implemented")
 		}),
 		GetBidsHandler: GetBidsHandlerFunc(func(params GetBidsParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetBids has not yet been implemented")
-		}),
-		GetMetricsHandler: GetMetricsHandlerFunc(func(params GetMetricsParams, principal *models.User) middleware.Responder {
-			return middleware.NotImplemented("operation GetMetrics has not yet been implemented")
 		}),
 		GetTransactionsTransfersHandler: GetTransactionsTransfersHandlerFunc(func(params GetTransactionsTransfersParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactionsTransfers has not yet been implemented")
@@ -72,21 +68,13 @@ func NewMarketMainAPI(spec *loads.Document) *MarketMainAPI {
 		PostTransactionsWithdrawHandler: PostTransactionsWithdrawHandlerFunc(func(params PostTransactionsWithdrawParams, principal *models.User) middleware.Responder {
 			return middleware.NotImplemented("operation PostTransactionsWithdraw has not yet been implemented")
 		}),
-		UpdateOrderStatusHandler: UpdateOrderStatusHandlerFunc(func(params UpdateOrderStatusParams, principal *models.User) middleware.Responder {
+		UpdateOrderStatusHandler: UpdateOrderStatusHandlerFunc(func(params UpdateOrderStatusParams) middleware.Responder {
 			return middleware.NotImplemented("operation UpdateOrderStatus has not yet been implemented")
 		}),
 
 		// Applies when the "api_key" header is set
 		APIKeyAuth: func(token string) (*models.User, error) {
 			return nil, errors.NotImplemented("api key auth (api_key) api_key from header param [api_key] has not yet been implemented")
-		},
-		// Applies when the "market_maker" header is set
-		MarketMakerKeyAuth: func(token string) (*models.User, error) {
-			return nil, errors.NotImplemented("api key auth (market_maker_key) market_maker from header param [market_maker] has not yet been implemented")
-		},
-		// Applies when the "metrics_key" header is set
-		MetricsKeyAuth: func(token string) (*models.User, error) {
-			return nil, errors.NotImplemented("api key auth (metrics_key) metrics_key from header param [metrics_key] has not yet been implemented")
 		},
 		// default authorizer is authorized meaning no requests are blocked
 		APIAuthorizer: security.Authorized(),
@@ -125,21 +113,10 @@ type MarketMainAPI struct {
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
 	JSONProducer runtime.Producer
-	// TxtProducer registers a producer for the following mime types:
-	//   - text/plain
-	TxtProducer runtime.Producer
 
 	// APIKeyAuth registers a function that takes a token and returns a principal
 	// it performs authentication based on an api key api_key provided in the header
 	APIKeyAuth func(string) (*models.User, error)
-
-	// MarketMakerKeyAuth registers a function that takes a token and returns a principal
-	// it performs authentication based on an api key market_maker provided in the header
-	MarketMakerKeyAuth func(string) (*models.User, error)
-
-	// MetricsKeyAuth registers a function that takes a token and returns a principal
-	// it performs authentication based on an api key metrics_key provided in the header
-	MetricsKeyAuth func(string) (*models.User, error)
 
 	// APIAuthorizer provides access control (ACL/RBAC/ABAC) by providing access to the request and authenticated principal
 	APIAuthorizer runtime.Authorizer
@@ -148,8 +125,6 @@ type MarketMainAPI struct {
 	GetAccountBalanceHandler GetAccountBalanceHandler
 	// GetBidsHandler sets the operation handler for the get bids operation
 	GetBidsHandler GetBidsHandler
-	// GetMetricsHandler sets the operation handler for the get metrics operation
-	GetMetricsHandler GetMetricsHandler
 	// GetTransactionsTransfersHandler sets the operation handler for the get transactions transfers operation
 	GetTransactionsTransfersHandler GetTransactionsTransfersHandler
 	// CancelBidHandler sets the operation handler for the cancel bid operation
@@ -240,18 +215,9 @@ func (o *MarketMainAPI) Validate() error {
 	if o.JSONProducer == nil {
 		unregistered = append(unregistered, "JSONProducer")
 	}
-	if o.TxtProducer == nil {
-		unregistered = append(unregistered, "TxtProducer")
-	}
 
 	if o.APIKeyAuth == nil {
 		unregistered = append(unregistered, "APIKeyAuth")
-	}
-	if o.MarketMakerKeyAuth == nil {
-		unregistered = append(unregistered, "MarketMakerAuth")
-	}
-	if o.MetricsKeyAuth == nil {
-		unregistered = append(unregistered, "MetricsKeyAuth")
 	}
 
 	if o.GetAccountBalanceHandler == nil {
@@ -259,9 +225,6 @@ func (o *MarketMainAPI) Validate() error {
 	}
 	if o.GetBidsHandler == nil {
 		unregistered = append(unregistered, "GetBidsHandler")
-	}
-	if o.GetMetricsHandler == nil {
-		unregistered = append(unregistered, "GetMetricsHandler")
 	}
 	if o.GetTransactionsTransfersHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsTransfersHandler")
@@ -308,18 +271,6 @@ func (o *MarketMainAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme
 				return o.APIKeyAuth(token)
 			})
 
-		case "market_maker_key":
-			scheme := schemes[name]
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
-				return o.MarketMakerKeyAuth(token)
-			})
-
-		case "metrics_key":
-			scheme := schemes[name]
-			result[name] = o.APIKeyAuthenticator(scheme.Name, scheme.In, func(token string) (interface{}, error) {
-				return o.MetricsKeyAuth(token)
-			})
-
 		}
 	}
 	return result
@@ -355,8 +306,6 @@ func (o *MarketMainAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pro
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONProducer
-		case "text/plain":
-			result["text/plain"] = o.TxtProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
@@ -408,10 +357,6 @@ func (o *MarketMainAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/metrics"] = NewGetMetrics(o.context, o.GetMetricsHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
 	o.handlers["GET"]["/transactions/transfers"] = NewGetTransactionsTransfers(o.context, o.GetTransactionsTransfersHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
@@ -433,10 +378,10 @@ func (o *MarketMainAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/transactions/withdraw"] = NewPostTransactionsWithdraw(o.context, o.PostTransactionsWithdrawHandler)
-	if o.handlers["PATCH"] == nil {
-		o.handlers["PATCH"] = make(map[string]http.Handler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/market-maker/{order_id}/status"] = NewUpdateOrderStatus(o.context, o.UpdateOrderStatusHandler)
+	o.handlers["POST"]["/market-maker/statuses"] = NewUpdateOrderStatus(o.context, o.UpdateOrderStatusHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

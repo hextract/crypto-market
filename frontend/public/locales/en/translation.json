@@ -34,6 +34,9 @@
     "signIn": "sign in"
   },
   "main": {
+    "type_buy": "buy",
+    "type_sell": "sell",
+    "priceUndefined": "undefined",
     "tradingPair": "USDT/BTC",
     "high": "high this day:",
     "change": "this day",
@@ -68,6 +71,7 @@
     },
     "chart" : {
       "volume_hour": "volume per hour",
+      "volume": "Volume",
       "clearing": "Clearing",
       "price": "Price",
       "supply": "Supply",
@@ -102,7 +106,7 @@
       "statuses": {
         "completed": "Completed",
         "pending": "Pending",
-        "processing": "Processing",
+        "partial": "Partial",
         "cancelled": "Cancelled"
       },
       "clear": "Clear filters"

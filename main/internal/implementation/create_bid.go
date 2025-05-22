@@ -2,14 +2,14 @@ package implementation
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 func (ds *DatabaseService) CreateBid(userID string, fromCurrency, toCurrency string, minPrice, maxPrice, amountToBuy, buySpeed float32) (string, error) {
-	bidID := fmt.Sprintf("bid_%s", uuid.New().String())
+	bidID := fmt.Sprintf("bid_%d", int(time.Now().UnixNano()))
 
 	query := `
 		INSERT INTO bids (
@@ -50,4 +50,22 @@ func (ds *DatabaseService) CreateBid(userID string, fromCurrency, toCurrency str
 	}
 
 	return id, nil
+}
+
+func (ds *DatabaseService) CheckBid(bid int64) (string, error) {
+	bidID := fmt.Sprintf("bid_%d", int(bid))
+
+	query := `select id from bids where id=$1;`
+
+	var foundID string
+	err := ds.pool.QueryRow(context.Background(), query, bidID).Scan(&foundID)
+
+	switch {
+	case err == nil:
+		return foundID, nil
+	case errors.Is(err, pgx.ErrNoRows):
+		return "", fmt.Errorf("bid with id %s not found", bidID)
+	default:
+		return "", fmt.Errorf("failed to check bid existence: %w", err)
+	}
 }

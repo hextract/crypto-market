@@ -136,7 +136,7 @@ const Profile = () => {
   const mapTradeStatus = (status) => {
     switch (status) {
       case 'finished': return t('profile.filters.statuses.completed');
-      case 'processing': return t('profile.filters.statuses.processing');
+      case 'partial': return t('profile.filters.statuses.partial');
       case 'pending': return t('profile.filters.statuses.pending');
       case 'cancelled': return t('profile.filters.statuses.cancelled');
       default: return status;
@@ -308,7 +308,7 @@ const Profile = () => {
               <option value="all">{t('profile.filters.allStatuses')}</option>
               <option value="finished">{t('profile.filters.statuses.completed')}</option>
               <option value="pending">{t('profile.filters.statuses.pending')}</option>
-              <option value="processing">{t('profile.filters.statuses.processing')}</option>
+              <option value="processing">{t('profile.filters.statuses.partial')}</option>
               <option value="cancelled">{t('profile.filters.statuses.cancelled')}</option>
             </select>
           </div>
@@ -402,7 +402,7 @@ const Profile = () => {
                             >
                               {expandedId === item.id ? t('profile.table.hide') : t('profile.table.details')}
                             </button>
-                            {(item.rawStatus === 'pending' || item.rawStatus === 'processing') && (
+                            {(item.rawStatus === 'pending' || item.rawStatus === 'partial') && (
                               <button
                                 onClick={() => handleCancelClick(item.id)}
                                 className="cancel-btn"

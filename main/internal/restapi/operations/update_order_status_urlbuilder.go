@@ -9,16 +9,11 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
-	"strings"
 )
 
 // UpdateOrderStatusURL generates an URL for the update order status operation
 type UpdateOrderStatusURL struct {
-	OrderID string
-
 	_basePath string
-	// avoid unkeyed usage
-	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -40,14 +35,7 @@ func (o *UpdateOrderStatusURL) SetBasePath(bp string) {
 func (o *UpdateOrderStatusURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/market-maker/{order_id}/status"
-
-	orderID := o.OrderID
-	if orderID != "" {
-		_path = strings.Replace(_path, "{order_id}", orderID, -1)
-	} else {
-		return nil, errors.New("orderId is required on UpdateOrderStatusURL")
-	}
+	var _path = "/market-maker/statuses"
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)

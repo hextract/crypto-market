@@ -1,6 +1,10 @@
 package implementation
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"strconv"
+)
 
 func (ds *DatabaseService) CancelBid(ID string) error {
 	query := `
@@ -9,11 +13,18 @@ func (ds *DatabaseService) CancelBid(ID string) error {
 				status = 'cancelled',
 				complete_date = CURRENT_TIMESTAMP
 			WHERE id = $1
-			AND status IN ('pending', 'processing');`
+			RETURNING from_id, max_price * amount_to_buy;`
 
-	args := []any{ID}
+	currencyToReturn := new(int)
+	amountToReturn := new(float32)
 
-	rows, err := ds.pool.Query(context.Background(), query, args...)
-	rows.Close()
-	return err
+	err := ds.pool.QueryRow(context.Background(), query, ID).Scan(&currencyToReturn, &amountToReturn)
+	if err != nil {
+		return err
+	}
+	fmt.Println(err)
+
+	updateErr := ds.UpdateUserCurrencyBalance(ID, strconv.Itoa(*currencyToReturn), *amountToReturn)
+	fmt.Println(updateErr)
+	return updateErr
 }

@@ -348,8 +348,8 @@ paths:
           description: "Unauthorized"
           schema:
             $ref: "#/definitions/Error"
-  /market-maker/{order_id}/status:
-    patch:
+  /market-maker/statuses:
+    post:
       summary: "Update order status"
       operationId: "update_order_status"
       consumes:
@@ -361,35 +361,18 @@ paths:
           in: "body"
           required: true
           schema:
-            type: object
-            required:
-              - status
-            properties:
-              status:
-                type: string
-                enum: [ "finished", "cancelled" ]
-              price:
-                type: number
-                format: float
-                minimum: 0
-              bought_amount:
-                type: number
-                format: float
-                minimum: 0
-        - name: "order_id"
-          in: "path"
-          description: "ID of bid to update"
-          type: "string"
-          required: true
+            type: array
+            items:
+              $ref: "#/definitions/bid_update"
       responses:
         200:
           description: "Successful operation"
           schema:
             type: object
             properties:
-              id:
+              status:
                 type: string
-                example: bid_123
+                example: ok
         403:
           description: "No access"
           schema:
@@ -398,37 +381,10 @@ paths:
           description: "Incorrect data"
           schema:
             $ref: "#/definitions/Error"
-      security:
-        - market_maker_key: [ ]
-  /metrics:
-    get:
-      summary: "Prometheus metrics"
-      description: "Returns Prometheus-compatible metrics for the service"
-      produces:
-        - "text/plain; version=0.0.4"
-      security:
-        - metrics_key: [ ]
-      responses:
-        200:
-          description: "Successful operation"
-          schema:
-            type: string
-        401:
-          description: "Unauthorized"
-          schema:
-            $ref: "#/definitions/Error"
 securityDefinitions:
   api_key:
     type: apiKey
     name: api_key
-    in: header
-  metrics_key:
-    type: apiKey
-    name: metrics_key
-    in: header
-  market_maker_key:
-    type: apiKey
-    name: market_maker
     in: header
 definitions:
   Error:
@@ -640,3 +596,23 @@ definitions:
         type: string
         enum: [ "pending", "finished", "cancelled" ]
         example: "pending"
+  bid_update:
+    type: object
+    required:
+      - status
+      - order_id
+    properties:
+      status:
+        type: string
+        enum: [ "finished", "cancelled", "partial" ]
+      paid_price:
+        type: number
+        format: float
+        minimum: 0
+      bought_amount:
+        type: number
+        format: float
+        minimum: 0
+      order_id:
+        type: integer
+        format: int64

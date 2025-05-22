@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 func (ds *DatabaseService) UpdateUserCurrencyBalance(orderID, currency string, amount float32) error {
@@ -54,25 +54,39 @@ func (ds *DatabaseService) UpdateUserCurrencyBalance(orderID, currency string, a
 
 	// 2. Получаем currency_id
 	var currencyID int
-	err = tx.QueryRow(context.Background(),
-		`SELECT currency_id FROM currencies WHERE name = $1`,
-		currency).Scan(&currencyID)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			logEntry.Error("Currency not found")
-			return errors.New("currency not found")
+	if value, err := strconv.Atoi(currency); err == nil {
+		currencyID = value
+	} else {
+		err = tx.QueryRow(context.Background(),
+			`SELECT currency_id FROM currencies WHERE name = $1`,
+			currency).Scan(&currencyID)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				logEntry.Error("Currency not found")
+				return errors.New("currency not found")
+			}
+			logEntry.WithError(err).Error("Failed to get currency")
+			return fmt.Errorf("failed to get currency: %w", err)
 		}
-		logEntry.WithError(err).Error("Failed to get currency")
-		return fmt.Errorf("failed to get currency: %w", err)
 	}
 
 	// 3. Обновляем баланс (увеличиваем или уменьшаем)
 	query := `
 		INSERT INTO user_balance (user_id, currency_id, balance)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (user_id, currency_id)
-		DO UPDATE SET balance = user_balance.balance + $3
-		RETURNING balance;
+        VALUES($1, $2, 0)
+        ON CONFLICT (user_id, currency_id) DO NOTHING;
+	`
+	rows, insertErr := tx.Query(context.Background(), query, userID, currencyID)
+	if insertErr != nil {
+		return insertErr
+	}
+	rows.Close()
+
+	query = `
+		UPDATE user_balance
+        SET balance = balance + $3
+        WHERE user_id = $1 AND currency_id = $2
+        RETURNING balance;
 	`
 
 	var newBalance float32
@@ -81,23 +95,6 @@ func (ds *DatabaseService) UpdateUserCurrencyBalance(orderID, currency string, a
 	if err != nil {
 		logEntry.WithError(err).Error("Failed to update balance")
 		return fmt.Errorf("failed to update balance: %w", err)
-	}
-
-	// Проверяем, что баланс не стал отрицательным
-	if newBalance < 0 {
-		logEntry.WithField("new_balance", newBalance).Error("Insufficient funds")
-		return errors.New("insufficient funds")
-	}
-
-	// 4. Логируем изменение баланса
-	_, err = tx.Exec(context.Background(),
-		`INSERT INTO balance_history 
-		 (user_id, currency_id, order_id, amount_change, new_balance, created_at)
-		 VALUES ($1, $2, $3, $4, $5, NOW())`,
-		userID, currencyID, orderID, amount, newBalance)
-	if err != nil {
-		logEntry.WithError(err).Error("Failed to log balance change")
-		// Не прерываем выполнение из-за ошибки логирования
 	}
 
 	// Фиксируем транзакцию
