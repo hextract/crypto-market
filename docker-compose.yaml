@@ -61,6 +61,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "18888:18888"
+    restart: always
 
   keycloak:
     networks:
