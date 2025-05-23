@@ -407,7 +407,7 @@ const Profile = () => {
                             >
                               {expandedId === item.id ? t('profile.table.hide') : t('profile.table.details')}
                             </button>
-                            {(item.rawStatus === 'pending' || item.rawStatus === 'partial') && (
+                            {(item.rawStatus === 'pending') && (
                               <button
                                 onClick={() => handleCancelClick(item.id)}
                                 className="cancel-btn"
